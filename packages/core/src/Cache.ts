@@ -1,13 +1,15 @@
 /**
- * Replayable trajectories backed by memory and a key/value store.
+ * Replayable trajectories backed by memory, a file system, or a key/value store.
  *
  * {@link Cache.cache} reads a source once and returns a {@link Trajectory.TrajectoryFile}.
- * {@link layerMemory} and {@link layerKVStore} choose the backing store.
+ * {@link layerMemory}, {@link layerFileSystem}, and {@link layerKVStore} choose
+ * the backing store.
  *
  * @stability stable
  */
 
-import { Context, Data, Effect, Formatter, Layer, Option, Stream } from "effect";
+import { Context, Data, Effect, FileSystem, Formatter, Layer, Option, Stream } from "effect";
+import type { Path, PlatformError, Scope } from "effect";
 import * as EffectCache from "effect/Cache";
 import { KeyValueStore } from "effect/persistence";
 
@@ -106,6 +108,7 @@ export const Cache = Context.Service<Cache, Cache>()("trajs/core/Cache");
  * A part kept again is written over the one the store held.
  *
  * @see {@link layerMemory} for a cache holding every part in memory.
+ * @see {@link layerFileSystem} for the same cache over files on disk.
  * @stability stable
  * @category layers
  */
@@ -184,6 +187,44 @@ export const layerKVStore = (options?: {
     }),
   );
 };
+
+/**
+ * Creates a {@link Cache} keeping its parts as files in a directory.
+ *
+ * **When to use**
+ *
+ * Use when the parts are to be read from disk, and no store of the program is stated.
+ *
+ * **Details**
+ *
+ * The keys are the `<id>/<index>` keys {@link layerKVStore} writes, and
+ * `KeyValueStore.layerFileSystem` keeps each one as a single file.
+ * A stated `directory` is created when the layer is built.
+ * Where it is omitted, the directory is a temporary one, made with
+ * `FileSystem.makeTempDirectoryScoped`, that the scope removes when the layer ends.
+ * `capacity` bounds the memory holding decoded parts, as {@link layerKVStore} does.
+ *
+ * @see {@link layerKVStore} for the same cache over a store you provide.
+ * @stability stable
+ * @category layers
+ */
+export const layerFileSystem = (
+  directory?: string,
+  options?: {
+    readonly capacity?: number | "unbounded";
+  },
+): Layer.Layer<
+  Cache,
+  PlatformError.PlatformError,
+  FileSystem.FileSystem | Path.Path | Scope.Scope
+> =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+
+    const stated = directory ?? (yield* fs.makeTempDirectoryScoped({ prefix: "trajs-cache-" }));
+
+    return layerKVStore(options).pipe(Layer.provide(KeyValueStore.layerFileSystem(stated)));
+  }).pipe(Layer.unwrap);
 
 /**
  * Creates a {@link Cache} holding every part of a trajectory in memory.
