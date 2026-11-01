@@ -37,5 +37,5 @@ dist-ssr
 examples/traj-analysis/cases/*/fixtures/
 examples/tutorials/*/fixtures/
 
-# references/ holds symlinks to sibling checkouts created by .agents/prepare
+# references/ holds local sibling checkouts, shared into Delta workspaces by .agents/linked
 references/

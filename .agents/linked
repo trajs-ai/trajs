@@ -1,0 +1,5 @@
+# Local environment configuration, shared between workspaces on this machine.
+.env
+
+# Sibling checkouts kept for reference, shared between workspaces on this machine.
+references
