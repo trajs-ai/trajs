@@ -15,7 +15,8 @@ description: Use when writing, reviewing, or removing comments and public API do
    - comments inside code: [implementation.md](implementation.md).
 3. Make a focused fix or module refinement. Preserve verified facts and valuable examples rather than rewriting mechanically.
 4. For a module refinement or APIs with close alternatives, audit `@see` links and inspect implementation and tests for concrete **Gotchas**.
-5. Run `vp check`. Run `vp test` when examples or code changed.
+5. Run `vp check`. No test collects examples, so read each changed one against
+   the implementation.
 
 `@internal` declarations and modules are outside public JSDoc authoring.
 
@@ -31,15 +32,18 @@ Applies to every comment and doc block below: write so a reader gets the point i
 
 Applies to implementation comments and to public JSDoc.
 
-- Short technical sentences, one per line, at most 20 words. `packages/core/src/Trajectory.ts` is the reference. Match its comments.
-- No relative clauses, no em dashes, no rhetorical colons. `SAFETY:` keeps its colon. The anti-slop linter requires it.
+- Short technical sentences, one per line, at most 20 words.
+- A description states what the value is or does in its domain. The type states its shape.
+- Follow how the `effect` package documents its own values, in its `src/Layer.ts` and `src/Stream.ts`.
+- No em dashes and no rhetorical colons. `SAFETY:` keeps its colon. The anti-slop linter requires it.
 - Write only what the code and the types cannot say.
 - Use terminology already established in the project or Effect. Verify usage against existing APIs, documentation, and implementation.
 - Name concrete APIs and concepts directly. Do not invent umbrella terms or replace established names with vague synonyms.
 - Link every type a comment names with `{@link}`, and link the concrete type rather than its `Any` alias.
 - Use backticks for identifiers, literal values, and expressions. Reserve `{@link}` for API symbols that help a reader navigate.
 - Present tense and third person. No marketing or hedging words ("powerful", "simply", "just"), no first person, and no "this function" or "this module".
-- Never restate the name, the signature, or the types.
+- Never restate the name, the signature, or the type's composition. Intersections, `extends`, and fields are the type's job.
+- A type parameter a caller cannot guess is stated in **Details**, such as `E` and `R` on {@link TrajectoryBuffer}.
 
 ## Public documentation
 
@@ -48,6 +52,8 @@ Public comments are the contract of the API, written for callers rather than mai
 The description is one paragraph. Optional non-empty sections appear once in this order: **When to use**, **Details**, **Gotchas**. Examples follow the sections, then the tags. A section earns its place only when it changes how a caller uses the API.
 
 The weight of a public block lies in **When to use** and **Details**: state what cannot be inferred, `{@link}` to a sibling instead of repeating it, and let the type carry the rest.
+
+Swap in the nearest sibling's name. A description that still holds states neither.
 
 The block shape, tag rules, and precedence live in [declarations.md](declarations.md).
 

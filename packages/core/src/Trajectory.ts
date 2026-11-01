@@ -53,9 +53,8 @@ export const PromptMeta = Schema.TaggedStruct("Prompt", {
 });
 
 /**
- * The metadata of a prompt part.
+ * The decoded form of {@link PromptMeta}.
  *
- * @see {@link PromptMeta} for the schema.
  * @stability stable
  * @category models
  */
@@ -172,10 +171,34 @@ export const mainSessionId = "main";
 
 const MainSession = Schema.TaggedStruct("main", { id: Schema.Literal(mainSessionId) });
 
+/**
+ * The declaration of the main session.
+ *
+ * **Details**
+ *
+ * `id` is {@link mainSessionId}, and it has no `fork`.
+ *
+ * @see {@link subSession} for the declaration of a session forked from another.
+ * @stability stable
+ * @category constants
+ */
 export const mainSession = MainSession.make({ id: mainSessionId });
 
 const SubSession = Schema.TaggedStruct("sub", { id: Schema.String, fork: Uuid });
 
+/**
+ * Creates the declaration of a session forked from an earlier part.
+ *
+ * **Details**
+ *
+ * `id` names the new session, and `fork` is the uuid of the part it branches
+ * from.
+ *
+ * @see {@link mainSession} for the declaration every trajectory already has.
+ * @see {@link parts} for building the whole session part.
+ * @stability stable
+ * @category constructors
+ */
 export const subSession = (id: string, { fork }: { fork: string }) => SubSession.make({ id, fork });
 
 /**
@@ -202,9 +225,8 @@ export const SessionMeta = Schema.TaggedStruct("Session", {
 });
 
 /**
- * The metadata of a session declaration.
+ * The decoded form of {@link SessionMeta}.
  *
- * @see {@link SessionMeta} for the schema.
  * @stability stable
  * @category models
  */
@@ -322,9 +344,8 @@ export const ResponseMeta = Schema.TaggedStruct("Response", {
 });
 
 /**
- * The metadata of a response part.
+ * The decoded form of {@link ResponseMeta}.
  *
- * @see {@link ResponseMeta} for the schema.
  * @stability stable
  * @category models
  */
@@ -473,9 +494,8 @@ export const EventMeta = Schema.TaggedStruct("Event", {
 });
 
 /**
- * The metadata of an event part.
+ * The decoded form of {@link EventMeta}.
  *
- * @see {@link EventMeta} for the schema.
  * @stability stable
  * @category models
  */
@@ -593,9 +613,8 @@ export const MetricMeta = Schema.TaggedStruct("Metric", {
 });
 
 /**
- * The metadata of a metric part.
+ * The decoded form of {@link MetricMeta}.
  *
- * @see {@link MetricMeta} for the schema.
  * @stability stable
  * @category models
  */
@@ -711,9 +730,8 @@ export type MetricPartEncoded = Schema.Codec.Encoded<ReturnType<typeof MetricPar
 export const Meta = Schema.Union([PromptMeta, SessionMeta, ResponseMeta, EventMeta, MetricMeta]);
 
 /**
- * The metadata of one part, whichever kind it is.
+ * The decoded form of {@link Meta}.
  *
- * @see {@link Meta} for the schema.
  * @stability stable
  * @category models
  */
@@ -951,7 +969,7 @@ export type TrajectoryStream<Config extends Config.AnyConfig, E = never, R = nev
  * `E` and `R` are the error and the requirements of one read.
  *
  * @see {@link asStream} for reading those parts as a stream.
- * @see {@link TrajectoryFile} for a buffer that names its id and config.
+ * @see {@link TrajectoryFile} for a whole trajectory of those parts.
  * @stability stable
  * @category models
  */
@@ -989,9 +1007,6 @@ export const asStream = <Config extends Config.AnyConfig, E = never, R = never>(
  *
  * **Details**
  *
- * The value is that stream.
- * `id` names it.
- * The other fields repeat that config.
  * `E` and `R` are the error and the requirements of the stream.
  *
  * @see {@link make} for binding the id and the config.
@@ -1007,19 +1022,19 @@ export type Trajectory<
 > = TrajectoryStream<Config, E, R> & Readonly<{ id: Id }> & Readonly<Config>;
 
 /**
- * A {@link TrajectoryBuffer} that names its id and its config.
+ * A whole trajectory, addressed by index the way a file is.
  *
  * **When to use**
  *
- * Use when a buffer is the whole trajectory in hand, with no source to replay.
+ * Use when a caller reads a part at any index, not the parts in order.
  *
  * **Details**
  *
- * `asStream` reads its parts, and `id` names it.
- * The other fields repeat the config its parts are read with.
+ * `at` reaches a part without reading the parts before it.
  *
- * @see {@link TrajectoryBuffer} for the parts alone.
- * @see {@link Trajectory} for the same id and config over a stream.
+ * @see {@link TrajectoryBuffer} for those parts without an id or a config.
+ * @see {@link Trajectory} for the same id and config over a stream, read in order.
+ * @see {@link asStream} for reading those parts in order.
  * @stability stable
  * @category models
  */
@@ -1031,7 +1046,7 @@ export type TrajectoryFile<
 > = TrajectoryBuffer<Config, E, R> & Readonly<{ id: Id }> & Readonly<Config>;
 
 /**
- * Returns a function from an id and `config` to a bound part stream.
+ * Creates a {@link Trajectory} from a part stream, named by an id and read with `config`.
  *
  * **When to use**
  *
@@ -1051,7 +1066,7 @@ export type TrajectoryFile<
  *
  * **Example** (Naming a trajectory)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Stream } from "effect"
  * import { Config, Prompt, Trajectory } from "@trajs/core"
  *

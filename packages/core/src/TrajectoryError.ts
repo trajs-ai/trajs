@@ -164,40 +164,34 @@ export class TrajectoryError extends Data.TaggedError("TrajectoryError")<{
   }
 
   /**
-   * Wraps a schema encoding error with its toolkit.
-   *
-   * @see {@link ToolEncodeError} for the retained reason.
+   * Wraps a schema encoding failure in a {@link ToolEncodeError} holding its
+   * toolkit.
    */
   static encodeTool = (toolkit: Toolkit.Any) => (cause: Schema.SchemaError) =>
     new TrajectoryError({ reason: new ToolEncodeError({ toolkit, cause }) });
 
   /**
-   * Wraps a schema decoding error with its toolkit.
-   *
-   * @see {@link ToolDecodeError} for the retained reason.
+   * Wraps a schema decoding failure in a {@link ToolDecodeError} holding its
+   * toolkit.
    */
   static decodeTool = (toolkit: Toolkit.Any) => (cause: Schema.SchemaError) =>
     new TrajectoryError({ reason: new ToolDecodeError({ toolkit, cause }) });
 
   /**
-   * Wraps a session invariant failure with its session id.
-   *
-   * @see {@link SessionError} for the retained reason.
+   * Wraps a session invariant failure in a {@link SessionError} named by its id.
    */
   static session = (id: string, reason: SessionErrorReason) =>
     new TrajectoryError({ reason: new SessionError({ id, reason }) });
 
   /**
-   * Wraps a parsing or serialization failure without discarding its cause.
-   *
-   * @see {@link ParseError} for the retained reason.
+   * Wraps a parsing or serialization failure in a {@link ParseError} that keeps
+   * its cause.
    */
   static parse = (cause: unknown) => new TrajectoryError({ reason: new ParseError({ cause }) });
 
   /**
-   * Wraps a binary layout failure without discarding its cause.
-   *
-   * @see {@link BinaryLayoutError} for the retained reason.
+   * Wraps a binary layout failure in a {@link BinaryLayoutError} that keeps its
+   * cause.
    */
   static binaryLayout = (cause: unknown) =>
     new TrajectoryError({ reason: new BinaryLayoutError({ cause }) });

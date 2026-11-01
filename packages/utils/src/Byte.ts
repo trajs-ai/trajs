@@ -60,7 +60,7 @@ export interface ReadOptions {
  *
  * **Example** (A sequence of bytes read at random)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
  * import { makeByte } from "@trajs/utils/Byte"
  *
@@ -145,7 +145,7 @@ const Chunk = 64 * 1024;
  *
  * **Example** (Building the sequence a store serves)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
  *
  * const held = new Uint8Array([1, 2, 3])

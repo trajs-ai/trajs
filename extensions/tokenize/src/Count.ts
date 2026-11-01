@@ -139,7 +139,7 @@ export interface CountOptions {
  *
  * **Example** (Counting the prompt of a turn)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
  * import { Prompt } from "effect/ai"
  * import { Config, Trajectory } from "@trajs/core"
@@ -197,7 +197,7 @@ export const promptPart = (
  *
  * **Example** (Counting what a model answered)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Option } from "effect"
  * import { Config, EventKit, ExtraKit, MetricKit, Response, Toolkit, Trajectory } from "@trajs/core"
  * import { Count, Tokenizer } from "@trajs/extension-tokenize"

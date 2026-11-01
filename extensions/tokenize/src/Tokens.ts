@@ -252,7 +252,7 @@ export type FileTokens = Schema.Schema.Type<typeof FileTokens>;
  *
  * **Example** (Reading the count of a prompt and of the text of a response)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Tokens } from "@trajs/extension-tokenize"
  *
  * const prompt = Tokens.PromptTokens.make({

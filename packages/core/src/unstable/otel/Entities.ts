@@ -12,7 +12,7 @@
 import { Schema } from "effect";
 
 /**
- * An entity definition.
+ * An entity of the conventions, as the registry states it.
  *
  * @stability experimental
  * @category models

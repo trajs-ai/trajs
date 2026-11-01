@@ -14,7 +14,7 @@ import * as Groups from "#/unstable/otel/internal/groups.ts";
 import * as Spans from "#/unstable/otel/Spans.ts";
 
 /**
- * An event definition.
+ * An event of the conventions, as the registry states it.
  *
  * @stability experimental
  * @category models

@@ -234,9 +234,8 @@ export const mediaExtra = new Extra.Extra({
 export const DocumentFields = document180.self;
 
 /**
- * Current decoded ATIF run extras.
+ * The decoded form of {@link DocumentFields}.
  *
- * @see {@link DocumentFields} for the schema.
  * @stability stable
  * @category models
  */
@@ -256,9 +255,8 @@ export type DocumentFields = Schema.Schema.Type<typeof DocumentFields>;
 export const StepFields = step180.self;
 
 /**
- * Current decoded ATIF step extras.
+ * The decoded form of {@link StepFields}.
  *
- * @see {@link StepFields} for the schema.
  * @stability stable
  * @category models
  */
@@ -274,9 +272,8 @@ export type StepFields = Schema.Schema.Type<typeof StepFields>;
 export const CallFields = call180.self;
 
 /**
- * Current decoded tool call extras.
+ * The decoded form of {@link CallFields}.
  *
- * @see {@link CallFields} for the schema.
  * @stability stable
  * @category models
  */
@@ -292,9 +289,8 @@ export type CallFields = Schema.Schema.Type<typeof CallFields>;
 export const ResultFields = result180.self;
 
 /**
- * Current decoded observation result extras.
+ * The decoded form of {@link ResultFields}.
  *
- * @see {@link ResultFields} for the schema.
  * @stability stable
  * @category models
  */
@@ -310,9 +306,8 @@ export type ResultFields = Schema.Schema.Type<typeof ResultFields>;
 export const MediaFields = media180.self;
 
 /**
- * Current decoded media extras.
+ * The decoded form of {@link MediaFields}.
  *
- * @see {@link MediaFields} for the schema.
  * @stability stable
  * @category models
  */

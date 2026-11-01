@@ -1,13 +1,11 @@
 /**
  * Span definitions of the GenAI and MCP semantic conventions.
  *
- * Each export states the identity of a span and the attributes it carries. A base
- * span is exported under the type the registry gives it, and a provider or tool
- * refinement under its own type with a `ref` to the span it extends.
- *
- * Attributes the registry marks required are struct fields, and the rest are
- * optional. Provider refinements repeat the attributes of the span they extend,
- * so one schema decodes a refined span.
+ * Each export states the identity of a span and the attributes it carries.
+ * A base span is exported under the type the registry gives it, and a provider
+ * or tool refinement under its own type with a `ref` to the span it extends.
+ * Required attributes are struct fields and the rest are optional, and a
+ * refinement repeats them, so one schema decodes a refined span.
  *
  * @see [the source span definitions](https://github.com/open-telemetry/semantic-conventions-genai/tree/main/model).
  * @stability experimental
@@ -34,7 +32,7 @@ import * as Groups from "#/unstable/otel/internal/groups.ts";
 export const SpanKind = Schema.Literals(["client", "server", "internal", "producer", "consumer"]);
 
 /**
- * The kind of a span.
+ * The role a span plays in the operation it records.
  *
  * @see {@link SpanKind} for the schema.
  * @stability experimental
@@ -43,8 +41,9 @@ export const SpanKind = Schema.Literals(["client", "server", "internal", "produc
 export type SpanKind = Schema.Schema.Type<typeof SpanKind>;
 
 /**
- * A span definition.
+ * A span of the conventions, as the registry states it.
  *
+ * @see {@link SpanRefinement} for a span that extends another.
  * @stability experimental
  * @category models
  */

@@ -120,7 +120,7 @@ export const defaultChunkSize = 64 * 1024;
  *
  * **Example** (Keeping a sequence of bytes and reading part of it back)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Stream } from "effect"
  *
  * import { ByteStore } from "@trajs/utils"

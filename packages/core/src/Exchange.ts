@@ -1,3 +1,12 @@
+/**
+ * Trajectories held as files.
+ *
+ * {@link Exchange} reads one by id, and {@link layerFileSystem} provides it
+ * from the file system.
+ *
+ * @stability stable
+ */
+
 import { Compression } from "@trajs/utils";
 import { Context, Effect, FileSystem, Layer, Match, Option, Path, Scope } from "effect";
 import type { PlatformError } from "effect/PlatformError";
@@ -9,6 +18,19 @@ import * as file from "#/internal/exchange/file.ts";
 import * as Trajectory from "#/Trajectory.ts";
 import { TrajectoryError } from "#/TrajectoryError.ts";
 
+/**
+ * A summary of a trajectory file, read without its parts.
+ *
+ * **Details**
+ *
+ * `id`, `version`, and the four kits are the file's own header.
+ * `length` counts the parts, and `fileSize` the bytes holding them.
+ * `digest` covers those bytes.
+ *
+ * @see {@link Exchange} for the `inspect` that reads one.
+ * @stability stable
+ * @category models
+ */
 export interface Inspection {
   id: string;
   version: string;
@@ -21,6 +43,20 @@ export interface Inspection {
   fileSize: bigint;
 }
 
+/**
+ * A store holding whole trajectories by id, each as one file.
+ *
+ * **Details**
+ *
+ * `read` decodes the parts of one file with `config`.
+ * `write` stores a trajectory as a file.
+ * `inspect` states what a file holds without decoding any part.
+ *
+ * @see {@link Inspection} for what `inspect` returns.
+ * @see {@link layerFileSystem} for a store of files on disk.
+ * @stability stable
+ * @category services
+ */
 export interface Exchange {
   read: <Config extends Config.AnyConfig>(
     config: Config,
@@ -43,8 +79,32 @@ export interface Exchange {
   inspect: (id: string) => Effect.Effect<Option.Option<Inspection>, TrajectoryError>;
 }
 
+/**
+ * The service a store of trajectories is provided through.
+ *
+ * @see {@link Exchange} for what the service gives.
+ * @stability stable
+ * @category tags
+ */
 export const Exchange = Context.Service<Exchange, Exchange>("trajs/Exchange");
 
+/**
+ * Creates an {@link Exchange} from a file system, one file per id.
+ *
+ * **Details**
+ *
+ * `locate` turns an id into a path, or into `null` for an id with no file.
+ * A relative path is joined to `cwd`.
+ *
+ * **Gotchas**
+ *
+ * A file stays open for the scope of the layer.
+ * `write` and `inspect` are not implemented yet, and die when called.
+ *
+ * @see {@link Exchange} for the store this layer provides.
+ * @stability stable
+ * @category layers
+ */
 export const layerFileSystem = ({
   cwd,
   locate = (id) => `${id}.trajs`,

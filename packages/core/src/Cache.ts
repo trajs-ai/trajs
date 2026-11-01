@@ -38,6 +38,12 @@ export class CacheError extends Data.TaggedError("CacheError")<{
   override get message(): string {
     return `Failed to ${this.operation} part ${this.index} of '${this.id}': ${Formatter.format(this.cause)}`;
   }
+
+  static read = (id: string, index: number) => (cause: unknown) =>
+    new CacheError({ id, index, operation: "read", cause });
+
+  static write = (id: string, index: number) => (cause: unknown) =>
+    new CacheError({ id, index, operation: "write", cause });
 }
 
 /**
@@ -77,7 +83,7 @@ export interface Cache {
 export const Cache = Context.Service<Cache, Cache>()("trajs/core/Cache");
 
 /**
- * Creates a cache keeping its least recently read parts in memory.
+ * Creates a {@link Cache} keeping its parts in a key/value store.
  *
  * **When to use**
  *
@@ -85,7 +91,8 @@ export const Cache = Context.Service<Cache, Cache>()("trajs/core/Cache");
  *
  * **Details**
  *
- * `capacity` is the size of the memory, counted in parts rather than bytes.
+ * `capacity` is the size of the memory holding decoded parts, counted in parts
+ * rather than bytes.
  * A part read again is the last to be dropped, and omission or `"unbounded"`
  * holds every part.
  * Reading the source runs to its end, and every part is encoded and kept under
@@ -129,27 +136,15 @@ export const layerKVStore = (options?: {
               requireServicesAt: "lookup",
               lookup: (index: number) =>
                 Effect.gen(function* () {
-                  const bytes = yield* store.getUint8Array(`${trajectory.id}/${index}`).pipe(
-                    Effect.mapError(
-                      (cause) =>
-                        new CacheError({
-                          id: trajectory.id,
-                          index,
-                          operation: "read",
-                          cause,
-                        }),
-                    ),
-                  );
+                  const bytes = yield* store
+                    .getUint8Array(`${trajectory.id}/${index}`)
+                    .pipe(Effect.mapError(CacheError.read(trajectory.id, index)));
 
                   if (bytes === undefined) {
-                    return yield* Effect.fail(
-                      new CacheError({
-                        id: trajectory.id,
-                        index,
-                        operation: "read",
-                        cause: "the store holds no part at this index",
-                      }),
-                    );
+                    return yield* CacheError.read(
+                      trajectory.id,
+                      index,
+                    )("the store holds no part at this index");
                   }
 
                   return yield* decode(bytes);
@@ -166,17 +161,9 @@ export const layerKVStore = (options?: {
 
                 return encode(part).pipe(
                   Effect.flatMap((bytes) =>
-                    store.set(`${trajectory.id}/${index}`, bytes).pipe(
-                      Effect.mapError(
-                        (cause) =>
-                          new CacheError({
-                            id: trajectory.id,
-                            index,
-                            operation: "write",
-                            cause,
-                          }),
-                      ),
-                    ),
+                    store
+                      .set(`${trajectory.id}/${index}`, bytes)
+                      .pipe(Effect.mapError(CacheError.write(trajectory.id, index))),
                   ),
                 );
               }),
@@ -199,14 +186,15 @@ export const layerKVStore = (options?: {
 };
 
 /**
- * Reads a trajectory into a buffer of its parts, kept in memory.
+ * Creates a {@link Cache} holding every part of a trajectory in memory.
  *
  * **Details**
  *
- * Reading the source runs through to its end before the buffer is returned.
+ * Reading the source runs through to its end before the parts are all held.
  * `length` counts the parts held, and `at` reads one by a zero-based index.
  *
  * @see {@link Trajectory.TrajectoryFile} for the buffer.
+ * @see {@link layerKVStore} for a cache keeping its parts in a store.
  * @stability stable
  * @category layers
  */

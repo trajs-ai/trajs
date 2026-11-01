@@ -76,7 +76,7 @@ export type Sessions = Record<string, Conversation>;
  *
  * **Example** (Converting an Anthropic tool exchange)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Anthropic } from "@trajs/core/codec"
  * import { Cache, Config, Prompt, Response, Session, Trajectory } from "@trajs/core"
  * import { Effect, Stream } from "effect"

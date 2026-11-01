@@ -53,7 +53,7 @@ const Repository = Schema.Union([
  *
  * **Example** (Attaching the declaring package)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import pkg from "../package.json" with { type: "json" }
  * import { PackageMetadata } from "@trajs/utils/Package"
  * import { Schema } from "effect"

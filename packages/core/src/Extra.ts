@@ -120,7 +120,7 @@ export const make = <
  *
  * **When to use**
  *
- * Use where a kit names an extra whose schemas the caller does not hold.
+ * Use when a kit names an extra whose schemas the caller does not hold.
  *
  * **Details**
  *

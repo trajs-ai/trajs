@@ -60,7 +60,7 @@ export type Sessions = Record<string, Message[]>;
  *
  * **Example** (Converting an OpenAI-compatible tool exchange)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { OpenAiCompat } from "@trajs/core/codec"
  * import { Cache, Config, Prompt, Response, Session, Trajectory } from "@trajs/core"
  * import { Effect, Stream } from "effect"

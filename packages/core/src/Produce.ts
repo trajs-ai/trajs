@@ -523,8 +523,6 @@ export type ProduceSession<
    *
    * Returns none until the part that ends the chunk arrives.
    * A chunk still open when the run ends is not written.
-   *
-   * @see {@link Response.AllPartsView} for the parts a response arrives in.
    */
   enqueueResponse: (
     response: Response.AllPartsView<Tools>,
@@ -588,7 +586,7 @@ type ProduceFn<
  *
  * **Example** (Forking after a recorded prompt)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Config, MetricKit, Produce, Prompt } from "@trajs/core"
  * import { Effect, Stream } from "effect"
  *

@@ -248,7 +248,7 @@ export interface OpenAiNumbers {
  *
  * **Example** (The published numbers)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * const rule = Count.openAiRule()
  * rule(part, { width: 500, height: 500 }) // => 255
  * rule(part, { width: 513, height: 513 }) // => 765
@@ -321,7 +321,7 @@ export interface OpenAiPatchNumbers {
  *
  * **Example** (The published numbers)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * const rule = Count.openAiPatchRule()
  * rule(part, { width: 1024, height: 1024 }) // => 1229
  * rule(part, { width: 2048, height: 2048 }) // => 3000
@@ -391,7 +391,7 @@ export interface AnthropicNumbers {
  *
  * **Example** (The published numbers)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * const rule = Count.anthropicRule()
  * rule(part, { width: 1000, height: 1000 }) // => 1296
  * rule(part, { width: 1920, height: 1080 }) // => 1560

@@ -183,7 +183,7 @@ export type EncodingServices<C extends AnyConfig> =
  *
  * **When to use**
  *
- * Use for the requirement of an operation that both reads and writes parts.
+ * Use as the requirement of an operation that both reads and writes parts.
  *
  * **Details**
  *

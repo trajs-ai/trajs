@@ -103,7 +103,7 @@ export const make = <
  *
  * **Example** (Migrating a renamed field)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Schema, SchemaGetter } from "effect"
  * import * as VersionedSchema from "@trajs/utils/VersionedSchema"
  *

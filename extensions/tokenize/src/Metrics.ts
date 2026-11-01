@@ -304,7 +304,7 @@ export type Uncounted = Schema.Schema.Type<typeof Uncounted>;
  *
  * **Example** (Providing the kit with the producer of its metric)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
  * import { Metric } from "@trajs/core"
  * import { Tokenizer, makeProducer, metrickit, tokenEstimate } from "@trajs/extension-tokenize"

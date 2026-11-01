@@ -121,7 +121,7 @@ export type AnySession<Config extends Config.AnyConfig, E, R> =
  * Each session replay scans the cached trajectory.
  *
  * @see {@link MainSession} for the resulting tree root.
- * @see {@link Cache.layerFsTemp} for disk-backed caching with a finite capacity.
+ * @see {@link Cache.layerKVStore} for a cache keeping its parts in a store.
  * @stability stable
  * @category constructors
  */

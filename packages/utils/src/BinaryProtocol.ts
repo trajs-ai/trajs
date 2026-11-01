@@ -242,7 +242,7 @@ const betweenBig = (minimum: bigint, maximum: bigint): Schema.Codec<bigint, bigi
  *
  * **Example** (A chunk header, written and read back)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Schema } from "effect"
  * import * as BinaryProtocol from "@trajs/utils/BinaryProtocol"
  *
@@ -274,7 +274,7 @@ const betweenBig = (minimum: bigint, maximum: bigint): Schema.Codec<bigint, bigi
  *
  * **Example** (A length declared after the data it sizes)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Schema } from "effect"
  * import * as BinaryProtocol from "@trajs/utils/BinaryProtocol"
  *
@@ -511,7 +511,7 @@ export const bytes = (size?: number): Field<Uint8Array> =>
  *
  * **Example** (A body the header sizes)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Schema } from "effect"
  * import * as BinaryProtocol from "@trajs/utils/BinaryProtocol"
  *
@@ -562,7 +562,7 @@ export const bytesOf = (name: string): Field<Uint8Array> =>
  *
  * **Example** (A name and its tags embedded beside a count)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Schema } from "effect"
  * import * as BinaryProtocol from "@trajs/utils/BinaryProtocol"
  *
@@ -606,7 +606,7 @@ export const frame = <A>(schema: Schema.Codec<A, unknown, never, never>): Field<
  *
  * **Example** (Elements to the end of the message)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Schema } from "effect"
  * import * as BinaryProtocol from "@trajs/utils/BinaryProtocol"
  *
@@ -643,7 +643,7 @@ export const array = <A>(field: Field<A>, count?: number): Field<ReadonlyArray<A
  *
  * **Example** (A table of counted elements)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Schema } from "effect"
  * import * as BinaryProtocol from "@trajs/utils/BinaryProtocol"
  *
@@ -693,7 +693,7 @@ export const arrayOf = <A>(field: Field<A>, name: string): Field<ReadonlyArray<A
  *
  * **Example** (A body the code states)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Schema } from "effect"
  * import * as BinaryProtocol from "@trajs/utils/BinaryProtocol"
  *
@@ -737,7 +737,7 @@ export const union = <Cases extends Record<string, Field<unknown>>>(
  *
  * **Example** (A code byte of a closed set)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Schema } from "effect"
  * import * as BinaryProtocol from "@trajs/utils/BinaryProtocol"
  *

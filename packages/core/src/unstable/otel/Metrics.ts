@@ -1,13 +1,11 @@
 /**
  * Metric definitions of the GenAI and MCP semantic conventions.
  *
- * Each export states the name, instrument, unit, and attributes of a metric. A base
- * metric is exported under the name the registry gives it, and an OpenAI refinement
- * under its own name with a `ref` to the metric it extends.
- *
- * Attributes the registry marks required are struct fields, and the rest are
- * optional. Each OpenAI refinement repeats the attributes of the metric it extends,
- * so one schema decodes a refined metric.
+ * Each export states the name, instrument, unit, and attributes of a metric.
+ * A base metric is exported under the name the registry gives it, and an
+ * OpenAI refinement under its own name with a `ref` to the metric it extends.
+ * Required attributes are struct fields and the rest are optional, and a
+ * refinement repeats them, so one schema decodes a refined metric.
  *
  * @see [the source metric definitions](https://github.com/open-telemetry/semantic-conventions-genai/tree/main/model).
  * @stability experimental
@@ -54,8 +52,9 @@ export const MetricUnit = Schema.String;
 export type MetricUnit = Schema.Schema.Type<typeof MetricUnit>;
 
 /**
- * A metric definition.
+ * A metric of the conventions, as the registry states it.
  *
+ * @see {@link MetricRefinement} for a metric that extends another.
  * @stability experimental
  * @category models
  */

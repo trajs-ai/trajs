@@ -17,7 +17,7 @@
  *
  * **Example** (Counting the tokens of a text)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect } from "effect"
  * import { Tokenizer } from "@trajs/extension-tokenize"
  *
@@ -126,7 +126,7 @@ export const layerAnthropic: Layer.Layer<AiTokenizer.Tokenizer> = Layer.effect(
  *
  * **Example** (Counting for one of the GPT-4o family)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * const layer = Tokenizer.layerOpenAi({ model: "gpt-4o" })
  * ```
  *

@@ -97,7 +97,7 @@ export const make = <Pkg extends string, Id extends string, S extends Schema.Top
  *
  * **When to use**
  *
- * Use where a kit names an event whose payload schema the caller does not hold.
+ * Use when a kit names an event whose payload schema the caller does not hold.
  *
  * **Details**
  *

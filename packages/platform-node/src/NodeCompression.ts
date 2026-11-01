@@ -83,7 +83,7 @@ const compression: Compression = make({
  *
  * **Example** (Compressing text into a gzip frame)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { gunzipSync } from "node:zlib"
  * import { Effect, Stream } from "effect"
  * import { Algorithm } from "@trajs/utils/Compression"
@@ -125,7 +125,7 @@ export const compress = (options?: Options): Frame => compression.compress(optio
  *
  * **Example** (Decompressing what a compression wrote)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * import { Effect, Stream } from "effect"
  *
  * const source = Stream.make(new TextEncoder().encode("hello ".repeat(1024)))

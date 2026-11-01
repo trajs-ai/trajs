@@ -22,7 +22,7 @@ Use a multiline JSDoc block for a public declaration:
  *
  * **Example** (Parsing JSON)
  *
- * ```ts import.meta.vitest
+ * ```ts
  * operation() // => expected
  * ```
  *
@@ -32,13 +32,23 @@ Use a multiline JSDoc block for a public declaration:
  */
 ````
 
-Write practical English about the public concept, not its implementation. Start functions and methods with a present-tense action such as `Creates`, `Returns`, or `Converts`; match nearby noun families for values, such as `Schema for`, `Layer that`, or `Service that`.
+Write practical English about the public concept, not its implementation. Start functions and methods with a present-tense action such as `Creates`, `Returns`, or `Converts`, then name the produced value with `{@link}` and what it is produced from. Start values with the noun the name denotes, such as `Schema for`.
+
+A description that restates the type says nothing:
+
+- `A {@link TrajectoryBuffer} that names its id and its config.` states composition.
+- `A whole trajectory, addressed by index the way a file is.` states the concept.
+
+A schema and its `type` alias share a name, so their blocks must state different
+things. The schema block carries the domain description, and the type block
+states its form: `The decoded form of {@link PromptMeta}` beside `The wire form
+of {@link PromptMeta}`.
 
 Document a dual or overloaded export with one block above the declaration, not one block per signature.
 
 The description is one paragraph. Optional non-empty sections appear once in this order: `**When to use**`, `**Details**`, `**Gotchas**`. Examples follow the sections. Separate descriptions, sections, examples, and tags with exactly one blank line. Use prose for one fact and bullets for parallel facts. Do not add other headings.
 
-`**When to use**` states a positive use case distinct from the description and begins with `Use to`, `Use when`, `Use as`, or `Use with`. Put sibling comparisons in `@see`. Reserve `**Gotchas**` for concrete preconditions, edge cases, surprising behavior, and important failure modes.
+`**When to use**` states a positive use case distinct from the description and begins with `Use to`, `Use when`, `Use as`, or `Use with`. It must single out this declaration from its nearest sibling. Put sibling comparisons in `@see`. Reserve `**Gotchas**` for concrete preconditions, edge cases, surprising behavior, and important failure modes.
 
 ## Tags
 
@@ -72,4 +82,4 @@ Module prose does not use the declaration template. It is one or two short parag
 
 Inline `{@link Symbol}` targets must resolve to TypeScript symbols; use normal Markdown links for URLs. Prefer code formatting when navigation does not help a reader understand or choose the API.
 
-Use `@see` only for a verified related public API: a close alternative, inverse, complement, level variant, or closely returned, consumed, or configured type. Explain non-obvious relationships with `for ...`. Exclude implementation dependencies, broad concepts, example-only helpers, private APIs, and merely lexical matches. The target must have public JSDoc.
+Use `@see` only for a verified related public API: a close alternative, inverse, complement, level variant, or closely returned, consumed, or configured type. Explain non-obvious relationships with `for ...`. The phrase states what sets the target apart, not what it shares. Exclude implementation dependencies, broad concepts, example-only helpers, private APIs, and merely lexical matches. The target must have public JSDoc.
