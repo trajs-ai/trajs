@@ -60,7 +60,7 @@ export const layerWebStorage = (
  * **When to use**
  *
  * Use where the bytes a page keeps are to outlive a reload of it, such as the parts of
- * a trajectory a viewer reads again. Use {@link ByteStore.layer} instead where they are
+ * a trajectory a viewer reads again. Use {@link ByteStore.layerMemory} instead where they are
  * kept for as long as the page runs and no longer.
  *
  * **Details**

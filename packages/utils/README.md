@@ -7,10 +7,10 @@ platform package can say what each is over.
   a source serves.
 - `ByteStore` — the bytes a program keeps between readings, held in chunks in the
   key/value store of `effect/persistence` (`ByteStore.layerKVStore`), in memory
-  (`ByteStore.layer`), in a temporary directory of the file system that goes with
-  the scope (`ByteStore.layerFsTemp`), or in a bucket reached with a client of the
-  AWS SDK (`ByteStore.layerS3`), read back as a `Byte` and written a chunk at a
-  time.
+  (`ByteStore.layerMemory`), in a directory of the file system
+  (`ByteStore.layerFileSystem`), a temporary one that goes with the scope where
+  none is stated, or in a bucket reached with a client of the AWS SDK
+  (`ByteStore.layerS3`), read back as a `Byte` and written a chunk at a time.
 - `Compression` — what carries a trajectory's parts in a frame: zstd, gzip,
   deflate, or the bytes as they are, stated at the call that writes or reads one
   (`Compression.Options`) and recorded with each chunk of a stored trajectory.
@@ -46,9 +46,9 @@ platform package can say what each is over.
 `@trajs/platform-node` and `@trajs/platform-browser` provide the layers these
 services are read through, and the exchange layer of [`@trajs/core`](../core) is built
 over them. A `ByteStore` is provided by a program instead — in memory with
-`ByteStore.layer`, in the key/value store it keeps its bytes in with
-`ByteStore.layerKVStore`, in a temporary directory with `ByteStore.layerFsTemp`, or
-in a bucket with `ByteStore.layerS3` — and a trajectory read with its bytes kept
+`ByteStore.layerMemory`, in the key/value store it keeps its bytes in with
+`ByteStore.layerKVStore`, in a directory with `ByteStore.layerFileSystem`, or in a
+bucket with `ByteStore.layerS3` — and a trajectory read with its bytes kept
 requires one.
 
 Every module here is re-exported by [`@trajs/core`](../core): a program reads the

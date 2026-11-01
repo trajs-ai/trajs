@@ -7,17 +7,18 @@
  * A read reaches only the chunks it asks for, so a sequence too large to hold is still written and
  * read.
  *
- * This package states a store in memory ({@link layer}), one in a temporary directory
- * ({@link layerFsTemp}), one in a bucket ({@link layerS3}), and one over a key/value store a
- * program holds ({@link layerKVStore}).
+ * This package states a store in memory ({@link layerMemory}), one in a directory of the file
+ * system ({@link layerFileSystem}), one in a bucket ({@link layerS3}), and one over a key/value
+ * store a program holds ({@link layerKVStore}).
  *
  * @stability stable
  */
 
 import type { S3Client } from "@aws-sdk/client-s3";
-import { Context, Data, Effect, FileSystem, Formatter, Layer, Path, Sink } from "effect";
+import { Context, Data, Effect, FileSystem, Formatter, Layer, Path, Predicate, Sink } from "effect";
 import { KeyValueStore } from "effect/persistence";
 import type { PlatformError } from "effect/PlatformError";
+import type { Scope } from "effect/Scope";
 
 import { type Byte } from "#/Byte.ts";
 import { keyValueStoreBytes } from "#/internal/byte-store.ts";
@@ -56,8 +57,9 @@ export interface WriteOptions {
  *
  * **When to use**
  *
- * Use where a store is built ({@link layer}, {@link layerKVStore}, {@link layerS3}) and how it
- * cuts a sequence matters, such as the quota of a store of a limited size.
+ * Use where a store is built ({@link layerMemory}, {@link layerFileSystem}, {@link layerKVStore},
+ * {@link layerS3}) and how it cuts a sequence matters, such as the quota of a store of a limited
+ * size.
  *
  * **Details**
  *
@@ -135,13 +137,13 @@ export const defaultChunkSize = 64 * 1024;
  * })
  *
  * const bytes = await Effect.runPromise(
- *   program.pipe(Effect.provide(ByteStore.layer({ chunkSize: 4 }))),
+ *   program.pipe(Effect.provide(ByteStore.layerMemory({ chunkSize: 4 }))),
  * )
  *
  * new TextDecoder().decode(bytes) // => "ajs"
  * ```
  *
- * @see {@link layer} for the store this service is provided as.
+ * @see {@link layerMemory} for the store this service is provided as.
  * @stability stable
  * @category services
  */
@@ -191,8 +193,8 @@ export interface ByteStore {
  *
  * **When to use**
  *
- * Use to require a store of a program, and {@link layer}, {@link layerKVStore} or {@link make} to
- * provide it.
+ * Use to require a store of a program, and {@link layerMemory}, {@link layerFileSystem},
+ * {@link layerKVStore} or {@link make} to provide it.
  *
  * **Details**
  *
@@ -281,7 +283,8 @@ export const make = (store: KeyValueStore.KeyValueStore, options?: Options): Byt
  * written by a store built with another size.
  *
  * @see {@link ByteStore} for the store this provides.
- * @see {@link layer} for the same store over the key/value store in memory.
+ * @see {@link layerMemory} for the same store over the key/value store in memory.
+ * @see {@link layerFileSystem} for the same store over files in a directory.
  * @see {@link make} for the same store built over a store at hand.
  * @stability stable
  * @category layers
@@ -295,13 +298,13 @@ export const layerKVStore = (
   );
 
 /**
- * The store held in the key/value store in memory.
+ * The store held in memory.
  *
  * **When to use**
  *
  * Use where the bytes are kept for as long as the program runs and no longer, such as what a
  * reading of a trajectory keeps between its readings.
- * Provide {@link layerKVStore} instead where they are to outlive it.
+ * Use {@link layerFileSystem} instead where they are to outlive it.
  *
  * **Details**
  *
@@ -311,48 +314,53 @@ export const layerKVStore = (
  * Nothing else is required of a program, since the key/value store is this layer's own.
  *
  * @see {@link ByteStore} for the store this provides.
+ * @see {@link layerFileSystem} for the same store over files in a directory.
  * @see {@link layerKVStore} for the same store over a key/value store a program states.
  * @stability stable
  * @category layers
  */
-export const layer = (options?: Options): Layer.Layer<ByteStore> =>
+export const layerMemory = (options?: Options): Layer.Layer<ByteStore> =>
   layerKVStore(options).pipe(Layer.provide(KeyValueStore.layerMemory));
 
 /**
- * The store in a temporary directory of the file system.
+ * The store in a directory of the file system.
  *
  * **When to use**
  *
  * Use where the bytes a program keeps are too many to hold in memory for as long as it runs, such
  * as the frames of the trajectories it reads again and again.
- * Use as well where they are not to be found after it ends, since the system clears the directory.
+ * Use as well where they are to be read again by a later run, since a stated directory outlives
+ * the scope.
  *
  * **Details**
  *
- * It is {@link layerKVStore} over `KeyValueStore.layerFileSystem` in a directory made by
- * `FileSystem.makeTempDirectoryScoped`.
- * The directory is named after `prefix`, which defaults to `"trajs-"`, and holds nothing but the
- * sequences written through the store.
- * It is removed when the scope closes.
+ * It is {@link layerKVStore} over `KeyValueStore.layerFileSystem` in `dir`.
+ * A directory stated alone is `dir`, so `layerFileSystem("bytes")` and
+ * `layerFileSystem({ dir: "bytes" })` build the same layer.
+ * Where `dir` is omitted, the directory is a temporary one, made with
+ * `FileSystem.makeTempDirectoryScoped` under the prefix `"trajs-"`, which the scope removes.
  *
- * A sequence is cut into chunks of {@link defaultChunkSize} ({@link Options}).
- * Where another size is to be kept, state the store with {@link layerKVStore} over a directory of
- * the program's own.
+ * A sequence is cut into chunks of {@link defaultChunkSize} where `chunkSize` is not stated
+ * ({@link Options}).
  *
  * @see {@link ByteStore} for the store this provides.
- * @see {@link layer} for the same store held in memory.
+ * @see {@link layerMemory} for the same store held in memory.
  * @see {@link layerKVStore} for the same store over a key/value store a program states.
  * @stability stable
  * @category layers
  */
-export const layerFsTemp = (
-  prefix = "trajs-",
-): Layer.Layer<ByteStore, PlatformError, FileSystem.FileSystem | Path.Path> =>
+export const layerFileSystem = (
+  options: string | (Options & { readonly dir?: string }) = {},
+): Layer.Layer<ByteStore, PlatformError, FileSystem.FileSystem | Path.Path | Scope> =>
   Effect.gen(function* () {
+    const stated = Predicate.isString(options) ? { dir: options } : options;
     const fs = yield* FileSystem.FileSystem;
-    const directory = yield* fs.makeTempDirectoryScoped({ prefix });
 
-    return layerKVStore().pipe(Layer.provide(KeyValueStore.layerFileSystem(directory)));
+    const directory = stated.dir ?? (yield* fs.makeTempDirectoryScoped({ prefix: "trajs-" }));
+
+    return layerKVStore({ chunkSize: stated.chunkSize }).pipe(
+      Layer.provide(KeyValueStore.layerFileSystem(directory)),
+    );
   }).pipe(Layer.unwrap);
 
 /**
