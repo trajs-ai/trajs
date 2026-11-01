@@ -180,20 +180,20 @@ catalogs:
       specifier: ^3.0.3
       version: 3.0.3
     '@effect/ai-anthropic':
-      specifier: ^4.1.0
-      version: 4.1.0
+      specifier: ^4.1.1
+      version: 4.1.1
     '@effect/ai-openai-compat':
-      specifier: ^4.1.0
-      version: 4.1.0
+      specifier: ^4.1.1
+      version: 4.1.1
     '@effect/platform-node':
-      specifier: ^4.1.0
-      version: 4.1.0
+      specifier: ^4.1.1
+      version: 4.1.1
     '@effect/sql-clickhouse':
-      specifier: ^4.1.0
-      version: 4.1.0
+      specifier: ^4.1.1
+      version: 4.1.1
     '@effect/vitest':
-      specifier: ^4.1.0
-      version: 4.1.0
+      specifier: ^4.1.1
+      version: 4.1.1
     '@fontsource-variable/geist':
       specifier: ^5.3.0
       version: 5.3.0
@@ -242,6 +242,9 @@ catalogs:
     cn:
       specifier: ^0.5.0
       version: 0.5.0
+    effect:
+      specifier: ^4.1.1
+      version: 4.1.1
     gpt-tokenizer:
       specifier: ^4.1.0
       version: 4.1.0
@@ -290,7 +293,6 @@ catalogs:
 
 overrides:
   vite@*: npm:@voidzero-dev/vite-plus-core@^1.4.0
-  effect: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
 
 importers:
 
@@ -322,7 +324,7 @@ importers:
     dependencies:
       '@effect/platform-node':
         specifier: 'catalog:'
-        version: 4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(redis@6.3.0(@node-rs/xxhash@1.7.8))
+        version: 4.1.1(effect@4.1.1)(redis@6.3.0(@node-rs/xxhash@1.7.8))
       '@trajs/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -333,8 +335,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/utils
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -353,7 +355,7 @@ importers:
     dependencies:
       '@effect/platform-node':
         specifier: 'catalog:'
-        version: 4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(redis@6.3.0(@node-rs/xxhash@1.7.8))
+        version: 4.1.1(effect@4.1.1)(redis@6.3.0(@node-rs/xxhash@1.7.8))
       '@trajs/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -367,12 +369,12 @@ importers:
         specifier: workspace:*
         version: link:../../packages/platform-node
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
     devDependencies:
       '@effect/vitest':
         specifier: 'catalog:'
-        version: 4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(vitest@5.0.5)
+        version: 4.1.1(effect@4.1.1)(vitest@5.0.5)
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.6
@@ -395,12 +397,12 @@ importers:
         specifier: workspace:*
         version: link:../../packages/olap
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
     devDependencies:
       '@effect/vitest':
         specifier: 'catalog:'
-        version: 4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(vitest@5.0.5)
+        version: 4.1.1(effect@4.1.1)(vitest@5.0.5)
       '@types/node':
         specifier: 'catalog:'
         version: 26.6.6
@@ -423,8 +425,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/core
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
       gpt-tokenizer:
         specifier: 'catalog:'
         version: 4.1.0
@@ -446,16 +448,16 @@ importers:
     dependencies:
       '@effect/ai-anthropic':
         specifier: 'catalog:'
-        version: 4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)
+        version: 4.1.1(effect@4.1.1)
       '@effect/ai-openai-compat':
         specifier: 'catalog:'
-        version: 4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)
+        version: 4.1.1(effect@4.1.1)
       '@trajs/utils':
         specifier: workspace:*
         version: link:../utils
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
       uuid:
         specifier: 'catalog:'
         version: 14.0.3
@@ -477,7 +479,7 @@ importers:
     dependencies:
       '@effect/sql-clickhouse':
         specifier: 'catalog:'
-        version: 4.1.0(@effect/platform-node@4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(redis@6.3.0(@node-rs/xxhash@1.7.8)))(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)
+        version: 4.1.1(@effect/platform-node@4.1.1(effect@4.1.1)(redis@6.3.0(@node-rs/xxhash@1.7.8)))(effect@4.1.1)
       '@trajs/core':
         specifier: workspace:*
         version: link:../core
@@ -485,8 +487,8 @@ importers:
         specifier: 'catalog:'
         version: 3.4.0(@aws-sdk/client-s3@3.1159.0)(@clickhouse/client@1.24.1)(ai@7.0.138(zod@4.6.5))(zod@4.6.5)
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -516,8 +518,8 @@ importers:
         specifier: workspace:*
         version: link:../utils
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -541,8 +543,8 @@ importers:
         specifier: workspace:*
         version: link:../utils
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -561,7 +563,7 @@ importers:
     dependencies:
       '@effect/platform-node':
         specifier: 'catalog:'
-        version: 4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(redis@6.3.0(@node-rs/xxhash@1.7.8))
+        version: 4.1.1(effect@4.1.1)(redis@6.3.0(@node-rs/xxhash@1.7.8))
       '@node-rs/xxhash':
         specifier: 'catalog:'
         version: 1.7.8
@@ -569,8 +571,8 @@ importers:
         specifier: workspace:*
         version: link:../utils
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -591,8 +593,8 @@ importers:
         specifier: 'catalog:'
         version: 3.1159.0
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -611,7 +613,7 @@ importers:
     dependencies:
       '@effect/platform-node':
         specifier: 'catalog:'
-        version: 4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(redis@6.3.0(@node-rs/xxhash@1.7.8))
+        version: 4.1.1(effect@4.1.1)(redis@6.3.0(@node-rs/xxhash@1.7.8))
       '@trajs/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -622,8 +624,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/utils
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -650,8 +652,8 @@ importers:
         specifier: 'catalog:'
         version: 0.5.0
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
       lucide-react:
         specifier: 'catalog:'
         version: 1.64.0(@types/react@19.3.0)(react@19.3.1)
@@ -696,8 +698,8 @@ importers:
         specifier: 'catalog:'
         version: 0.5.0
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
       fumadocs-core:
         specifier: ^16.17.9
         version: 16.17.9(@mdx-js/mdx@3.1.1(supports-color@10.2.2))(@modelcontextprotocol/server@2.3.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(flexsearch@0.8.212)(lucide-react@1.64.0(@types/react@19.3.0)(react@19.3.1))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(supports-color@10.2.2)(zod@4.6.7)
@@ -863,8 +865,8 @@ importers:
         specifier: 'catalog:'
         version: 0.5.0
       effect:
-        specifier: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
-        version: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+        specifier: 'catalog:'
+        version: 4.1.1
       lucide-react:
         specifier: 'catalog:'
         version: 1.64.0(@types/react@19.3.0)(react@19.3.1)
@@ -883,7 +885,7 @@ importers:
     devDependencies:
       '@effect/platform-node':
         specifier: 'catalog:'
-        version: 4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(redis@6.3.0(@node-rs/xxhash@1.7.8))
+        version: 4.1.1(effect@4.1.1)(redis@6.3.0(@node-rs/xxhash@1.7.8))
       '@streamdown/code':
         specifier: 'catalog:'
         version: 2.0.0(react@19.3.1)
@@ -1466,45 +1468,39 @@ packages:
   '@dotenvx/primitives@0.8.0':
     resolution: {integrity: sha512-VYJy0uhFm9zTJ1TxBaW/pA8bjbOM/OttaNMwZ1RHG4JKyRG7DhSdiqD1ipQoAyoD22olUtxbP78W9xY3Wd11bg==}
 
-  '@effect/ai-anthropic@4.1.0':
-    resolution: {integrity: sha512-ibl/tCXP1Fah+UmyvUCy0ZbxNgnnrbjqXbvKJUP9Sc4C03Vt2NmlN5MKujD6wGFGYPfsgAswAHp0VmeL2y2F2A==}
-    version: 4.1.0
+  '@effect/ai-anthropic@4.1.1':
+    resolution: {integrity: sha512-tBJ4JCeoiyxxVwgTwbU9BZ8/Mshg6LufdsHBF/N/uXIM+Uq0ogSaHSG+BomDEx2uBDCF8/FPhuHp2dQAgSoWqA==}
     peerDependencies:
-      effect: ^4.1.0
+      effect: ^4.1.1
 
-  '@effect/ai-openai-compat@4.1.0':
-    resolution: {integrity: sha512-PD9z2CD1zdLel8qEQUG4NAw+HHvXhy5yRF2pwSN44YiB5iGohrRe5AOTb1VYflJVUjlqyjFzTU3g5JtvAKyLMQ==}
-    version: 4.1.0
+  '@effect/ai-openai-compat@4.1.1':
+    resolution: {integrity: sha512-uy9AGjCUquw1/EVrQdeZ1Zlidn9dQeUkkmq9S2xAFiwTnVKpmzZrpK7CcceT7tt+uzLX1DHUJsbIO6P3GmPKrA==}
     peerDependencies:
-      effect: ^4.1.0
+      effect: ^4.1.1
 
-  '@effect/platform-node-shared@4.1.0':
-    resolution: {integrity: sha512-uYQfFRoxWLo8fIhiSeBcmz/R1ooOfE3HF3cWHFgxz82tZMk2Wn02BGABcdLmaAch9VpDLbtWnuhSxNyBsGMUFg==}
-    version: 4.1.0
+  '@effect/platform-node-shared@4.1.1':
+    resolution: {integrity: sha512-29zdEDs3i5W+t92+mWTFNSfzSHsTpZMcFZ9k4lkkz4tETlC1m4lRwjdjieJtvQ/bKHMnYrCtZwizsBFSf3L5Yg==}
     engines: {node: '>=22.19.0'}
     peerDependencies:
-      effect: ^4.1.0
+      effect: ^4.1.1
 
-  '@effect/platform-node@4.1.0':
-    resolution: {integrity: sha512-v+X7moGVF9k5oMVvz0slA+NgtEod+W+oygeI285MDJgSlUCW3JcqElj+cD3rlijFZtpKhC7RLkU1GuCxjGHTpA==}
-    version: 4.1.0
+  '@effect/platform-node@4.1.1':
+    resolution: {integrity: sha512-Oy3eP27XeipUgejftptHy0zf2W75HU8/yPKwBqdz8uYxAvWdf4c48OFYs6KJX/+uIEKdMjnF6mXYgbauWgIcVA==}
     engines: {node: '>=22.19.0'}
     peerDependencies:
-      effect: ^4.1.0
-      redis: '>=5.0.0 <7.0.0'
+      effect: ^4.1.1
+      redis: '>=5.1.0 <7.0.0'
 
-  '@effect/sql-clickhouse@4.1.0':
-    resolution: {integrity: sha512-sBTfQTjq1AYeRMjHW0EVHuOLcmLSoHrUKT7BTF8Kal7ZoSPmr7Nduyjv1NZnu75w4wAaEhLjJnKhXhZO8L/76Q==}
-    version: 4.1.0
+  '@effect/sql-clickhouse@4.1.1':
+    resolution: {integrity: sha512-tLt7M7GORDGuiwKbTL+isPYhWZFhOAWrgI2Cfkd6dtHEIUlNGvEZnPZd4J3Sz1/g+YlL5oVjWBmG+r7kNNeO2A==}
     peerDependencies:
-      '@effect/platform-node': ^4.1.0
-      effect: ^4.1.0
+      '@effect/platform-node': ^4.1.1
+      effect: ^4.1.1
 
-  '@effect/vitest@4.1.0':
-    resolution: {integrity: sha512-+APF69oTYgGj5WCewowk1/udepH74xz4ONyH7d+UfcK0SrF3osiSwsWEyODUpJvWd6MIk5F5PcFJiE4evMuG2A==}
-    version: 4.1.0
+  '@effect/vitest@4.1.1':
+    resolution: {integrity: sha512-VkE9EUXE4G7mXMmV3X3Iu+6k3pZswWjOf7PB2qiaHMoFAZAPtHp+eUZo9oJM4Ip5z+ghQ9K0IDAQM2iG6+w5MA==}
     peerDependencies:
-      effect: ^4.1.0
+      effect: ^4.1.1
       vitest: '>=5.0.0 <6.0.0'
 
   '@emnapi/core@1.11.1':
@@ -2889,10 +2885,12 @@ packages:
   '@smithy/core@3.36.0':
     resolution: {integrity: sha512-3hJiwG1F5t1SoXqp/yOCmYXziyx7ZVqF63S5W6YU201e/qwVaHPex+E/3vvyY9a3ORq/b+BydeNZpP2saQ9X2g==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/core@3.37.0':
     resolution: {integrity: sha512-97imTcCyiPd8k0e9+ts/Sp0W65Dn9Ti357J7M09Ov4tI8Q1JDJVFSoAJtjEVKqfHEr3Pdo2jfolqKCaaiszH0g==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.5.2':
     resolution: {integrity: sha512-A9uSdn72ozbRUSit0eib0TW7nXuNPlaeM0zcGkJ+nE6tFcSDbnmtwoxbTCFBukVQcszDAyvsd7+rTduPTXpygg==}
@@ -3987,9 +3985,8 @@ packages:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
 
-  effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51:
-    resolution: {integrity: sha512-G+ozh1o5cfQOWFz7gnFczNWJYDEzCT8r4f8nKxwHBh/nA4QsdiKFK7Y2VfXVR2hIWmlf7kZpFAeEJSmRhzyb/w==, tarball: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51}
-    version: 4.1.0
+  effect@4.1.1:
+    resolution: {integrity: sha512-XYu65BrcmNqu5i7PPvP4dqL+R5ma37zIsfuSPjcn78mog+6e5PkilNg7Xo+pBpjXJYlWEIpH4j91tMrfW05CMw==}
 
   electron-to-chromium@1.5.452:
     resolution: {integrity: sha512-cVvk1YBSj6571VmV6hdJTqj94Y79xSu8cj6Y9t6ae4Y4431z8/7EJFvu3rVp90xhfuv9BpPKUmaLfTo4+FOGBg==}
@@ -6805,42 +6802,42 @@ snapshots:
 
   '@dotenvx/primitives@0.8.0': {}
 
-  '@effect/ai-anthropic@4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)':
+  '@effect/ai-anthropic@4.1.1(effect@4.1.1)':
     dependencies:
-      effect: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+      effect: 4.1.1
 
-  '@effect/ai-openai-compat@4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)':
+  '@effect/ai-openai-compat@4.1.1(effect@4.1.1)':
     dependencies:
-      effect: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+      effect: 4.1.1
 
-  '@effect/platform-node-shared@4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)':
+  '@effect/platform-node-shared@4.1.1(effect@4.1.1)':
     dependencies:
       '@types/ws': 8.18.2
-      effect: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+      effect: 4.1.1
       ws: 8.22.0
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/platform-node@4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(redis@6.3.0(@node-rs/xxhash@1.7.8))':
+  '@effect/platform-node@4.1.1(effect@4.1.1)(redis@6.3.0(@node-rs/xxhash@1.7.8))':
     dependencies:
-      '@effect/platform-node-shared': 4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)
-      effect: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+      '@effect/platform-node-shared': 4.1.1(effect@4.1.1)
+      effect: 4.1.1
       redis: 6.3.0(@node-rs/xxhash@1.7.8)
       undici: 8.12.3
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
 
-  '@effect/sql-clickhouse@4.1.0(@effect/platform-node@4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(redis@6.3.0(@node-rs/xxhash@1.7.8)))(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)':
+  '@effect/sql-clickhouse@4.1.1(@effect/platform-node@4.1.1(effect@4.1.1)(redis@6.3.0(@node-rs/xxhash@1.7.8)))(effect@4.1.1)':
     dependencies:
       '@clickhouse/client': 1.24.1
-      '@effect/platform-node': 4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(redis@6.3.0(@node-rs/xxhash@1.7.8))
-      effect: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+      '@effect/platform-node': 4.1.1(effect@4.1.1)(redis@6.3.0(@node-rs/xxhash@1.7.8))
+      effect: 4.1.1
 
-  '@effect/vitest@4.1.0(effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51)(vitest@5.0.5)':
+  '@effect/vitest@4.1.1(effect@4.1.1)(vitest@5.0.5)':
     dependencies:
-      effect: https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51
+      effect: 4.1.1
       vitest: 5.0.5(@types/node@26.6.6)(@vitest/browser-preview@5.0.5)(@vitest/ui@5.0.5)(@voidzero-dev/vite-plus-core@1.4.0(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1))(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1)
 
   '@emnapi/core@1.11.1':
@@ -8819,7 +8816,7 @@ snapshots:
 
   dotenv@17.4.2: {}
 
-  effect@https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51: {}
+  effect@4.1.1: {}
 
   electron-to-chromium@1.5.452: {}
 

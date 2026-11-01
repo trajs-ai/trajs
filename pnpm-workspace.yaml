@@ -15,11 +15,11 @@ catalog:
   "@base-ui/react": ^1.9.0
   "@changesets/changelog-github": ^1.0.1
   "@changesets/cli": ^3.0.3
-  "@effect/ai-anthropic": ^4.1.0
-  "@effect/ai-openai-compat": ^4.1.0
-  "@effect/platform-node": ^4.1.0
-  "@effect/vitest": ^4.1.0
-  "@effect/sql-clickhouse": ^4.1.0
+  "@effect/ai-anthropic": ^4.1.1
+  "@effect/ai-openai-compat": ^4.1.1
+  "@effect/platform-node": ^4.1.1
+  "@effect/vitest": ^4.1.1
+  "@effect/sql-clickhouse": ^4.1.1
   "@fontsource-variable/geist": ^5.3.0
   "@fontsource/ibm-plex-mono": ^5.3.0
   "@fontsource/poppins": ^5.3.0
@@ -36,7 +36,7 @@ catalog:
   class-variance-authority: ^0.7.1
   cmdk: ^1.1.1
   cn: ^0.5.0
-  effect: ^4.1.0
+  effect: ^4.1.1
   gpt-tokenizer: ^4.1.0
   lucide-react: ^1.64.0
   next-themes: ^0.4.6
@@ -54,10 +54,6 @@ catalog:
   wrangler: ^4.155.0
 overrides:
   vite@*: "catalog:"
-  # Temporary: `effect` 4.1.0 cannot derive a `SchemaBinary` codec for the AI part
-  # schemas that hold a file (Effect-TS/effect#10186). Drop this and bump the
-  # `effect` catalog entry once a release carries the fix.
-  effect: "https://pkg.pr.new/Effect-TS/effect/effect@e2ea531d241cd848fa1434aedd18e496c6951a51"
 peerDependencyRules:
   allowAny:
     - vite
