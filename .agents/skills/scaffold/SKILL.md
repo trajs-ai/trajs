@@ -1,5 +1,5 @@
 ---
-name: scaffold-package
+name: scaffold
 description: Scaffold a new @trajs package in the trajs monorepo, or sync existing packages after a template or convention change. Use for "add a package", bootstrapping a Vite+ library package under packages/ or tools/, or bringing packages in line with this skill.
 ---
 
@@ -20,7 +20,7 @@ Scaffold new `@trajs` packages, or sync existing ones, to the templates in `temp
 
 ## Layout
 
-Follow `packages/core` and `packages/eval`:
+Follow `packages/core`:
 
 ```
 src/
