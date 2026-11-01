@@ -109,10 +109,10 @@ export const encodeChunk = (
   prev: Uint8Array,
   {
     frames,
-    compression,
+    algorithm,
   }: {
     readonly frames: ReadonlyArray<Frame>;
-    readonly compression: Compression.Algorithm;
+    readonly algorithm: Compression.Algorithm;
   },
 ): Effect.Effect<
   Uint8Array,
@@ -121,7 +121,7 @@ export const encodeChunk = (
 > =>
   Effect.gen(function* () {
     const checksum = yield* Checksum.Checksum;
-    const codecs = yield* Compression.Compression;
+    const compression = yield* Compression.Compression;
 
     const meta = joined(
       new Uint8Array(),
@@ -133,13 +133,13 @@ export const encodeChunk = (
       frames.map((frame) => frame.body),
     );
 
-    const packed = yield* codecs.compressBytes({ algorithm: compression })(bodies);
+    const packed = yield* compression.compressBytes({ algorithm })(bodies);
 
     // A region the codec does not make smaller is stored unwrapped (section 5.1).
     const smaller = packed.length < bodies.length;
 
     const body = smaller ? packed : bodies;
-    const code = smaller ? compression : Compression.Algorithm.enums.None;
+    const code = smaller ? algorithm : Compression.Algorithm.enums.None;
     const bodyLen = body.length;
 
     // A length beyond a `u32` is refused where a part is accepted (section 14).

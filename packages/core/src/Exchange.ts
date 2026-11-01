@@ -93,7 +93,7 @@ export const Exchange = Context.Service<Exchange, Exchange>("trajs/Exchange");
  *
  * **Details**
  *
- * `locate` turns an id into a path, or into `null` for an id with no file.
+ * `pathOf` turns an id into a path, or into `null` for an id with no file.
  * A relative path is joined to `cwd`.
  *
  * **Gotchas**
@@ -107,10 +107,10 @@ export const Exchange = Context.Service<Exchange, Exchange>("trajs/Exchange");
  */
 export const layerFileSystem = ({
   cwd,
-  locate = (id) => `${id}.trajs`,
+  pathOf = (id) => `${id}.trajs`,
 }: {
   cwd?: string;
-  locate?: (id: string) => string | null;
+  pathOf?: (id: string) => string | null;
 }): Layer.Layer<Exchange, never, FileSystem.FileSystem | Path.Path | Scope.Scope> =>
   Layer.effect(
     Exchange,
@@ -119,8 +119,8 @@ export const layerFileSystem = ({
       const paths = yield* Path.Path;
       const scope = yield* Effect.scope;
 
-      // A store that reports an id absent states what a locate that names no path does.
-      const absent =
+      // A missing file reports the issue a `pathOf` naming no path reports.
+      const openFailure =
         (id: string) =>
         (cause: PlatformError): TrajectoryError | ExchangeIssue.NotFound =>
           Match.value(cause.reason).pipe(
@@ -128,70 +128,68 @@ export const layerFileSystem = ({
             Match.orElse(() => TrajectoryError.parse(cause)),
           );
 
-      // The bytes of one trajectory, as the file serves them.
-      const serve = (id: string) =>
+      // The bytes of one trajectory, opened from its file.
+      const bytesOf = (
+        id: string,
+      ): Effect.Effect<file.Bytes, TrajectoryError | ExchangeIssue.NotFound> =>
         Effect.gen(function* () {
-          const located = locate(id);
+          const path = pathOf(id);
 
-          if (located === null) {
+          if (path === null) {
             return yield* Effect.fail(new ExchangeIssue.NotFound({ id }));
           }
 
-          const path =
-            cwd === undefined || paths.isAbsolute(located) ? located : paths.join(cwd, located);
+          const resolved =
+            cwd === undefined || paths.isAbsolute(path) ? path : paths.join(cwd, path);
 
           const opened = yield* fs
-            .open(path)
-            .pipe(Effect.provideService(Scope.Scope, scope), Effect.mapError(absent(id)));
+            .open(resolved)
+            .pipe(Effect.provideService(Scope.Scope, scope), Effect.mapError(openFailure(id)));
 
           const { size } = yield* opened.stat.pipe(Effect.mapError(TrajectoryError.parse));
 
-          // The file serves a region in as many reads as it states.
-          const read = (position: bigint, size: number) =>
+          // A read returns what it can, so the region is read until it is full.
+          const readAt = (position: bigint, length: number) =>
             Effect.gen(function* () {
-              const bytes = new Uint8Array(size);
+              const region = new Uint8Array(length);
 
               let filled = 0;
 
-              while (filled < size) {
+              while (filled < length) {
                 const taken = yield* opened
-                  .read(bytes.subarray(filled), { position: position + BigInt(filled) })
+                  .read(region.subarray(filled), { position: position + BigInt(filled) })
                   .pipe(Effect.mapError(TrajectoryError.parse));
 
                 if (taken === 0) {
                   return yield* Effect.fail(
-                    TrajectoryError.parse(new Error(`'${path}' ends before its bytes do`)),
+                    TrajectoryError.parse(new Error(`'${resolved}' ends before its bytes do`)),
                   );
                 }
 
                 filled += taken;
               }
 
-              return bytes;
+              return region;
             });
 
-          return { size, read };
+          return { size, read: readAt };
         });
 
       const read =
         <C extends Config.AnyConfig>(config: C) =>
         <Id extends string>(id: Id) =>
           Effect.gen(function* () {
-            const buffer = yield* file.bufferOf(
-              config,
-              yield* Compression.Compression,
-            )(yield* serve(id));
+            const compression = yield* Compression.Compression;
+            const buffer = yield* file.bufferOf(config, compression)(yield* bytesOf(id));
 
             return { ...config, id, ...buffer };
           });
 
       // TODO: writing and inspecting a file.
-      const unimplemented = (name: string) => Effect.die(new Error(`Exchange.${name}`));
-
       return {
         read,
-        write: () => unimplemented("write"),
-        inspect: () => unimplemented("inspect"),
+        write: () => Effect.die(new Error("Exchange.write")),
+        inspect: () => Effect.die(new Error("Exchange.inspect")),
       };
     }),
   );

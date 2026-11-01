@@ -13,8 +13,8 @@ export interface Bytes {
   readonly read: (position: bigint, size: number) => Effect.Effect<Uint8Array, TrajectoryError>;
 }
 
-/** One chunk of a file: where it begins, how many bytes it takes, and the parts it holds. */
-interface Held {
+/** One chunk the footer's table states: where it begins, how many bytes it takes, and the parts it holds. */
+interface TableEntry {
   readonly at: bigint;
   readonly len: number;
   readonly index: number;
@@ -22,7 +22,7 @@ interface Held {
 }
 
 // The table a file ends with, summed back from the footer to where the first chunk begins.
-const tableOf = (bytes: Bytes): Effect.Effect<ReadonlyArray<Held>, TrajectoryError> =>
+const tableOf = (bytes: Bytes): Effect.Effect<ReadonlyArray<TableEntry>, TrajectoryError> =>
   Effect.gen(function* () {
     const tailBytes = BigInt(chunk.FooterTailBytes);
     const noFooter = TrajectoryError.parse(new Error("the bytes end in no footer"));
@@ -44,32 +44,32 @@ const tableOf = (bytes: Bytes): Effect.Effect<ReadonlyArray<Held>, TrajectoryErr
 
     // The table states each chunk's size, so summing it back from the footer ends where
     // the first chunk begins.
-    const held: Array<Held> = [];
+    const table: Array<TableEntry> = [];
 
     let index = 0;
     let position = footer.chunks.reduce((sum, entry) => sum - BigInt(entry.len), start);
 
     for (const entry of footer.chunks) {
-      held.push({ at: position, len: entry.len, index, count: entry.count });
+      table.push({ at: position, len: entry.len, index, count: entry.count });
 
       position += BigInt(entry.len);
       index += entry.count;
     }
 
-    return held;
+    return table;
   });
 
 // One chunk's two regions, split into the frames that tile them.
-const framesOf = (bytes: Bytes, codecs: Compression.Compression) => (held: Held) =>
+const framesOf = (bytes: Bytes, compression: Compression.Compression) => (entry: TableEntry) =>
   Effect.gen(function* () {
     const stored = yield* Schema.decodeUnknownEffect(chunk.Chunk)(
-      yield* bytes.read(held.at, held.len),
+      yield* bytes.read(entry.at, entry.len),
     ).pipe(Effect.mapError(TrajectoryError.parse));
 
     const body =
       stored.compression === Compression.Algorithm.enums.None
         ? stored.body
-        : yield* codecs
+        : yield* compression
             .decompressBytes({ algorithm: stored.compression })(stored.body)
             .pipe(Effect.mapError(TrajectoryError.parse));
 
@@ -81,12 +81,12 @@ const framesOf = (bytes: Bytes, codecs: Compression.Compression) => (held: Held)
       return yield* Effect.fail(TrajectoryError.parse(new Error("a chunk holds no whole frames")));
     }
 
-    return regions.map((body, at) => ({ meta: metas[at]!, body }));
+    return regions.map((region, frame) => ({ meta: metas[frame]!, body: region }));
   });
 
 // The parts of a stored trajectory, read by index.
 export const bufferOf =
-  <C extends Config.AnyConfig>(config: C, codecs: Compression.Compression) =>
+  <C extends Config.AnyConfig>(config: C, compression: Compression.Compression) =>
   (
     bytes: Bytes,
   ): Effect.Effect<
@@ -97,24 +97,24 @@ export const bufferOf =
     const decodeFrame = part.decodeFrame(config);
 
     return Effect.gen(function* () {
-      const held = yield* tableOf(bytes);
+      const table = yield* tableOf(bytes);
 
       const at = (index: number) =>
         Effect.gen(function* () {
-          const which = held.findIndex(
-            (one) => index >= one.index && index < one.index + one.count,
+          const found = table.findIndex(
+            (entry) => index >= entry.index && index < entry.index + entry.count,
           );
 
-          if (which === -1) {
+          if (found === -1) {
             return Option.none();
           }
 
-          const one = held[which]!;
-          const frames = yield* framesOf(bytes, codecs)(one);
+          const entry = table[found]!;
+          const frames = yield* framesOf(bytes, compression)(entry);
 
-          return Option.some(yield* decodeFrame(frames[index - one.index]!));
+          return Option.some(yield* decodeFrame(frames[index - entry.index]!));
         });
 
-      return { length: held.reduce((sum, one) => sum + one.count, 0), at };
+      return { length: table.reduce((sum, entry) => sum + entry.count, 0), at };
     });
   };
