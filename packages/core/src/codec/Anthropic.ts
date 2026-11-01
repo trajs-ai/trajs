@@ -72,7 +72,7 @@ export type Sessions = Record<string, Conversation>;
  * Reasoning, provider-executed calls and results, approvals, and non-image files are omitted.
  * Embedded images support JPEG, PNG, GIF, and WebP.
  * Conversion retains every session's complete conversation in memory.
- * Session reads scan the cached trajectory and can repeat inherited context.
+ * Session reads scan the buffer and can repeat inherited context.
  *
  * **Example** (Converting an Anthropic tool exchange)
  *
@@ -122,10 +122,12 @@ export type Sessions = Record<string, Conversation>;
  *
  * const trajectory = Trajectory.make(config)(Stream.fromIterable(parts))
  *
- * const conversations = await Effect.runPromise(Session.main(trajectory).pipe(
- *   Effect.flatMap(Anthropic.make),
- *   Effect.provide(Cache.layer()),
- * ))
+ * const conversations = await Effect.runPromise(Effect.gen(function* () {
+ *   const cache = yield* Cache.Cache
+ *   const root = yield* Session.main(yield* cache.cache(trajectory))
+ *
+ *   return yield* Anthropic.make(root)
+ * }).pipe(Effect.provide(Cache.layerMemory())))
  * const conversation = conversations[Trajectory.mainSessionId]
  *
  * conversation?.messages.map((message) => message.role) // => ["user", "assistant", "user", "assistant"]

@@ -56,7 +56,7 @@ export type Sessions = Record<string, Message[]>;
  * Empty user content and assistant content without text, calls, or results are omitted.
  * Tool results are converted to text rather than multimodal content.
  * Conversion retains every session's complete conversation in memory.
- * Session reads scan the cached trajectory and can repeat inherited context.
+ * Session reads scan the buffer and can repeat inherited context.
  *
  * **Example** (Converting an OpenAI-compatible tool exchange)
  *
@@ -101,10 +101,12 @@ export type Sessions = Record<string, Message[]>;
  *
  * const trajectory = Trajectory.make(config)(Stream.fromIterable(parts))
  *
- * const conversations = await Effect.runPromise(Session.main(trajectory).pipe(
- *   Effect.flatMap(OpenAiCompat.make),
- *   Effect.provide(Cache.layer()),
- * ))
+ * const conversations = await Effect.runPromise(Effect.gen(function* () {
+ *   const cache = yield* Cache.Cache
+ *   const root = yield* Session.main(yield* cache.cache(trajectory))
+ *
+ *   return yield* OpenAiCompat.make(root)
+ * }).pipe(Effect.provide(Cache.layerMemory())))
  *
  * conversations[Trajectory.mainSessionId]?.map((message) => message.role) // => ["user", "assistant", "tool", "assistant"]
  * ```

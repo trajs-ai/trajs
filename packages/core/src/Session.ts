@@ -1,18 +1,16 @@
 /**
  * Session trees and inherited conversation streams.
  *
- * {@link main} reads and validates a cached trajectory.
+ * {@link main} reads and validates a buffered trajectory.
  * {@link stream} adds inherited parts to a session's own stream.
  *
  * @stability stable
  */
 
-import { Effect, type Option, type Stream } from "effect";
+import type { Effect, Option, Stream } from "effect";
 
-import * as Cache from "#/Cache.ts";
 import type * as Config from "#/Config.ts";
 import { allSessions, findSession, read, sessionParts } from "#/internal/session.ts";
-import { configOf } from "#/internal/trajectory.ts";
 import * as Trajectory from "#/Trajectory.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
 
@@ -45,7 +43,7 @@ export type SessionStream<Config extends Config.AnyConfig, E, R> = Stream.Stream
  * `forkFrom` names the parent session and fork part uuid.
  * A fork targets a prompt, response, or session declaration.
  * `forkBy` holds direct children keyed by session id.
- * The `stream` field replays only this session's own parts from the cache.
+ * The `stream` field reads only this session's own parts.
  *
  * @see {@link stream} for including inherited parts.
  * @see {@link MainSession} for the root without a parent fork.
@@ -99,7 +97,7 @@ export type AnySession<Config extends Config.AnyConfig, E, R> =
   | MainSession<Config, E, R>;
 
 /**
- * Reads a trajectory into a validated session tree.
+ * Reads the parts of a buffer into a validated session tree.
  *
  * **When to use**
  *
@@ -107,8 +105,9 @@ export type AnySession<Config extends Config.AnyConfig, E, R> =
  *
  * **Details**
  *
- * {@link Cache.Cache} reads the source to completion before session discovery.
- * Session streams replay filtered parts from that cache.
+ * The buffer holds the parts of a trajectory read once.
+ * It is read to its end before any session is discovered.
+ * Each session stream reads the buffer again, one part at a time.
  * The main session exists without a declaration.
  *
  * **Gotchas**
@@ -117,30 +116,17 @@ export type AnySession<Config extends Config.AnyConfig, E, R> =
  * Forks must name an earlier prompt, response, or session declaration.
  * Invalid sessions fail with {@link TrajectoryError}.
  * Repeated declarations for an already declared id are ignored.
- * Session streams require the cache's backing store to remain available.
- * Each session replay scans the cached trajectory.
+ * A session stream fails wherever the buffer it reads fails.
  *
  * @see {@link MainSession} for the resulting tree root.
- * @see {@link Cache.layerKVStore} for a cache keeping its parts in a store.
+ * @see {@link Trajectory.TrajectoryBuffer} for the parts this reads.
  * @stability stable
  * @category constructors
  */
-export const main = Effect.fn(function* <Config extends Config.AnyConfig, E, R>(
-  trajectory: Trajectory.Trajectory<string, Config, E, R>,
-): Effect.fn.Return<
-  MainSession<Config, E | TrajectoryError | Cache.CacheError, R | Config.DecodingServices<Config>>,
-  E | TrajectoryError | Cache.CacheError,
-  R | Config.SchemaServices<Config> | Cache.Cache
-> {
-  const cache = yield* Cache.Cache;
-  const cached = yield* cache.cache(trajectory);
-
-  const replay = Trajectory.asStream(cached).pipe(
-    Trajectory.make(cached.id, configOf<Config>(trajectory)),
-  );
-
-  return yield* read(replay);
-});
+export const main = <Config extends Config.AnyConfig, E, R>(
+  buffer: Trajectory.TrajectoryBuffer<Config, E, R>,
+): Effect.Effect<MainSession<Config, E | TrajectoryError, R>, E | TrajectoryError, R> =>
+  read(Trajectory.asStream(buffer));
 
 /**
  * Reads a session's parts after its inherited ancestor prefixes.

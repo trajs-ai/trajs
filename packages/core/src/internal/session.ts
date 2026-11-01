@@ -258,7 +258,7 @@ const treeOf = <Config extends Config.AnyConfig, E, R>(
   });
 
 export const read = <Config extends Config.AnyConfig, E, R>(
-  trajectory: Trajectory.Trajectory<string, Config, E, R>,
+  trajectory: Trajectory.TrajectoryStream<Config, E, R>,
 ): Effect.Effect<Session.MainSession<Config, E | TrajectoryError, R>, E | TrajectoryError, R> =>
   Effect.gen(function* () {
     const recorded = yield* readParts(trajectory);

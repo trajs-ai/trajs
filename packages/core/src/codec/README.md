@@ -14,10 +14,16 @@ way each API takes them.
 ## Usage
 
 ```ts
+import { Cache, Session } from "@trajs/core";
 import { Anthropic, OpenAiCompat } from "@trajs/core/codec";
 import { Effect } from "effect";
 
-const root = await Effect.runPromise(Session.main(trajectory).pipe(Effect.provide(Cache.layer())));
+const root = await Effect.runPromise(
+  Effect.gen(function* () {
+    const cache = yield* Cache.Cache;
+    return yield* Session.main(yield* cache.cache(trajectory));
+  }).pipe(Effect.provide(Cache.layerMemory())),
+);
 
 // One conversation per session, keyed by the id of the session.
 const anthropic = await Effect.runPromise(Anthropic.make(root));
