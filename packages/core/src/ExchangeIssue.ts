@@ -111,6 +111,20 @@ export class Composite extends Data.TaggedClass("Composite")<{
 }
 
 /**
+ * An id the exchange holds nothing under.
+ *
+ * @stability stable
+ * @category errors
+ */
+export class NotFound extends Data.TaggedClass("NotFound")<{
+  readonly id: string;
+}> {
+  get message(): string {
+    return `Failed to find a trajectory '${this.id}': the exchange holds none under it`;
+  }
+}
+
+/**
  * Why a stored trajectory does not hold the parts it states.
  *
  * @see {@link Composite} for several issues at once.
@@ -122,4 +136,5 @@ export type Issue =
   | UndecodablePart
   | TruncatedFrame
   | DigestMismatch
+  | NotFound
   | Composite;

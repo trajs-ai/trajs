@@ -18,13 +18,6 @@ import * as Toolkit from "#/Toolkit.ts";
 import * as Trajectory from "#/Trajectory.ts";
 import { TrajectoryError } from "#/TrajectoryError.ts";
 
-// A frame holds a meta and a body.
-// The meta is the tag and the identifiers a reader reads with no config.
-// A uuid is stored as 16 bytes and a moment as its epoch, so a meta region stays small.
-// The body is what a kit decodes.
-// A kind states its fields once, as the two halves a chunk holds, and the part they compose.
-
-// An extra read as `Schema.Unknown` would store bytes and moments as JSON text.
 const extraField = <K extends ExtraKit.Any, P extends Extra.Part>(extrakit: K, part: P) =>
   Extra.ExtraRecord(extrakit, part).pipe(Schema.withDecodingDefault(Effect.succeed({})));
 
@@ -83,8 +76,6 @@ const MainSessionEncoded = Schema.TaggedStruct("main", {});
 
 const SubSessionEncoded = Schema.TaggedStruct("sub", { id: Schema.String, fork: UuidFromByte });
 
-// A stored main holds no id, because the id is the constant `"main"`. A stored
-// sub holds its fork as 16 bytes, so decoding states the declaration's type.
 const SessionType = Schema.Union([MainSessionEncoded, SubSessionEncoded]).pipe(
   Schema.decodeTo(Trajectory.SessionMeta.fields.type, {
     decode: SchemaGetter.transform((stored) =>
@@ -104,7 +95,6 @@ const SessionType = Schema.Union([MainSessionEncoded, SubSessionEncoded]).pipe(
   }),
 );
 
-// The declaration alone: a reader draws a session tree from what this states.
 const sessionMetaFields = {
   _tag: Schema.tag("Session"),
   uuid: UuidFromByte,
@@ -143,8 +133,6 @@ export interface ResponsePartBodyEncoded {
   extra?: Extra.ExtraRecordEncoded<ExtraKit.Extras<ExtraKit.Any>, "response">;
 }
 
-// A response may name a tool the toolkit does not declare, so any tool's parts
-// are stated too.
 const responsePartsOf = <T extends Toolkit.Any>(toolkit: T) =>
   Schema.Union([Response.Part(toolkit), Response.Part()]);
 
@@ -252,10 +240,9 @@ export interface MetricPartMetaEncoded {
   startTimestamp?: number;
 }
 
-// The meta of a metric part, which is the one meta that is not a subset of its
-// part: the tag and the attach list are lifted out of the part's metric, so a
-// reader learns what a result attaches to without reading the body, and the part
-// keeps both where it holds them.
+// The one meta that is not a subset of its part. The tag and the attach list are
+// lifted out of the part's metric, so a reader learns what a result attaches to
+// without reading the body.
 export interface MetricPartMeta {
   readonly _tag: "Metric";
   readonly metricTag: string;
@@ -315,9 +302,29 @@ const partOf = <K extends MetricKit.Any>(metrickit: K) =>
     startTimestamp: Schema.optional(Schema.toType(TimestampInt)),
   }));
 
-// The two halves are one struct in the stored form, so the split is a view of it.
-// The transformation states what the view cannot: the meta's tag and attach list
-// go into the part's metric, and the body's result comes back out without them.
+// The two halves are one struct in the stored form, so the split is a view of it: the
+// meta's tag and attach list go into the part's metric, and the body's result comes
+// back out without them.
+const metricPartOf = <K extends MetricKit.Any>({
+  _tag,
+  metricTag,
+  attach,
+  data,
+  timestamp,
+  startTimestamp,
+}: MetricPartMeta & MetricPartBodyEncoded) =>
+  // SAFETY: the meta names the metric whose result the body holds;
+  // stored apart, no type pairs them.
+  ({
+    _tag,
+    metric: {
+      _tag: metricTag,
+      data: attach === undefined ? data : { ...(data as object), attach },
+    },
+    timestamp,
+    startTimestamp,
+  }) as Schema.Codec.Encoded<ReturnType<typeof partOf<K>>>;
+
 const metricPartStored = <K extends MetricKit.Any>(metrickit: K) =>
   Schema.Struct({ ...metricMetaFields, ...metricBodyFields(metrickit) });
 
@@ -333,17 +340,7 @@ export const MetricPart = <K extends MetricKit.Any>(
     .annotate({ identifier: "MetricPart" })
     .pipe(
       Schema.decodeTo(partOf(metrickit), {
-        decode: SchemaGetter.transform(
-          ({ _tag, metricTag, attach, data, timestamp, startTimestamp }) =>
-            // SAFETY: the meta names the metric whose result the body holds;
-            // stored apart, no type pairs them.
-            ({
-              _tag,
-              metric: { _tag: metricTag, data: attach === undefined ? data : { ...data, attach } },
-              timestamp,
-              startTimestamp,
-            }) as Schema.Codec.Encoded<ReturnType<typeof partOf<K>>>,
-        ),
+        decode: SchemaGetter.transform(metricPartOf<K>),
         encode: SchemaGetter.transform(({ _tag, metric, timestamp, startTimestamp }) => {
           const { attach, ...data } = metric.data;
 
@@ -352,9 +349,8 @@ export const MetricPart = <K extends MetricKit.Any>(
       }),
     );
 
-// Every meta a frame may hold, read with no config: the five kinds a data chunk holds.
-// The header and the footer state no meta: each is a message of its own, located without a
-// frame.
+// Every meta a frame may hold, read with no config.
+// The header and the footer state no meta, because each is a message of its own.
 export const Meta = Schema.Union([
   PromptPartMeta,
   SessionPartMeta,
@@ -365,8 +361,7 @@ export const Meta = Schema.Union([
 
 export type Meta = Schema.Schema.Type<typeof Meta>;
 
-// The five kinds read with the kits a config states, so each body is read, not
-// only located.
+// The config's kits read each body, so a part is read in full, not only located.
 const exchangePart = <C extends Config.AnyConfig>(config: C) =>
   Schema.Union([
     PromptPart(config.extrakit),
@@ -378,7 +373,6 @@ const exchangePart = <C extends Config.AnyConfig>(config: C) =>
 
 type ExchangePart<C extends Config.AnyConfig> = ReturnType<typeof exchangePart<C>>;
 
-// One part of a config, whichever kind it is.
 export const Part = <C extends Config.AnyConfig>(
   config: C,
 ): Schema.Codec<
@@ -398,7 +392,6 @@ export const Part = <C extends Config.AnyConfig>(
     Config.EncodingServices<C>
   >;
 
-// One part as the bytes a store keeps: the part's encoded side, laid out alone.
 export const encodePart = <C extends Config.AnyConfig>(config: C) => {
   const encode = Part(config).pipe(SchemaBinary.toCodec, Schema.encodeEffect);
 
@@ -412,7 +405,6 @@ export const encodePart = <C extends Config.AnyConfig>(config: C) => {
     );
 };
 
-// The part the bytes of `encodePart` state.
 export const decodePart = <C extends Config.AnyConfig>(config: C) => {
   const decode = Part(config).pipe(SchemaBinary.toCodec, Schema.decodeUnknownEffect);
 
@@ -420,6 +412,63 @@ export const decodePart = <C extends Config.AnyConfig>(config: C) => {
     bytes: Uint8Array,
   ): Effect.Effect<Trajectory.Part<C>, TrajectoryError, Config.DecodingServices<C>> =>
     decode(bytes).pipe(Effect.mapError(TrajectoryError.parse));
+};
+
+// One segment of a region, as the schema its frame states reads it.
+const decodeSegment =
+  <S extends Schema.Constraint>(schema: S) =>
+  (bytes: Uint8Array) =>
+    Schema.decodeUnknownEffect(SchemaBinary.toCodec(schema))(bytes).pipe(
+      Effect.mapError(TrajectoryError.parse),
+    );
+
+// The two halves of a frame are one stored struct split in two, so joining them states
+// the part.
+const joined = <M extends object, B extends object>(meta: M, body: B): M & B => ({
+  ...meta,
+  ...body,
+});
+
+// A chunk stores a part's meta and body apart, so the tag the meta states picks the
+// schema its body is read with.
+export const decodeFrame = <C extends Config.AnyConfig>(config: C) => {
+  const decodeMeta = decodeSegment(Meta);
+
+  return (frame: {
+    readonly meta: Uint8Array;
+    readonly body: Uint8Array;
+  }): Effect.Effect<Trajectory.Part<C>, TrajectoryError, Config.DecodingServices<C>> =>
+    // SAFETY: each member reads one kind with the config's own kits, so the config's
+    // services cover them, and the halves join to the part its tag names.
+    Effect.gen(function* () {
+      const stored = yield* decodeMeta(frame.meta);
+
+      return yield* Match.value(stored).pipe(
+        Match.tagsExhaustive({
+          Prompt: (meta) =>
+            Effect.map(decodeSegment(PromptPartBody(config.extrakit))(frame.body), (body) =>
+              joined(meta, body),
+            ),
+          Session: (meta) =>
+            Effect.map(decodeSegment(SessionPartBody(config.extrakit))(frame.body), (body) =>
+              joined(meta, body),
+            ),
+          Response: (meta) =>
+            Effect.map(
+              decodeSegment(ResponsePartBody(config.toolkit, config.extrakit))(frame.body),
+              (body) => joined(meta, body),
+            ),
+          Event: (meta) =>
+            Effect.map(decodeSegment(EventPartBody(config.eventkit))(frame.body), (body) =>
+              joined(meta, body),
+            ),
+          Metric: (meta) =>
+            Effect.map(decodeSegment(MetricPartBody(config.metrickit))(frame.body), (body) =>
+              metricPartOf<C["metrickit"]>(joined(meta, body)),
+            ),
+        }),
+      );
+    }) as Effect.Effect<Trajectory.Part<C>, TrajectoryError, Config.DecodingServices<C>>;
 };
 
 export interface Header {
