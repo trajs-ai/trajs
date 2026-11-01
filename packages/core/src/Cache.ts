@@ -8,7 +8,17 @@
  * @stability stable
  */
 
-import { Context, Data, Effect, FileSystem, Formatter, Layer, Option, Stream } from "effect";
+import {
+  Context,
+  Data,
+  Effect,
+  FileSystem,
+  Formatter,
+  Layer,
+  Option,
+  Predicate,
+  Stream,
+} from "effect";
 import type { Path, PlatformError, Scope } from "effect";
 import * as EffectCache from "effect/Cache";
 import { KeyValueStore } from "effect/persistence";
@@ -199,31 +209,40 @@ export const layerKVStore = (options?: {
  *
  * The keys are the `<id>/<index>` keys {@link layerKVStore} writes, and
  * `KeyValueStore.layerFileSystem` keeps each one as a single file.
- * A stated `directory` is created when the layer is built.
- * Where it is omitted, the directory is a temporary one, made with
+ * `dir` names the directory, which the layer creates.
+ * Where `dir` is omitted, the directory is a temporary one, made with
  * `FileSystem.makeTempDirectoryScoped`, that the scope removes when the layer ends.
  * `capacity` bounds the memory holding decoded parts, as {@link layerKVStore} does.
+ *
+ * A directory stated alone is `dir`, so `layerFileSystem("parts")` and
+ * `layerFileSystem({ dir: "parts" })` build the same layer.
  *
  * @see {@link layerKVStore} for the same cache over a store you provide.
  * @stability stable
  * @category layers
  */
 export const layerFileSystem = (
-  directory?: string,
-  options?: {
-    readonly capacity?: number | "unbounded";
-  },
+  options:
+    | string
+    | {
+        readonly dir?: string;
+        readonly capacity?: number | "unbounded";
+      } = {},
 ): Layer.Layer<
   Cache,
   PlatformError.PlatformError,
   FileSystem.FileSystem | Path.Path | Scope.Scope
 > =>
   Effect.gen(function* () {
+    const stated = Predicate.isString(options) ? { dir: options } : options;
+
     const fs = yield* FileSystem.FileSystem;
 
-    const stated = directory ?? (yield* fs.makeTempDirectoryScoped({ prefix: "trajs-cache-" }));
+    const directory = stated.dir ?? (yield* fs.makeTempDirectoryScoped({ prefix: "trajs-cache-" }));
 
-    return layerKVStore(options).pipe(Layer.provide(KeyValueStore.layerFileSystem(stated)));
+    return layerKVStore({ capacity: stated.capacity }).pipe(
+      Layer.provide(KeyValueStore.layerFileSystem(directory)),
+    );
   }).pipe(Layer.unwrap);
 
 /**
