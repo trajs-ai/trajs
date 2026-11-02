@@ -21,7 +21,7 @@ import * as Config from "@trajs/core/Config";
 import * as Exchange from "@trajs/core/Exchange";
 import type { TrajectoryError } from "@trajs/core/TrajectoryError";
 import { BrowserServices } from "@trajs/platform-browser";
-import { makeByte } from "@trajs/utils/Byte";
+import { make } from "@trajs/utils/Byte";
 import { Storage, StorageError } from "@trajs/utils/Storage";
 import { Effect, Layer, Match, Option, Predicate, Sink, Stream } from "effect";
 
@@ -55,7 +55,7 @@ const Handed = "handed";
 const handed = (bytes: Uint8Array): Storage => ({
   read: () =>
     Effect.succeed(
-      makeByte({
+      make({
         length: Effect.succeed(BigInt(bytes.length)),
         read: (buffer, { offset = 0n } = {}) =>
           Effect.sync(() => {

@@ -5,12 +5,13 @@
  * Where the bytes come from is not part of what a sequence is.
  * A read fails as `E` where its source does, and requires `R`.
  *
- * {@link makeByte} builds a sequence from what its reads serve.
+ * {@link make} builds a sequence from what its reads serve.
  *
  * @stability stable
  */
 
-import { Effect, Stream } from "effect";
+import { ByteSize, Effect, FileSystem, Stream } from "effect";
+import type { PlatformError } from "effect/PlatformError";
 
 /**
  * Where and how much a byte sequence is read by.
@@ -62,11 +63,11 @@ export interface ReadOptions {
  *
  * ```ts
  * import { Effect } from "effect"
- * import { makeByte } from "@trajs/utils/Byte"
+ * import { make } from "@trajs/utils/Byte"
  *
  * const held = new TextEncoder().encode("trajs")
  *
- * const bytes = makeByte({
+ * const bytes = make({
  *   length: Effect.succeed(BigInt(held.length)),
  *   read: (buffer, { offset = 0n, size = buffer.length } = {}) =>
  *     Effect.sync(() => {
@@ -83,7 +84,7 @@ export interface ReadOptions {
  * new TextDecoder().decode(tail) // => "ajs"
  * ```
  *
- * @see {@link makeByte} for building one from the reads it takes.
+ * @see {@link make} for building one from the reads it takes.
  * @see {@link ByteStore} for what serves one.
  * @stability stable
  * @category models
@@ -150,7 +151,7 @@ const Chunk = 64 * 1024;
  *
  * const held = new Uint8Array([1, 2, 3])
  *
- * const bytes = makeByte({
+ * const bytes = make({
  *   length: Effect.succeed(BigInt(held.length)),
  *   read: (buffer, { offset = 0n } = {}) =>
  *     Effect.sync(() => {
@@ -171,7 +172,7 @@ const Chunk = 64 * 1024;
  * @stability stable
  * @category constructors
  */
-export const makeByte = <E = never, R = never>(bytes: {
+export const make = <E = never, R = never>(bytes: {
   readonly length: Effect.Effect<bigint, E, R>;
   readonly read: (buffer: Uint8Array, options?: ReadOptions) => Effect.Effect<number, E, R>;
 }): Byte<E, R> => {
@@ -212,3 +213,64 @@ export const makeByte = <E = never, R = never>(bytes: {
       ),
   };
 };
+
+/**
+ * Creates a {@link Byte} of the bytes a buffer holds, read at random.
+ *
+ * **When to use**
+ *
+ * Use to serve bytes already in memory where a {@link Byte} is asked for.
+ *
+ * **Details**
+ *
+ * A read copies up to `size` bytes beginning at `offset` into the buffer given.
+ * `length` is the size the buffer reports when it is asked, and a read never fails.
+ * The buffer is read as it holds at the time, so a buffer changed meanwhile is read as it then
+ * holds.
+ *
+ * @see {@link makeFromFile} for the same over an open file.
+ * @stability stable
+ * @category constructors
+ */
+export const makeFromBuffer = (buffer: Uint8Array<ArrayBufferLike>): Byte<never> =>
+  make({
+    length: Effect.succeed(BigInt(buffer.length)),
+    read: (held, options) => {
+      const offset = Number(options?.offset ?? 0n);
+      const size = Math.min(options?.size ?? held.length, held.length);
+      const taken = buffer.subarray(offset, offset + size);
+
+      held.set(taken);
+
+      return Effect.succeed(taken.length);
+    },
+  });
+
+/**
+ * Creates a {@link Byte} of the bytes an open file holds, read at random.
+ *
+ * **When to use**
+ *
+ * Use to read part of a file without holding it whole, such as its head or its tail.
+ * Use as well to serve the bytes of a file where a {@link Byte} is asked for.
+ *
+ * **Details**
+ *
+ * A read begins at `offset` and takes up to `size` bytes.
+ * It states where it reads rather than moving the cursor of the file, so the sequence is read at
+ * random and reads of the file itself still begin where its cursor was left.
+ * `length` is the size the file reports when it is asked.
+ * A read fails as a `PlatformError` where the file does.
+ *
+ * @see {@link make} for building a sequence from reads that are not a file's.
+ * @stability stable
+ * @category constructors
+ */
+export const makeFromFile = (file: FileSystem.File): Byte<PlatformError> =>
+  make({
+    length: file.stat.pipe(Effect.map((info) => ByteSize.toBigInt(info.size))),
+    read: (buffer, options) =>
+      file.read(buffer.subarray(0, options?.size ?? buffer.length), {
+        position: options?.offset ?? 0n,
+      }),
+  });

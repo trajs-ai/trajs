@@ -1,10 +1,11 @@
 /**
- * A store of byte sequences a program keeps between readings, cut into chunks as they are written.
+ * A store of byte sequences a program keeps between readings.
  *
- * What holds them is the key/value store of `effect/persistence`, so where the bytes live is the
- * store layer's to say.
- * A sequence is kept as the chunks it is cut into rather than as one value.
- * A read reaches only the chunks it asks for, so a sequence too large to hold is still written and
+ * What holds them is the key/value store of `effect/persistence` or a directory of files, so where
+ * the bytes live is the store layer's to say.
+ * A store over a key/value store keeps a sequence as the chunks it is cut into rather than as one
+ * value.
+ * A read reaches only the part it asks for, so a sequence too large to hold is still written and
  * read.
  *
  * This package states a store in memory ({@link layerMemory}), one in a directory of the file
@@ -15,42 +16,23 @@
  */
 
 import type { S3Client } from "@aws-sdk/client-s3";
-import { Context, Data, Effect, FileSystem, Formatter, Layer, Path, Predicate, Sink } from "effect";
+import {
+  ByteSize,
+  Context,
+  Data,
+  Effect,
+  FileSystem,
+  Formatter,
+  Layer,
+  Path,
+  Predicate,
+  Sink,
+} from "effect";
 import { KeyValueStore } from "effect/persistence";
 import type { PlatformError } from "effect/PlatformError";
 import type { Scope } from "effect/Scope";
 
-import { type Byte } from "#/Byte.ts";
-import { keyValueStoreBytes } from "#/internal/byte-store.ts";
-import { s3KeyValueStore } from "#/internal/s3/key-value-store.ts";
-
-/**
- * What a sequence is written into a store with.
- *
- * **When to use**
- *
- * Use to state whether a sequence already held is written over, or to type what
- * {@link ByteStore.write} is given.
- *
- * **Details**
- *
- * - `overwrite` says whether a sequence already held under the id is written over, and defaults to
- *   `true`.
- *
- * A store holds one sequence per id, so writing one again is how a sequence is kept a second time.
- * A store given `false` fails with a {@link ByteStoreError} where the id is taken, rather than
- * putting one sequence where another was.
- *
- * Writing over an id drops what it held before any of the new bytes are written.
- * A write that ends before the sequence does leaves the id holding nothing.
- *
- * @see {@link ByteStore.write} for the operation it is given to.
- * @stability stable
- * @category models
- */
-export interface WriteOptions {
-  readonly overwrite?: boolean;
-}
+import { type Byte, make, makeFromFile } from "#/Byte.ts";
 
 /**
  * How the bytes written to a store are cut into chunks.
@@ -174,7 +156,12 @@ export interface ByteStore {
    */
   readonly write: (
     id: string,
-    options?: WriteOptions,
+    options?: {
+      /**
+       * Whether a sequence already held under the id is written over.
+       */
+      readonly overwrite?: boolean;
+    },
   ) => Sink.Sink<void, Uint8Array, never, ByteStoreError>;
 
   /**
@@ -236,199 +223,155 @@ export class ByteStoreError extends Data.TaggedError("ByteStoreError")<{
   id: string;
   cause: unknown;
 }> {
+  /**
+   * Creates the failure of a store over `id` from the cause it failed with.
+   */
+  static readonly from = (id: string) => (cause: unknown) => new ByteStoreError({ id, cause });
+
   override get message(): string {
     return `Failed to read or write '${this.id}': ${Formatter.format(this.cause)}`;
   }
 }
 
-/**
- * Creates a store over a key/value store.
- *
- * **When to use**
- *
- * Use where a program holds the key/value store itself rather than requiring one from context.
- * Use as well to state the layer over a store at hand ({@link layerKVStore}).
- *
- * **Details**
- *
- * What the key/value store is given of a sequence is the chunks it is cut into rather than the
- * sequence itself ({@link Options}).
- * A sequence is held in the chunks of the size the store was built with, whatever the size the
- * bytes arrived in.
- *
- * @see {@link ByteStore} for what the store gives.
- * @see {@link layerKVStore} for the same store as a layer over a key/value store.
- * @stability stable
- * @category constructors
- */
-export const make = (store: KeyValueStore.KeyValueStore, options?: Options): ByteStore =>
-  keyValueStoreBytes(store, options);
-
-/**
- * The store over the key/value store of `effect/persistence`.
- *
- * **When to use**
- *
- * Use to keep bytes in the store a program states, such as memory, a file system or a database.
- * A store is provided wherever the bytes are to live, and this reads and writes sequences over it.
- *
- * **Details**
- *
- * A sequence is kept as one record beside the chunks it is cut into, and both are named by the id
- * alone.
- * A store may hold sequences from more than one part of a program without them meeting.
- *
- * `options` states how a sequence is cut as it is written ({@link Options}).
- * The size a sequence was written with is read back from the store, so this reads a sequence
- * written by a store built with another size.
- *
- * @see {@link ByteStore} for the store this provides.
- * @see {@link layerMemory} for the same store over the key/value store in memory.
- * @see {@link layerFileSystem} for the same store over files in a directory.
- * @see {@link make} for the same store built over a store at hand.
- * @stability stable
- * @category layers
- */
 export const layerKVStore = (
   options?: Options,
 ): Layer.Layer<ByteStore, never, KeyValueStore.KeyValueStore> =>
   Layer.effect(
     ByteStore,
-    KeyValueStore.KeyValueStore.pipe(Effect.map((store) => make(store, options))),
+    Effect.gen(function* () {
+      const kvstore = yield* KeyValueStore.KeyValueStore;
+
+      throw new Error("not implemented");
+    }),
   );
 
-/**
- * The store held in memory.
- *
- * **When to use**
- *
- * Use where the bytes are kept for as long as the program runs and no longer, such as what a
- * reading of a trajectory keeps between its readings.
- * Use {@link layerFileSystem} instead where they are to outlive it.
- *
- * **Details**
- *
- * It is {@link layerKVStore} over `KeyValueStore.layerMemory`.
- * A sequence is kept in the chunks that store cuts it into ({@link Options}), and nothing of it is
- * left when the program ends.
- * Nothing else is required of a program, since the key/value store is this layer's own.
- *
- * @see {@link ByteStore} for the store this provides.
- * @see {@link layerFileSystem} for the same store over files in a directory.
- * @see {@link layerKVStore} for the same store over a key/value store a program states.
- * @stability stable
- * @category layers
- */
 export const layerMemory = (options?: Options): Layer.Layer<ByteStore> =>
   layerKVStore(options).pipe(Layer.provide(KeyValueStore.layerMemory));
 
 /**
- * The store in a directory of the file system.
+ * A store that keeps each sequence in a file of a directory.
  *
  * **When to use**
  *
- * Use where the bytes a program keeps are too many to hold in memory for as long as it runs, such
- * as the frames of the trajectories it reads again and again.
- * Use as well where they are to be read again by a later run, since a stated directory outlives
- * the scope.
+ * Use to keep the bytes of a trajectory between runs in a directory, with no key/value store
+ * behind it.
  *
  * **Details**
  *
- * It is {@link layerKVStore} over `KeyValueStore.layerFileSystem` in `dir`.
- * A directory stated alone is `dir`, so `layerFileSystem("bytes")` and
- * `layerFileSystem({ dir: "bytes" })` build the same layer.
+ * One id is one file, named after the id, so a sequence is read at random through
+ * {@link Byte.read}.
+ * `dir` names the directory, which the layer creates.
  * Where `dir` is omitted, the directory is a temporary one, made with
- * `FileSystem.makeTempDirectoryScoped` under the prefix `"trajs-"`, which the scope removes.
+ * `FileSystem.makeTempDirectoryScoped`, that the scope removes when the layer ends.
  *
- * A sequence is cut into chunks of {@link defaultChunkSize} where `chunkSize` is not stated
- * ({@link Options}).
+ * A directory stated alone is `dir`, so `layerFileSystem("parts")` and
+ * `layerFileSystem({ dir: "parts" })` build the same layer.
  *
- * @see {@link ByteStore} for the store this provides.
- * @see {@link layerMemory} for the same store held in memory.
- * @see {@link layerKVStore} for the same store over a key/value store a program states.
+ * A write under an id that already holds a sequence drops it before the first byte is written,
+ * unless `overwrite` is stated `false`, which fails the write instead.
+ * The sequence takes the place of the file once it is whole, so a write that ends early leaves
+ * nothing under the id.
+ *
+ * @see {@link ByteStore} for what the store serves.
+ * @see {@link layerKVStore} for the store kept in a key/value store.
  * @stability stable
  * @category layers
  */
 export const layerFileSystem = (
-  options: string | (Options & { readonly dir?: string }) = {},
+  options: string | { readonly dir?: string } = {},
 ): Layer.Layer<ByteStore, PlatformError, FileSystem.FileSystem | Path.Path | Scope> =>
-  Effect.gen(function* () {
-    const stated = Predicate.isString(options) ? { dir: options } : options;
-    const fs = yield* FileSystem.FileSystem;
+  Layer.effect(
+    ByteStore,
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      const path = yield* Path.Path;
 
-    const directory = stated.dir ?? (yield* fs.makeTempDirectoryScoped({ prefix: "trajs-" }));
+      const named = Predicate.isString(options) ? options : options.dir;
+      // A store that names no directory is kept in a temporary one, dropped with the scope of the
+      // layer.
+      const directory = named ?? (yield* fs.makeTempDirectoryScoped({ prefix: "trajs" }));
 
-    return layerKVStore({ chunkSize: stated.chunkSize }).pipe(
-      Layer.provide(KeyValueStore.layerFileSystem(directory)),
-    );
-  }).pipe(Layer.unwrap);
+      yield* fs.makeDirectory(directory, { recursive: true });
 
-/**
- * What a bucket states about the values a store keeps in it.
- *
- * **When to use**
- *
- * Use where the store is built ({@link layerS3}) to state which bucket keeps the bytes.
- * Where the bucket is and how a request to it is signed is stated of the client rather than here.
- *
- * **Details**
- *
- * - `bucket` is the bucket a value is kept in.
- *
- * A sequence is kept in the bucket as one object per chunk, and its record as one more.
- * An id is read as the prefix of the keys a sequence is kept under, and as nothing else.
- * How a sequence is cut is stated as it is for every store ({@link Options}).
- *
- * @see {@link layerS3} for the layer this is given to.
- * @stability stable
- * @category models
- */
+      // The escapes leave the name of an id as one path segment of the directory, so every id is a
+      // file of its own.
+      const file = (id: string): string =>
+        path.join(directory, encodeURIComponent(id).replaceAll(".", "%2E"));
+
+      const bytes = (id: string): Byte<ByteStoreError> =>
+        make({
+          length: fs.stat(file(id)).pipe(
+            Effect.map((info) => ByteSize.toBigInt(info.size)),
+            Effect.mapError(ByteStoreError.from(id)),
+          ),
+          read: (buffer, options) =>
+            // The handle is opened for the read alone, so a sequence holds nothing open between
+            // reads.
+            fs.open(file(id), { flag: "r" }).pipe(
+              Effect.flatMap((opened) => makeFromFile(opened).read(buffer, options)),
+              Effect.mapError(ByteStoreError.from(id)),
+              Effect.scoped,
+            ),
+        });
+
+      return ByteStore.of({
+        read: (id) =>
+          fs.exists(file(id)).pipe(
+            Effect.mapError(ByteStoreError.from(id)),
+            Effect.flatMap((held) =>
+              held
+                ? Effect.succeed(bytes(id))
+                : Effect.fail(ByteStoreError.from(id)("No sequence is kept under the id")),
+            ),
+          ),
+        write: (id, options) =>
+          Effect.gen(function* () {
+            const target = file(id);
+            const held = yield* fs.exists(target).pipe(Effect.mapError(ByteStoreError.from(id)));
+
+            if (held && options?.overwrite === false) {
+              return yield* Effect.fail(
+                ByteStoreError.from(id)("A sequence is already kept under the id"),
+              );
+            }
+
+            // The sequence is written beside the file and takes its place once it is whole, so a
+            // write that ends before the sequence does leaves nothing under the id.
+            const written = yield* fs
+              .makeTempFileScoped({ directory })
+              .pipe(Effect.mapError(ByteStoreError.from(id)));
+
+            yield* fs
+              .remove(target, { force: true })
+              .pipe(Effect.mapError(ByteStoreError.from(id)));
+
+            return fs.sink(written).pipe(
+              Sink.mapEffectEnd((end) =>
+                fs.rename(written, target).pipe(
+                  Effect.mapError(ByteStoreError.from(id)),
+                  Effect.map(() => end),
+                ),
+              ),
+              Sink.mapError(ByteStoreError.from(id)),
+            );
+          }).pipe(Sink.unwrap),
+        remove: (id) =>
+          fs.remove(file(id), { force: true }).pipe(Effect.mapError(ByteStoreError.from(id))),
+        has: (id) => fs.exists(file(id)).pipe(Effect.mapError(ByteStoreError.from(id))),
+      });
+    }),
+  );
+
 export interface S3Options extends Options {
   readonly bucket: string;
 }
 
-/**
- * The store in a bucket.
- *
- * **When to use**
- *
- * Use when the bytes a program keeps are reached from more than one place, such as the frames of
- * trajectories read again from a bucket the program shares.
- * Use with a client of the AWS SDK, which states where the bucket is and how a request to it is
- * signed.
- *
- * **Details**
- *
- * It is {@link layerKVStore} over the key/value store of a bucket, stated with {@link S3Options}.
- * A sequence is kept as one object per chunk, and each chunk is written once it has arrived
- * whole.
- * A sequence is therefore kept as it is produced, not once it has ended.
- *
- * What the id held is dropped before the first chunk is written, so a sequence is written over
- * where the id is taken.
- * A write given `overwrite: false` fails where the id is taken, before anything is written
- * ({@link WriteOptions}).
- *
- * The client is the program's rather than this layer's, which neither builds one nor closes it.
- * The commands of the AWS SDK are read when the layer is built rather than when this module is
- * imported.
- *
- * **Gotchas**
- *
- * The whole bucket is the store's, and an id names the prefix of the keys its sequence is kept
- * under.
- * Two stores sharing a bucket write one over where an id of one is an id of the other.
- *
- * @see {@link ByteStore} for the store this provides.
- * @stability stable
- * @category layers
- */
 export const layerS3 = (client: S3Client, options: S3Options): Layer.Layer<ByteStore> =>
   Layer.effect(
     ByteStore,
     Effect.gen(function* () {
       const sdk = yield* Effect.promise(() => import("@aws-sdk/client-s3"));
 
-      return keyValueStoreBytes(s3KeyValueStore(sdk, client, options.bucket), options);
+      throw new Error("not implemented");
     }),
   );
