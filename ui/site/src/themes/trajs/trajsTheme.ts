@@ -230,7 +230,10 @@ export const trajsTheme = defineTheme({
             "--landing-display-size": "clamp(2.5rem, 15.276vw, 3.7236rem)",
             "--landing-display-leading": "1.1",
             "--landing-art-align": "center",
-            "--landing-lockup-width": "clamp(9rem, 41.27vw, 19rem)",
+            // The phone composition is a fixed-size block from the 390 board,
+            // where the symbol is 160.952 wide; the mark keeps that size
+            // instead of tracking the viewport width.
+            "--landing-lockup-width": "10.0595rem",
             "--landing-lockup-aspect": "160.952 / 260.426",
             "--landing-symbol-width": "100%",
             "--landing-wordmark-display": "none",

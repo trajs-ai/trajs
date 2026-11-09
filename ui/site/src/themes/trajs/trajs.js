@@ -372,7 +372,7 @@ export const trajsTheme = {
             "--landing-display-size": "clamp(2.5rem, 15.276vw, 3.7236rem)",
             "--landing-display-leading": "1.1",
             "--landing-art-align": "center",
-            "--landing-lockup-width": "clamp(9rem, 41.27vw, 19rem)",
+            "--landing-lockup-width": "10.0595rem",
             "--landing-lockup-aspect": "160.952 / 260.426",
             "--landing-symbol-width": "100%",
             "--landing-wordmark-display": "none",
