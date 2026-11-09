@@ -16,6 +16,13 @@ const ignoredByFmtAndLint = [
   // their own records.
   "ui/site/src/astryx-themes.ts",
   "ui/site/theme.template.ts",
+  // Theme builds overwrite these artifacts from the authored source.
+  "ui/site/src/themes/trajs/trajs.js",
+  "ui/site/src/themes/trajs/trajs.css",
+  "ui/site/src/themes/trajs/trajs.d.ts",
+  "ui/site/src/themes/trajs/trajs.variants.d.ts",
+  // Preserve the shader source exactly as Figma exports it.
+  "ui/site/src/internal/lib/custom-effects/**",
   // The agent docs `astryx init` writes: its text is wider than the formatter
   // wraps, and reformatting it would make the next init a diff of its own.
   "ui/site/AGENTS.md",

@@ -28,12 +28,34 @@ only what the site writes itself and `xstyle` overrides are not available: style
 a page with component props and design tokens, as `AGENTS.md` spells out.
 
 `src/astryx-themes.ts` is written by the CLI, not by hand: it imports the built
-module, the production CSS and the font CSS of one theme package, and
+module, the production CSS and the font CSS of the local TRAJS theme, and
 `src/App.tsx` wraps the page in `<Theme theme={themes[defaultThemeSlug]}>`. To
 change the look, install another `@astryxdesign/theme-*` package and add it with
 `pnpm exec astryx theme add`; `pnpm exec astryx theme use` moves the default.
 `theme.template.ts` is the starting point `astryx init --all` writes for a theme
 of the site's own, and nothing imports it.
+
+The landing page follows the desktop Figma board `267:90`. Its extracted
+variables, semantic mappings, local fonts and rebuild instructions live in
+[`src/themes/trajs/README.md`](src/themes/trajs/README.md). Edit `trajsTheme.ts`
+and rebuild the theme rather than editing its generated CSS or adding global
+color overrides. Both modes share `palette.ts`; each uses its own original
+Figma SVG assets and shader pigments. Responsive layout is deferred.
+
+The header is fixed and initially hidden. Scrolling past 64 CSS pixels reveals
+it through blur, opacity and translation; returning to the top hides it again.
+Hidden navigation is inert. Reduced-motion preferences disable this transition
+and render a still frame of the brand shader.
+
+The mark uses the original exported shader with the official
+`@figma/expressive-components` runtime. It requires WebGPU on HTTPS or localhost.
+The runtime leaves the fill empty when WebGPU is unavailable; the original
+outline and wordmark remain visible. The shader source is preserved verbatim
+under `src/internal/lib/custom-effects/`.
+
+Navigation currently points at the project's GitHub README, examples,
+discussions and changelog. The BLOG label uses discussions until a blog
+destination exists.
 
 ## The Astryx CLI
 

@@ -1,0 +1,103 @@
+{
+  "source": {
+    "fileKey": "wHC1Hy6AADFOheDz8FFt1e",
+    "nodeId": "267:90",
+    "canvas": {
+      "width": 1920,
+      "height": 1080
+    },
+    "colorCollection": {
+      "id": "VariableCollectionId:271:2",
+      "modes": {
+        "light": "271:1",
+        "dark": "271:0"
+      }
+    },
+    "frameCanvas": {
+      "light": "#ffffff",
+      "dark": "#171717"
+    }
+  },
+  "shared": {
+    "type/wordmark": "Font(family: \"IBM Plex Sans\", style: Light, size: 20, weight: 300, lineHeight: 100, letterSpacing: 11)",
+    "space-2-5": "10",
+    "type/navigation": "Font(family: \"Google Sans Flex\", style: Light, size: 15, weight: 300, lineHeight: 100, letterSpacing: 8)",
+    "stroke-hairline": "1",
+    "space-1-5": "6",
+    "space-7": "28",
+    "stroke-regular": "1.25",
+    "size-icon-12": "12",
+    "size-icon-24": "24",
+    "radius-12": "12",
+    "space-0-5": "2",
+    "radius-full": "999",
+    "space-6": "24",
+    "space-12": "48",
+    "type/display": "Font(family: \"Google Sans Flex\", style: ExtraLight, size: 135, weight: 250, lineHeight: 144, letterSpacing: -1)",
+    "space-16": "64",
+    "type/button": "Font(family: \"Google Sans Flex\", style: Medium, size: 23, weight: 500, lineHeight: 32, letterSpacing: 1)",
+    "space-3": "12",
+    "type/mono/prompt": "Font(family: \"IBM Plex Mono\", style: Medium, size: 19, weight: 500, lineHeight: 24, letterSpacing: 0)",
+    "type/mono/command": "Font(family: \"IBM Plex Mono\", style: Regular, size: 20, weight: 400, lineHeight: 24, letterSpacing: 2)",
+    "space-5": "20",
+    "space-4": "16",
+    "space-10": "40",
+    "size-icon-20": "20",
+    "type/eyebrow": "Font(family: \"Google Sans Flex\", style: Light, size: 18, weight: 300, lineHeight: 24, letterSpacing: 16)",
+    "type/body": "Font(family: \"Google Sans Flex\", style: Light, size: 20, weight: 300, lineHeight: 32, letterSpacing: 1)",
+    "type/mono/label": "Font(family: \"IBM Plex Mono\", style: Regular, size: 16, weight: 400, lineHeight: 24, letterSpacing: 12)",
+    "space-2": "8",
+    "space-18": "72",
+    "space-24": "96",
+    "space-14": "56",
+    "space-20": "80"
+  },
+  "modes": {
+    "light": {
+      "color-border": "#1717171f",
+      "color-ink": "#171717",
+      "color-ink-muted": "#6b6b70",
+      "color-border-icon": "#17171ce5",
+      "color-segment-light": "#ffffff",
+      "color-thumb": "#17171c",
+      "color-segment-dark": "#ffffff00",
+      "color-surface-control": "#0000000f",
+      "color-surface-control-border": "#0000001f",
+      "color-surface-glass": "#ffffff33",
+      "shader-mark-coral": "#ff908c",
+      "shader-mark-golden": "#ffd21b",
+      "shader-mark-apricot": "#ffb378",
+      "color-on-action": "#ffffff",
+      "color-action": "#171717",
+      "color-ink-quiet": "#7b7b80",
+      "color-ink-command": "#353539",
+      "color-ink-subtle": "#5f5f66",
+      "color-border-strong": "#1717172e",
+      "color-ink-secondary": "#5f5f66",
+      "color-canvas": "#f2f2ef"
+    },
+    "dark": {
+      "color-border": "#ffffff1f",
+      "color-ink": "#f2f2ef",
+      "color-ink-muted": "#c4c4ca",
+      "color-border-icon": "#ffffff6b",
+      "color-segment-light": "#ffffff00",
+      "color-thumb": "#171717",
+      "color-segment-dark": "#ffffff",
+      "color-surface-control": "#ffffff1f",
+      "color-surface-control-border": "#ffffff21",
+      "color-surface-glass": "#ffffff14",
+      "shader-mark-coral": "#0f69be",
+      "shader-mark-golden": "#f4bd22",
+      "shader-mark-apricot": "#9b9954",
+      "color-on-action": "#0b0b0c",
+      "color-action": "#f2f2ef",
+      "color-ink-quiet": "#6e6e75",
+      "color-ink-command": "#e4e4e2",
+      "color-ink-subtle": "#8a8a91",
+      "color-border-strong": "#ffffff38",
+      "color-ink-secondary": "#9c9ca3",
+      "color-canvas": "#0b0b0c"
+    }
+  }
+}

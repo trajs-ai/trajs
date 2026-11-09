@@ -191,6 +191,9 @@ catalogs:
     '@effect/vitest':
       specifier: ^4.1.1
       version: 4.1.1
+    '@figma/expressive-components':
+      specifier: 0.2.0
+      version: 0.2.0
     '@noble/hashes':
       specifier: ^2.4.0
       version: 2.4.0
@@ -588,6 +591,9 @@ importers:
       '@astryxdesign/theme-neutral':
         specifier: ^0.7.11
         version: 0.7.11(@astryxdesign/core@0.7.11(@stylexjs/stylex@0.19.1)(react-dom@19.3.1(react@19.3.1))(react@19.3.1))(@types/react@19.3.0)(react@19.3.1)
+      '@figma/expressive-components':
+        specifier: 'catalog:'
+        version: 0.2.0(react@19.3.1)
       '@stylexjs/stylex':
         specifier: ^0.19.1
         version: 0.19.1
@@ -1243,6 +1249,12 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@figma/expressive-components@0.2.0':
+    resolution: {integrity: sha512-Ps2t7+PLJybLQ/6cu6xqSpt8rL0UOj0lmkxVYVYYyWN82/+G7SQfPk62IJMxyaSHLuTLMWLyu9EA1JNb51sWtA==}
+    engines: {node: '>=22.12.0'}
+    peerDependencies:
+      react: ^18.3.1 || ^19.0.0
 
   '@formatjs/fast-memoize@3.1.7':
     resolution: {integrity: sha512-zXfhLpvA6T7+efdt9JLbBwZ00tT7NsBMDVnDu8rpHeNNv8KfRZAMo2gkG0k9lK/Nzc//3kJ9pImsfuJxk3KhUA==}
@@ -3991,6 +4003,10 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
+
+  '@figma/expressive-components@0.2.0(react@19.3.1)':
+    dependencies:
+      react: 19.3.1
 
   '@formatjs/fast-memoize@3.1.7': {}
 
