@@ -6,7 +6,7 @@
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "privatePackages": false,
-  "ignore": ["@trajs/cli", "@trajs/extension-*", "@trajs/ui-*"],
+  "ignore": ["@trajs/cli", "@trajs/extension-*"],
   "fixed": [
     [
       "@trajs/core",

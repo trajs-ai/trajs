@@ -74,6 +74,11 @@ minimumReleaseAgeExclude:
   - wrangler
   - miniflare
 allowBuilds:
+  # Both packages' install script is a one-line nudge to run `astryx init`. These
+  # agent docs are committed, so the check it makes finds them and it prints
+  # nothing; nothing here depends on an install-time script running.
+  "@astryxdesign/cli": false
+  "@astryxdesign/core": false
   # `chdb` states its install script as a no-op and ships its engine as the
   # prebuilt `@chdb/lib-*` package of the platform it runs on, so there is
   # nothing to build.

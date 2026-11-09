@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vp run website",
+    "dev": "vp run site",
     "prepare": "vp config"
   },
   "devDependencies": {

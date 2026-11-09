@@ -1,9 +1,9 @@
 import { configDefaults, defineConfig } from "vite-plus";
 
 // What fmt and lint stay out of: agent tooling assets and the vendored anti-slop
-// plugin, which are copied sources rather than project code, and the shadcn/ui
-// components in `ui/shadcn/src`, which are copied sources for the same reason —
-// they are re-added with `shadcn add`, so leaving them as written keeps that a
+// plugin, which are copied sources rather than project code, and the files
+// `@astryxdesign/cli` writes in the site — a generated theme module, a theme
+// template and the agent docs — which stay as it wrote them so rerunning it is a
 // no-op. The rest is written by a build, or by `changeset version`.
 const ignoredByFmtAndLint = [
   ".agents/**",
@@ -12,16 +12,13 @@ const ignoredByFmtAndLint = [
   // every release writes trailing whitespace the formatter would strip again.
   "**/CHANGELOG.md",
   "tools/oxlint/anti-slop/**",
-  "ui/shadcn/src/**",
-  // The shader runtime the fills are drawn with, copied from
-  // https://github.com/figma/expressive-components into `@trajs/ui-shaders` — see
-  // the README beside it. Kept as written so it can be diffed against upstream.
-  "ui/shaders/src/internal/runtime/**",
-  // Written by the Fumapress builds and the Fumadocs MDX collections they load.
-  "ui/website/.source/**",
-  "ui/website/src/pages.gen.ts",
-  "ui/gallery/.source/**",
-  "ui/gallery/src/pages.gen.ts",
+  // Written by `astryx init` and `astryx theme add`, which rewrite them from
+  // their own records.
+  "ui/site/src/astryx-themes.ts",
+  "ui/site/theme.template.ts",
+  // The agent docs `astryx init` writes: its text is wider than the formatter
+  // wraps, and reformatting it would make the next init a diff of its own.
+  "ui/site/AGENTS.md",
 ];
 
 export default defineConfig({
@@ -88,26 +85,14 @@ export default defineConfig({
   },
   run: {
     // Cache tasks, not `package.json` scripts (the Vite+ default). Script
-    // caching would also cover long-running commands like the docs dev server,
+    // caching would also cover long-running commands like the site's dev server,
     // whose cached output would be replayed instead of served.
     cache: { tasks: true, scripts: false },
     tasks: {
-      // `vp run website` starts the docs site's Fumapress dev server; the task
-      // is never replayed for the same reason.
-      website: {
-        command: "vp run website#dev",
-        cache: false,
-      },
-      // `vp run viewer` starts the viewer's Vite dev server; the task is never
+      // `vp run site` starts the site's Vite dev server; the task is never
       // replayed for the same reason.
-      viewer: {
-        command: "vp run viewer#dev",
-        cache: false,
-      },
-      // `vp run gallery` starts the component gallery's Fumapress dev server;
-      // the task is never replayed for the same reason.
-      gallery: {
-        command: "vp run gallery#dev",
+      site: {
+        command: "vp run site#dev",
         cache: false,
       },
     },

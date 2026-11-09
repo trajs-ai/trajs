@@ -1,21 +1,20 @@
-name: Deploy docs
+name: Deploy site
 
-# Publishes the documentation site to GitHub Pages: the workflow builds it, which
-# prerenders every page into `ui/website/dist/public`, and hands that directory to
-# Pages as the site. Nothing is served on a request — search is built into the
-# files and the MCP endpoint is off — so the deploy needs no server and no
+# Publishes the site to GitHub Pages: the workflow builds `ui/site` with Vite and
+# hands its `dist` directory to Pages as the site. Nothing is served on a request —
+# the app is a bundle of static files — so the deploy needs no server and no
 # secrets beyond the token Pages gives the job.
 #
 # The site answers on a path of its own (`/trajs/` for a project site, `/` once a
-# domain points at it). `configure-pages` reads that path and address off the
-# repository's Pages settings, and the build's `SITE_BASE_PATH` and `SITE_URL`
-# carry them in, so moving the site to a domain later needs no change here.
+# domain points at it). `configure-pages` reads that path off the repository's
+# Pages settings, and the build's `SITE_BASE_PATH`, which `vite.config.ts` turns
+# into Vite's `base`, carries it in, so moving the site to a domain later needs no
+# change here.
 
 on:
   push:
     branches: [main]
     paths:
-      - "ui/website/**"
       - "packages/**"
       - "apps/**"
       - "ui/**"
@@ -57,20 +56,12 @@ jobs:
           enablement: true
       # The build is run through its package script rather than `vp run`, which
       # strips the environment the base path arrives in.
-      - run: pnpm --filter website run build
+      - run: pnpm --filter site run build
         env:
-          SITE_URL: ${{ steps.pages.outputs.base_url }}
           SITE_BASE_PATH: ${{ steps.pages.outputs.base_path }}/
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ui/website/dist/public
-      # The Cloudflare Worker the site used to be, kept for when it returns:
-      # uncomment this step, the adapter in `vite.config.ts` and the MCP plugin in
-      # `press.config.tsx`, and add the secrets it names.
-      # - run: pnpm --filter website run deploy
-      #   env:
-      #     CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      #     CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          path: ui/site/dist
 
   deploy:
     needs: build

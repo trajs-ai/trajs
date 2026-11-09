@@ -152,7 +152,7 @@
 
 ```bash
 vp install
-vp run website
+vp run site
 ```
 
 ### Checks
