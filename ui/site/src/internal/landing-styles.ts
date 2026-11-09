@@ -1,5 +1,10 @@
 import type { CSSProperties } from "react";
 
+/**
+ * Layout for the landing page. Every value that changes across the responsive
+ * contract is a theme local token (see `themes/trajs/trajsTheme.ts`), so the
+ * breakpoint rules live in the generated theme CSS instead of in this file.
+ */
 export const styles = {
   page: {
     position: "relative",
@@ -18,16 +23,23 @@ export const styles = {
     maxWidth: "none",
   },
   header: {
-    position: "fixed",
+    // SAFETY: the theme root and both adaptation rules always set this token
+    // to a valid CSS position, so the substitution is a fixed, relative, or
+    // absolute keyword by construction.
+    position: "var(--landing-header-position)" as CSSProperties["position"],
     zIndex: 10,
-    top: "var(--landing-page-top)",
-    left: "var(--landing-page-inline)",
-    right: "var(--landing-page-inline)",
+    top: "var(--landing-header-top)",
+    left: "var(--landing-header-inset)",
+    right: "var(--landing-header-inset)",
     minHeight: "var(--landing-nav-height)",
-    padding: "var(--spacing-4) var(--landing-nav-padding)",
-    borderRadius: "var(--radius-element)",
+    padding: "var(--landing-nav-padding-block) var(--landing-nav-padding-inline)",
+    borderRadius: "var(--radius-full)",
     background: "var(--color-background-surface)",
     backdropFilter: "blur(var(--spacing-4))",
+  },
+  headerEnd: {
+    marginInlineStart: "auto",
+    gap: "var(--spacing-6)",
   },
   brand: {
     fontFamily: "var(--landing-brand-family)",
@@ -41,17 +53,16 @@ export const styles = {
   },
   nav: {
     display: "var(--landing-nav-display)",
-    width: "var(--landing-nav-width)",
-    order: "var(--landing-nav-order)",
     gap: "var(--landing-nav-gap)",
     color: "var(--color-ink-muted)",
     fontSize: "var(--landing-nav-font-size)",
     letterSpacing: "var(--landing-nav-tracking)",
     fontWeight: 300,
-    marginInlineStart: "auto",
   },
   navLink: { fontSize: "inherit", fontWeight: "inherit", whiteSpace: "nowrap" },
+  changelog: { display: "var(--landing-changelog-display)" },
   inkAsset: { flexShrink: 0 },
+  menuButton: { display: "var(--landing-menu-display)" },
   themeSegment: {
     width: "var(--landing-theme-segment-size)",
     height: "var(--landing-theme-segment-size)",
@@ -68,11 +79,26 @@ export const styles = {
   },
   hero: {
     paddingBlock: "var(--landing-stage-top) var(--landing-stage-bottom)",
+    width: "var(--landing-hero-width)",
+    marginInline: "var(--landing-hero-margin)",
     gridTemplateColumns: "var(--landing-hero-columns)",
-    gap: "var(--landing-hero-gap)",
+    gridTemplateAreas: "var(--landing-hero-areas)",
+    columnGap: "var(--landing-hero-column-gap)",
+    rowGap: "var(--landing-hero-row-gap)",
+    alignItems: "var(--landing-hero-align)",
   },
-  headline: { paddingBlockStart: "var(--landing-heading-top)", minWidth: 0 },
-  heading: { whiteSpace: "nowrap" },
+  headline: {
+    gridArea: "headline",
+    paddingBlockStart: "var(--landing-heading-top)",
+    minWidth: 0,
+  },
+  heading: {
+    whiteSpace: "nowrap",
+    // SAFETY: the theme root and both adaptation rules always set this token
+    // to a valid CSS text-align value, so the substitution is start, end, or
+    // center by construction.
+    textAlign: "var(--landing-heading-align)" as CSSProperties["textAlign"],
+  },
   headlineLine: {
     font: "inherit",
     lineHeight: "inherit",
@@ -87,13 +113,23 @@ export const styles = {
     color: "inherit",
     textAlign: "inherit",
   },
-  art: { position: "relative", width: "var(--landing-art-width)", minWidth: 0 },
+  art: {
+    gridArea: "art",
+    position: "relative",
+    width: "100%",
+    minWidth: 0,
+    alignItems: "var(--landing-art-align)",
+  },
   lockup: {
     position: "relative",
     width: "var(--landing-lockup-width)",
-    aspectRatio: "877.239 / 500.003",
+    aspectRatio: "var(--landing-lockup-aspect)",
   },
-  symbol: { position: "absolute", inset: "0 auto 0 0", width: "35.2262%" },
+  symbol: {
+    position: "absolute",
+    inset: "0 auto 0 0",
+    width: "var(--landing-symbol-width)",
+  },
   symbolMask: {
     position: "absolute",
     width: "130.6006%",
@@ -122,18 +158,20 @@ export const styles = {
   },
   wordmark: {
     position: "absolute",
+    display: "var(--landing-wordmark-display)",
     width: "59.0538%",
     height: "auto",
     left: "40.9469%",
     top: "49.088%",
   },
   ctas: {
-    position: "absolute",
-    right: "var(--landing-cta-right)",
-    bottom: "var(--landing-cta-bottom)",
-    marginTop: "var(--landing-cta-top)",
-    width: "var(--landing-cta-width)",
-    gap: "var(--landing-cta-gap)",
+    gridArea: "var(--landing-cta-area)",
+    alignSelf: "var(--landing-cta-align)",
+    justifySelf: "var(--landing-cta-justify)",
+    marginBlock: "var(--landing-cta-margin-block)",
+    marginInline: "var(--landing-cta-margin-inline)",
+    display: "var(--landing-cta-display)",
+    gap: "var(--spacing-4)",
   },
   command: {
     border: "var(--border-width) solid var(--color-border-emphasized)",
@@ -144,7 +182,7 @@ export const styles = {
   commandText: {
     fontFamily: "var(--font-family-code)",
     fontSize: "var(--landing-command-size)",
-    lineHeight: "1.5rem",
+    lineHeight: "var(--landing-command-leading)",
     color: "var(--color-ink-command)",
     whiteSpace: "nowrap",
     letterSpacing: "0.02em",
@@ -155,14 +193,34 @@ export const styles = {
     fontWeight: 500,
     color: "var(--color-ink-quiet)",
   },
-  index: { gap: "var(--landing-index-gap)", position: "relative" },
-  indexItem: { minWidth: 0 },
+  index: {
+    position: "relative",
+    gridTemplateColumns: "var(--landing-index-columns)",
+    gap: "var(--landing-index-gap)",
+    alignItems: "stretch",
+  },
+  indexItem: {
+    display: "grid",
+    minWidth: 0,
+    gridTemplateColumns: "var(--landing-card-columns)",
+    gridTemplateRows: "auto 1fr auto",
+    gridTemplateAreas: "var(--landing-card-areas)",
+    rowGap: "var(--landing-card-gap)",
+    columnGap: "var(--landing-card-gap)",
+    alignContent: "start",
+    alignItems: "start",
+  },
+  indexHead: { gridArea: "head", minWidth: 0 },
   indexBody: {
+    gridArea: "body",
     fontSize: "var(--landing-index-body-size)",
     lineHeight: "var(--landing-index-body-leading)",
     letterSpacing: "0.01em",
   },
   indexLink: {
+    gridArea: "link",
+    justifySelf: "var(--landing-card-link-justify)",
+    alignSelf: "center",
     fontFamily: "var(--font-family-code)",
     fontSize: "var(--landing-index-link-size)",
     lineHeight: "1.5rem",
@@ -172,5 +230,9 @@ export const styles = {
     fontSize: "var(--landing-index-link-size)",
     color: "var(--color-text-secondary)",
     minHeight: "var(--spacing-6)",
+  },
+  menuLink: {
+    display: "block",
+    paddingBlock: "var(--spacing-1-5)",
   },
 } satisfies Record<string, CSSProperties>;
