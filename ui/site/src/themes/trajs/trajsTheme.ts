@@ -209,10 +209,12 @@ export const trajsTheme = defineTheme({
             // enough for the 720px edge, where the 640px hero still fits.
             "--landing-nav-padding-inline": "clamp(2rem, 14.035vw - 4.3125rem, 3rem)",
             "--landing-nav-gap": "clamp(1.25rem, 7.018vw - 1.906rem, 1.75rem)",
-            // The fixed header takes no space in the flow, so the stage
-            // reserves the height the in-flow header used to take.
-            "--landing-stage-top": "calc(var(--landing-nav-height) + 10rem)",
-            "--landing-stage-bottom": "10rem",
+            // The tablet block is the 834 × 1112 board. Below that height the
+            // stage gaps close so the index stays on the first screen; the
+            // fixed header overlays the top band instead of taking flow space.
+            "--landing-stage-top": "clamp(6.875rem, calc(10rem - (1112px - 100svh) * 0.34), 10rem)",
+            "--landing-stage-bottom":
+              "clamp(6.875rem, calc(10rem - (1112px - 100svh) * 0.34), 10rem)",
             "--landing-hero-areas": '"art headline" "ctas ctas"',
             "--landing-hero-columns": "minmax(0, 190fr) minmax(0, 395fr)",
             "--landing-hero-column-gap": "3.5rem",

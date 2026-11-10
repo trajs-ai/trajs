@@ -358,8 +358,8 @@
     --landing-nav-height: 5.5rem;
     --landing-nav-padding-inline: clamp(2rem, 14.035vw - 4.3125rem, 3rem);
     --landing-nav-gap: clamp(1.25rem, 7.018vw - 1.906rem, 1.75rem);
-    --landing-stage-top: calc(var(--landing-nav-height) + 10rem);
-    --landing-stage-bottom: 10rem;
+    --landing-stage-top: clamp(6.875rem, calc(10rem - (1112px - 100svh) * 0.34), 10rem);
+    --landing-stage-bottom: clamp(6.875rem, calc(10rem - (1112px - 100svh) * 0.34), 10rem);
     --landing-hero-areas: "art headline" "ctas ctas";
     --landing-hero-columns: minmax(0, 190fr) minmax(0, 395fr);
     --landing-hero-column-gap: 3.5rem;
