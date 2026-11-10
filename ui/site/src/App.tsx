@@ -2,7 +2,6 @@ import { BottomSheet } from "@astryxdesign/core/BottomSheet";
 import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
-import { useMediaQuery } from "@astryxdesign/core/hooks";
 import { HStack } from "@astryxdesign/core/HStack";
 import { IconButton } from "@astryxdesign/core/IconButton";
 import { Link } from "@astryxdesign/core/Link";
@@ -15,7 +14,6 @@ import { defaultThemeSlug, themes } from "./astryx-themes";
 import { brandShaders, stillBrandShaders } from "./internal/brand-shader";
 import { landingAssets } from "./internal/landing-assets";
 import { styles } from "./internal/landing-styles";
-import { desktopBreakpoint } from "./themes/trajs/layout";
 import { palette, type ColorMode } from "./themes/trajs/palette";
 
 const repository = "https://github.com/trajs-ai/trajs";
@@ -115,10 +113,9 @@ export function App() {
   const [headerVisible, setHeaderVisible] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Below the desktop edge the header sits in the page flow and stays
-  // available: the nav links need a visible entry point on a phone.
-  const isCompactViewport = useMediaQuery(`(width < ${desktopBreakpoint}px)`);
-  const chromeVisible = isCompactViewport || headerVisible;
+  // Every breakpoint keeps the header fixed to the page frame and reveals it
+  // after scrolling.
+  const chromeVisible = headerVisible;
 
   useEffect(() => {
     const update = () => setHeaderVisible(window.scrollY > 64);

@@ -10,7 +10,9 @@ export const styles = {
     position: "relative",
     isolation: "isolate",
     overflow: "hidden",
-    minHeight: "calc(100svh + var(--landing-nav-height))",
+    // Revealing the header needs scroll travel. Short pages reserve enough
+    // travel even when their content fits in the window.
+    minHeight: "calc(100svh + max(var(--landing-nav-height), 5rem))",
     background: "var(--color-background-body)",
     color: "var(--color-text-primary)",
     padding: "var(--landing-page-top) var(--landing-page-inline) var(--landing-page-bottom)",
@@ -28,14 +30,13 @@ export const styles = {
     maxWidth: "none",
   },
   header: {
-    // SAFETY: the theme root and both adaptation rules always set this token
-    // to a valid CSS position, so the substitution is a fixed, relative, or
-    // absolute keyword by construction.
-    position: "var(--landing-header-position)" as CSSProperties["position"],
+    // The header floats on the page frame at every breakpoint, as on the
+    // desktop board. Only its contents reflow.
+    position: "fixed",
     zIndex: 10,
-    top: "var(--landing-header-top)",
-    left: "var(--landing-header-inset)",
-    right: "var(--landing-header-inset)",
+    top: "var(--landing-page-top)",
+    left: "var(--landing-page-inline)",
+    right: "var(--landing-page-inline)",
     minHeight: "var(--landing-nav-height)",
     padding: "var(--landing-nav-padding-block) var(--landing-nav-padding-inline)",
     borderRadius: "var(--radius-element)",

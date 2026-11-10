@@ -68,9 +68,6 @@ export const trajsTheme = defineTheme({
     "--landing-grid-left": "0",
 
     // Header
-    "--landing-header-position": "fixed",
-    "--landing-header-top": "clamp(3rem, 1.5rem + 1.6667vw, 3.5rem)",
-    "--landing-header-inset": "5vw",
     "--landing-nav-height": "clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem)",
     "--landing-nav-padding-block": "1rem",
     "--landing-nav-padding-inline": "3rem",
@@ -160,11 +157,9 @@ export const trajsTheme = defineTheme({
             // height-derived board width, centered, so a short window narrows
             // the composition instead of letting it overflow.
             "--landing-page-inline": `max(5vw, calc(50vw - ${desktopContentWidth / 2}px), calc(50vw - 80svh))`,
-            "--landing-header-inset": `max(5vw, calc(50vw - ${desktopContentWidth / 2}px), calc(50vw - 80svh))`,
             "--landing-grid-left": `calc(var(--landing-page-inline) - ${desktopBoardWidth * 0.05}px)`,
             "--landing-page-top": "min(clamp(3rem, 1.5rem + 1.6667vw, 3.5rem), 5.1851852svh)",
             "--landing-page-bottom": "min(5rem, 7.4074074svh)",
-            "--landing-header-top": "min(clamp(3rem, 1.5rem + 1.6667vw, 3.5rem), 5.1851852svh)",
             "--landing-nav-height": "min(clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem), 8.1481481svh)",
             "--landing-nav-padding-inline": "min(3rem, 4.4444444svh)",
             "--landing-nav-gap": "min(1.75rem, 2.5925926svh)",
@@ -199,9 +194,10 @@ export const trajsTheme = defineTheme({
         },
       },
       {
-        // Tablet: the header reflows above the hero, the hero becomes a
-        // centered art + headline pair with the CTAs underneath, and the index
-        // keeps three columns. This holds from md up to the desktop edge.
+        // Tablet: the header keeps the desktop's floating, reveal-on-scroll
+        // behavior while its contents reflow; the hero becomes a centered
+        // art + headline pair with the CTAs underneath, and the index keeps
+        // three columns. This holds from md up to the desktop edge.
         when: { width: { from: "md", below: "xl" } },
         value: {
           localTokens: {
@@ -213,10 +209,9 @@ export const trajsTheme = defineTheme({
             // enough for the 720px edge, where the 640px hero still fits.
             "--landing-nav-padding-inline": "clamp(2rem, 14.035vw - 4.3125rem, 3rem)",
             "--landing-nav-gap": "clamp(1.25rem, 7.018vw - 1.906rem, 1.75rem)",
-            "--landing-header-position": "relative",
-            "--landing-header-top": "auto",
-            "--landing-header-inset": "0",
-            "--landing-stage-top": "10rem",
+            // The fixed header takes no space in the flow, so the stage
+            // reserves the height the in-flow header used to take.
+            "--landing-stage-top": "calc(var(--landing-nav-height) + 10rem)",
             "--landing-stage-bottom": "10rem",
             "--landing-hero-areas": '"art headline" "ctas ctas"',
             "--landing-hero-columns": "minmax(0, 190fr) minmax(0, 395fr)",
@@ -266,15 +261,14 @@ export const trajsTheme = defineTheme({
             "--landing-page-inline": "1.25rem",
             "--landing-page-top": "1rem",
             "--landing-page-bottom": "2rem",
-            "--landing-header-position": "relative",
-            "--landing-header-top": "auto",
-            "--landing-header-inset": "0",
             "--landing-nav-height": "3.25rem",
             "--landing-nav-padding-block": "0.5rem",
             "--landing-nav-padding-inline": "1rem",
             "--landing-nav-display": "none",
             "--landing-menu-display": "flex",
-            "--landing-stage-top": "1.5rem",
+            // The fixed header takes no space in the flow, so the stage
+            // reserves the header band.
+            "--landing-stage-top": "calc(var(--landing-nav-height) + 1.5rem)",
             "--landing-stage-bottom": "1.5rem",
             "--landing-hero-areas": '"art" "headline"',
             "--landing-hero-columns": "minmax(0, 1fr)",
