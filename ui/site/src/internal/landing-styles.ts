@@ -1,5 +1,16 @@
 import type { CSSProperties } from "react";
 
+// The backdrop has to fill exactly the plate the outline draws, so both take
+// their placement from here.
+const markPlacement: CSSProperties = {
+  position: "absolute",
+  width: "164.173%",
+  maxWidth: "none",
+  left: "-32.0865%",
+  top: "18.366%",
+  transform: "rotate(90deg)",
+};
+
 /**
  * Layout for the landing page. Every value that changes across the responsive
  * contract is a theme local token (see `themes/trajs/trajsTheme.ts`), so the
@@ -68,6 +79,9 @@ export const styles = {
   navLink: { fontSize: "inherit", fontWeight: "inherit", whiteSpace: "nowrap" },
   changelog: { display: "var(--landing-changelog-display)" },
   inkAsset: { flexShrink: 0 },
+  // The copy glyph is an exported image, but the confirmation check is drawn
+  // inline so it can take the copy glyph's ink from the theme.
+  commandIcon: { flexShrink: 0, color: "var(--color-text-secondary)" },
   menuButton: { display: "var(--landing-menu-display)" },
   themeToggle: {
     width: "var(--landing-theme-toggle-size)",
@@ -148,14 +162,14 @@ export const styles = {
     top: "-15.3003%",
     transform: "rotate(-90deg)",
   },
-  outline: {
-    position: "absolute",
-    width: "164.173%",
-    maxWidth: "none",
-    left: "-32.0865%",
-    top: "18.366%",
-    transform: "rotate(90deg)",
+  // The artwork only draws the mark's edges, so the page's grid would show
+  // through it. This fill gives the mark an opaque plate in the page colour.
+  symbolBackdrop: {
+    ...markPlacement,
+    aspectRatio: "507.323 / 316.34",
+    background: "var(--color-background-body)",
   },
+  outline: markPlacement,
   wordmark: {
     position: "absolute",
     display: "var(--landing-wordmark-display)",
@@ -180,12 +194,17 @@ export const styles = {
     height: "var(--landing-action-icon-size)",
   },
   command: {
+    display: "flex",
+    alignItems: "center",
     border: "var(--border-width) solid var(--color-border-emphasized)",
     borderRadius: "var(--radius-element)",
     minHeight: "var(--landing-control-height)",
     paddingInline: "var(--landing-command-padding)",
     gap: "var(--landing-command-gap)",
     flexShrink: 0,
+    // The page's grid sits behind everything, so the control needs an opaque
+    // fill to read as one field instead of a window onto the board.
+    background: "var(--color-background-body)",
   },
   commandText: {
     fontFamily: "var(--font-family-code)",

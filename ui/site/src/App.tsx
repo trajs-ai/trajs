@@ -1,4 +1,5 @@
 import { Button } from "@astryxdesign/core/Button";
+import { ClickableCard } from "@astryxdesign/core/ClickableCard";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
@@ -85,6 +86,27 @@ function MoonIcon() {
   );
 }
 
+function CheckIcon() {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      aria-hidden="true"
+      style={styles.commandIcon}
+    >
+      <path
+        d="M4.75 10.5L8.25 14L15.25 6.5"
+        stroke="currentColor"
+        strokeWidth="1.7923"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function MenuIcon() {
   return (
     <svg width="20" height="10" viewBox="0 0 20 10" fill="none" aria-hidden="true">
@@ -110,6 +132,7 @@ export function App() {
   const assets = landingAssets[mode];
   const shader = (reducesMotion ? stillBrandShaders : brandShaders)[mode];
   const [copyStatus, setCopyStatus] = useState("");
+  const [installCopied, setInstallCopied] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -150,9 +173,15 @@ export function App() {
     }
   }, [mode]);
 
+  // The icon's copied state lasts exactly as long as its announcement, so the
+  // two never disagree.
   useEffect(() => {
     if (!copyStatus) return;
-    const timer = window.setTimeout(() => setCopyStatus(""), 2500);
+
+    const timer = window.setTimeout(() => {
+      setCopyStatus("");
+      setInstallCopied(false);
+    }, 2500);
 
     return () => window.clearTimeout(timer);
   }, [copyStatus]);
@@ -160,8 +189,10 @@ export function App() {
   async function copyInstallCommand() {
     try {
       await navigator.clipboard.writeText(installCommand);
+      setInstallCopied(true);
       setCopyStatus("Install command copied.");
     } catch {
+      setInstallCopied(false);
       setCopyStatus("Copy unavailable. Select the command to copy it manually.");
     }
   }
@@ -281,6 +312,7 @@ export function App() {
           <VStack style={styles.art}>
             <VStack role="img" aria-label="TRAJS" style={styles.lockup}>
               <VStack style={styles.symbol} aria-hidden="true">
+                <VStack style={styles.symbolBackdrop} />
                 <VStack style={{ ...styles.symbolMask, maskImage: `url("${assets.symbolFill}")` }}>
                   <Suspense fallback={null}>
                     <ShaderFill shader={shader} style={styles.shader} />
@@ -300,21 +332,25 @@ export function App() {
               style={styles.action}
               endContent={<img src={assets.arrowRight} alt="" style={styles.actionIcon} />}
             />
-            <HStack gap={3} vAlign="center" style={styles.command}>
+            <ClickableCard
+              label={`Copy install command: ${installCommand}`}
+              onClick={copyInstallCommand}
+              variant="transparent"
+              padding={0}
+              style={styles.command}
+            >
               <Text type="code" style={styles.prompt} aria-hidden="true">
                 $
               </Text>
               <Text as="p" type="code" style={styles.commandText}>
                 {installCommand}
               </Text>
-              <IconButton
-                label="Copy install command"
-                variant="ghost"
-                size="sm"
-                onClick={copyInstallCommand}
-                icon={<img src={assets.copy} alt="" style={styles.inkAsset} />}
-              />
-            </HStack>
+              {installCopied ? (
+                <CheckIcon />
+              ) : (
+                <img src={assets.copy} alt="" style={styles.inkAsset} />
+              )}
+            </ClickableCard>
           </HStack>
         </Grid>
         <Grid aria-label="Explore TRAJS" columns={3} style={styles.index}>
