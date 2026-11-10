@@ -38,7 +38,7 @@ export const styles = {
     right: "var(--landing-header-inset)",
     minHeight: "var(--landing-nav-height)",
     padding: "var(--landing-nav-padding-block) var(--landing-nav-padding-inline)",
-    borderRadius: "var(--radius-container)",
+    borderRadius: "var(--radius-element)",
     background: "var(--color-background-surface)",
     backdropFilter: "blur(var(--spacing-4))",
   },

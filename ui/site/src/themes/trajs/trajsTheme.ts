@@ -45,9 +45,7 @@ export const trajsTheme = defineTheme({
   },
   localTokens: {
     "--landing-header-blur": "0.75rem",
-    "--landing-header-offset": "-0.75rem",
-    "--landing-header-transition":
-      "opacity 480ms ease, filter 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1)",
+    "--landing-header-transition": "opacity 180ms ease, filter 220ms ease",
     "--landing-theme-toggle-size": "1.5rem",
     "--landing-prompt-size": "clamp(0.8125rem, 0.9896vw, 1.1875rem)",
     "--color-ink-quiet": colorPair("quiet"),

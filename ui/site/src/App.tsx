@@ -176,7 +176,6 @@ export function App() {
             ...styles.header,
             opacity: chromeVisible ? 1 : 0,
             filter: chromeVisible ? "blur(0)" : "blur(var(--landing-header-blur))",
-            transform: chromeVisible ? "translateY(0)" : "translateY(var(--landing-header-offset))",
             pointerEvents: chromeVisible ? "auto" : "none",
             transition: reducesMotion ? "none" : "var(--landing-header-transition)",
           }}
