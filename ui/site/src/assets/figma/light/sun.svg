@@ -1,6 +1,0 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Sun">
-<circle id="disc" cx="6" cy="6" r="2.075" stroke-width="1.25" stroke="#17171C" stroke-opacity="0.9"/>
-<path id="rays" d="M6 0.7V1.95M6 10.05V11.3M0.7 6H1.95M10.05 6H11.3M2.26 2.26L3.13 3.13M9.74 2.26L8.87 3.13M2.26 9.74L3.13 8.87M9.74 9.74L8.87 8.87" stroke-width="1.25" stroke-linecap="round" stroke="#17171C" stroke-opacity="0.9"/>
-</g>
-</svg>

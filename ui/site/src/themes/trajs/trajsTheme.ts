@@ -1,6 +1,11 @@
 import { defineTheme } from "@astryxdesign/core/theme";
 
-import { desktopBreakpoint, tabletBreakpoint } from "./layout";
+import {
+  desktopBoardWidth,
+  desktopBreakpoint,
+  desktopContentWidth,
+  tabletBreakpoint,
+} from "./layout";
 import { colorPair } from "./palette";
 
 export const trajsTheme = defineTheme({
@@ -43,9 +48,7 @@ export const trajsTheme = defineTheme({
     "--landing-header-offset": "-0.75rem",
     "--landing-header-transition":
       "opacity 480ms ease, filter 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1)",
-    "--color-segment-light": colorPair("segmentLight"),
-    "--color-segment-dark": colorPair("segmentDark"),
-    "--landing-theme-segment-size": "1.5rem",
+    "--landing-theme-toggle-size": "1.5rem",
     "--landing-prompt-size": "clamp(0.8125rem, 0.9896vw, 1.1875rem)",
     "--color-ink-quiet": colorPair("quiet"),
     "--color-ink-muted": colorPair("muted"),
@@ -61,6 +64,10 @@ export const trajsTheme = defineTheme({
     "--landing-page-inline": "5vw",
     "--landing-page-top": "clamp(3rem, 1.5rem + 1.6667vw, 3.5rem)",
     "--landing-page-bottom": "5rem",
+    // The exported board grid is 1921 pixels wide because its outer strokes
+    // sit on half pixels. Tablet and phone crop it from the left; desktop
+    // pins it so the board's own 5vw margin lands on the page's margin.
+    "--landing-grid-left": "0",
 
     // Header
     "--landing-header-position": "fixed",
@@ -102,6 +109,9 @@ export const trajsTheme = defineTheme({
     "--landing-cta-justify": "end",
     "--landing-cta-margin-block": "0 1rem",
     "--landing-cta-margin-inline": "0 1rem",
+    "--landing-cta-gap": "var(--spacing-4)",
+    "--landing-command-gap": "var(--spacing-3)",
+    "--landing-action-icon-size": "1.25rem",
 
     // CTAs and controls
     "--landing-action-size": "clamp(0.9375rem, 1.1979vw, 1.4375rem)",
@@ -117,6 +127,7 @@ export const trajsTheme = defineTheme({
     "--landing-index-body-size": "clamp(1rem, 0.75rem + 0.4167vw, 1.25rem)",
     "--landing-index-body-leading": "clamp(1.5rem, 1.25rem + 0.625vw, 2rem)",
     "--landing-index-label-size": "clamp(0.875rem, 0.75rem + 0.3125vw, 1.125rem)",
+    "--landing-index-label-leading": "1.5rem",
     "--landing-index-link-size": "clamp(0.8125rem, 0.5rem + 0.4167vw, 1rem)",
     "--landing-changelog-display": "flex",
     "--landing-card-gap": "1.25rem",
@@ -133,11 +144,60 @@ export const trajsTheme = defineTheme({
     widthBreakpoints: { md: tabletBreakpoint, xl: desktopBreakpoint },
     rules: [
       {
-        // 1440-class desktop: the controls sit at 48px, matching the tight
-        // board; 2xl and above use the full 56px controls.
-        when: { width: { from: "xl", below: "2xl" } },
+        // Desktop is the 1920 × 1080 board scaled uniformly until it fits the
+        // window. A size is the smallest of its board value, its share of a
+        // 1920-wide viewport and its share of a 1080-tall viewport. A wide
+        // window scales from its width and a short one from its height, so the
+        // whole composition stays in view. Above 1920 × 1080 every value pins
+        // to the board and the page margins take the extra space. The height
+        // terms keep a maximized window from pushing the index below the fold.
+        when: { width: { from: "xl" } },
         value: {
-          tokens: { "--size-element-lg": "3rem" },
+          // The button's own height must follow the same scale as its width
+          // and label; a fixed 56px height here stretched the control on every
+          // narrow desktop.
+          tokens: { "--size-element-lg": "var(--landing-control-height)" },
+          localTokens: {
+            // Content width follows the 16:9 board. It is 90% of the
+            // height-derived board width, centered, so a short window narrows
+            // the composition instead of letting it overflow.
+            "--landing-page-inline": `max(5vw, calc(50vw - ${desktopContentWidth / 2}px), calc(50vw - 80svh))`,
+            "--landing-header-inset": `max(5vw, calc(50vw - ${desktopContentWidth / 2}px), calc(50vw - 80svh))`,
+            "--landing-grid-left": `calc(var(--landing-page-inline) - ${desktopBoardWidth * 0.05}px)`,
+            "--landing-page-top": "min(clamp(3rem, 1.5rem + 1.6667vw, 3.5rem), 5.1851852svh)",
+            "--landing-page-bottom": "min(5rem, 7.4074074svh)",
+            "--landing-header-top": "min(clamp(3rem, 1.5rem + 1.6667vw, 3.5rem), 5.1851852svh)",
+            "--landing-nav-height": "min(clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem), 8.1481481svh)",
+            "--landing-nav-padding-inline": "min(3rem, 4.4444444svh)",
+            "--landing-nav-gap": "min(1.75rem, 2.5925926svh)",
+            "--landing-nav-font-size": "min(0.9375rem, 1.3888889svh)",
+            "--landing-brand-size": "min(1.25rem, 1.8518519svh)",
+            "--landing-stage-top":
+              "min(calc(var(--landing-nav-height) + min(3rem, 2.5vw)), 12.5925926svh)",
+            "--landing-stage-bottom": "min(8rem, 6.6666667vw, 11.8518519svh)",
+            "--landing-hero-column-gap": "min(2.5rem, 2.0833333vw, 3.7037037svh)",
+            "--landing-heading-top": "min(4rem, 3.3333333vw, 5.9259259svh)",
+            "--landing-display-size": "min(8.4375rem, 7.03125vw, 12.5svh)",
+            "--landing-prompt-size": "min(1.1875rem, 0.9895833vw, 1.7592593svh)",
+            "--landing-action-size": "min(1.4375rem, 1.1979167vw, 2.1296296svh)",
+            "--landing-command-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
+            "--landing-command-leading": "min(1.5rem, 1.25vw, 2.2222222svh)",
+            "--landing-control-height": "min(3.5rem, 2.9166667vw, 5.1851852svh)",
+            "--landing-action-padding": "min(1.75rem, 1.4583333vw, 2.5925926svh)",
+            "--landing-command-padding": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
+            "--landing-cta-gap": "min(1rem, 0.8333333vw, 1.4814815svh)",
+            "--landing-command-gap": "min(0.75rem, 0.625vw, 1.1111111svh)",
+            "--landing-action-icon-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
+            "--landing-cta-margin-block": "0 min(1rem, 0.8333333vw, 1.4814815svh)",
+            "--landing-cta-margin-inline": "0 min(1rem, 0.8333333vw, 1.4814815svh)",
+            "--landing-index-gap": "min(4.5rem, 3.75vw, 6.6666667svh)",
+            "--landing-index-body-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
+            "--landing-index-body-leading": "min(2rem, 1.6666667vw, 2.962963svh)",
+            "--landing-index-label-size": "min(1.125rem, 0.9375vw, 1.6666667svh)",
+            "--landing-index-label-leading": "min(1.5rem, 1.25vw, 2.2222222svh)",
+            "--landing-index-link-size": "min(1rem, 0.8333333vw, 1.4814815svh)",
+            "--landing-card-gap": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
+          },
         },
       },
       {
@@ -263,7 +323,7 @@ export const trajsTheme = defineTheme({
       "level:2": {
         fontSize: "var(--landing-index-label-size)",
         fontWeight: "300",
-        lineHeight: "1.5rem",
+        lineHeight: "var(--landing-index-label-leading)",
         letterSpacing: "0.16em",
       },
     },

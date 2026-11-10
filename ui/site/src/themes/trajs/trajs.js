@@ -56,9 +56,7 @@ export const trajsTheme = {
     "--landing-header-blur": "0.75rem",
     "--landing-header-offset": "-0.75rem",
     "--landing-header-transition": "opacity 480ms ease, filter 600ms ease, transform 600ms cubic-bezier(0.22, 1, 0.36, 1)",
-    "--color-segment-light": "light-dark(#ffffff, #ffffff00)",
-    "--color-segment-dark": "light-dark(#ffffff00, #ffffff)",
-    "--landing-theme-segment-size": "1.5rem",
+    "--landing-theme-toggle-size": "1.5rem",
     "--landing-prompt-size": "clamp(0.8125rem, 0.9896vw, 1.1875rem)",
     "--color-ink-quiet": "light-dark(#7b7b80, #6e6e75)",
     "--color-ink-muted": "light-dark(#6b6b70, #c4c4ca)",
@@ -71,6 +69,7 @@ export const trajsTheme = {
     "--landing-page-inline": "5vw",
     "--landing-page-top": "clamp(3rem, 1.5rem + 1.6667vw, 3.5rem)",
     "--landing-page-bottom": "5rem",
+    "--landing-grid-left": "0",
     "--landing-header-position": "fixed",
     "--landing-header-top": "clamp(3rem, 1.5rem + 1.6667vw, 3.5rem)",
     "--landing-header-inset": "5vw",
@@ -108,6 +107,9 @@ export const trajsTheme = {
     "--landing-cta-justify": "end",
     "--landing-cta-margin-block": "0 1rem",
     "--landing-cta-margin-inline": "0 1rem",
+    "--landing-cta-gap": "var(--spacing-4)",
+    "--landing-command-gap": "var(--spacing-3)",
+    "--landing-action-icon-size": "1.25rem",
     "--landing-action-size": "clamp(0.9375rem, 1.1979vw, 1.4375rem)",
     "--landing-command-size": "clamp(0.875rem, 1.0417vw, 1.25rem)",
     "--landing-command-leading": "clamp(1.25rem, 1.25vw, 1.5rem)",
@@ -119,6 +121,7 @@ export const trajsTheme = {
     "--landing-index-body-size": "clamp(1rem, 0.75rem + 0.4167vw, 1.25rem)",
     "--landing-index-body-leading": "clamp(1.5rem, 1.25rem + 0.625vw, 2rem)",
     "--landing-index-label-size": "clamp(0.875rem, 0.75rem + 0.3125vw, 1.125rem)",
+    "--landing-index-label-leading": "1.5rem",
     "--landing-index-link-size": "clamp(0.8125rem, 0.5rem + 0.4167vw, 1rem)",
     "--landing-changelog-display": "flex",
     "--landing-card-gap": "1.25rem",
@@ -130,9 +133,7 @@ export const trajsTheme = {
     "--landing-header-blur": "trajs",
     "--landing-header-offset": "trajs",
     "--landing-header-transition": "trajs",
-    "--color-segment-light": "trajs",
-    "--color-segment-dark": "trajs",
-    "--landing-theme-segment-size": "trajs",
+    "--landing-theme-toggle-size": "trajs",
     "--landing-prompt-size": "trajs",
     "--color-ink-quiet": "trajs",
     "--color-ink-muted": "trajs",
@@ -145,6 +146,7 @@ export const trajsTheme = {
     "--landing-page-inline": "trajs",
     "--landing-page-top": "trajs",
     "--landing-page-bottom": "trajs",
+    "--landing-grid-left": "trajs",
     "--landing-header-position": "trajs",
     "--landing-header-top": "trajs",
     "--landing-header-inset": "trajs",
@@ -182,6 +184,9 @@ export const trajsTheme = {
     "--landing-cta-justify": "trajs",
     "--landing-cta-margin-block": "trajs",
     "--landing-cta-margin-inline": "trajs",
+    "--landing-cta-gap": "trajs",
+    "--landing-command-gap": "trajs",
+    "--landing-action-icon-size": "trajs",
     "--landing-action-size": "trajs",
     "--landing-command-size": "trajs",
     "--landing-command-leading": "trajs",
@@ -193,6 +198,7 @@ export const trajsTheme = {
     "--landing-index-body-size": "trajs",
     "--landing-index-body-leading": "trajs",
     "--landing-index-label-size": "trajs",
+    "--landing-index-label-leading": "trajs",
     "--landing-index-link-size": "trajs",
     "--landing-changelog-display": "trajs",
     "--landing-card-gap": "trajs",
@@ -212,7 +218,7 @@ export const trajsTheme = {
       "level:2": {
         "fontSize": "var(--landing-index-label-size)",
         "fontWeight": "300",
-        "lineHeight": "1.5rem",
+        "lineHeight": "var(--landing-index-label-leading)",
         "letterSpacing": "0.16em"
       }
     },
@@ -271,13 +277,49 @@ export const trajsTheme = {
       {
         "when": {
           "width": {
-            "from": "xl",
-            "below": "2xl"
+            "from": "xl"
           }
         },
         "value": {
           "tokens": {
-            "--size-element-lg": "3rem"
+            "--size-element-lg": "var(--landing-control-height)"
+          },
+          "localTokens": {
+            "--landing-page-inline": "max(5vw, calc(50vw - 864px), calc(50vw - 80svh))",
+            "--landing-header-inset": "max(5vw, calc(50vw - 864px), calc(50vw - 80svh))",
+            "--landing-grid-left": "calc(var(--landing-page-inline) - 96px)",
+            "--landing-page-top": "min(clamp(3rem, 1.5rem + 1.6667vw, 3.5rem), 5.1851852svh)",
+            "--landing-page-bottom": "min(5rem, 7.4074074svh)",
+            "--landing-header-top": "min(clamp(3rem, 1.5rem + 1.6667vw, 3.5rem), 5.1851852svh)",
+            "--landing-nav-height": "min(clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem), 8.1481481svh)",
+            "--landing-nav-padding-inline": "min(3rem, 4.4444444svh)",
+            "--landing-nav-gap": "min(1.75rem, 2.5925926svh)",
+            "--landing-nav-font-size": "min(0.9375rem, 1.3888889svh)",
+            "--landing-brand-size": "min(1.25rem, 1.8518519svh)",
+            "--landing-stage-top": "min(calc(var(--landing-nav-height) + min(3rem, 2.5vw)), 12.5925926svh)",
+            "--landing-stage-bottom": "min(8rem, 6.6666667vw, 11.8518519svh)",
+            "--landing-hero-column-gap": "min(2.5rem, 2.0833333vw, 3.7037037svh)",
+            "--landing-heading-top": "min(4rem, 3.3333333vw, 5.9259259svh)",
+            "--landing-display-size": "min(8.4375rem, 7.03125vw, 12.5svh)",
+            "--landing-prompt-size": "min(1.1875rem, 0.9895833vw, 1.7592593svh)",
+            "--landing-action-size": "min(1.4375rem, 1.1979167vw, 2.1296296svh)",
+            "--landing-command-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
+            "--landing-command-leading": "min(1.5rem, 1.25vw, 2.2222222svh)",
+            "--landing-control-height": "min(3.5rem, 2.9166667vw, 5.1851852svh)",
+            "--landing-action-padding": "min(1.75rem, 1.4583333vw, 2.5925926svh)",
+            "--landing-command-padding": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
+            "--landing-cta-gap": "min(1rem, 0.8333333vw, 1.4814815svh)",
+            "--landing-command-gap": "min(0.75rem, 0.625vw, 1.1111111svh)",
+            "--landing-action-icon-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
+            "--landing-cta-margin-block": "0 min(1rem, 0.8333333vw, 1.4814815svh)",
+            "--landing-cta-margin-inline": "0 min(1rem, 0.8333333vw, 1.4814815svh)",
+            "--landing-index-gap": "min(4.5rem, 3.75vw, 6.6666667svh)",
+            "--landing-index-body-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
+            "--landing-index-body-leading": "min(2rem, 1.6666667vw, 2.962963svh)",
+            "--landing-index-label-size": "min(1.125rem, 0.9375vw, 1.6666667svh)",
+            "--landing-index-label-leading": "min(1.5rem, 1.25vw, 2.2222222svh)",
+            "--landing-index-link-size": "min(1rem, 0.8333333vw, 1.4814815svh)",
+            "--landing-card-gap": "min(1.25rem, 1.0416667vw, 1.8518519svh)"
           }
         }
       },

@@ -18,6 +18,11 @@ export const styles = {
   grid: {
     position: "absolute",
     inset: 0,
+    // The board is a fixed 1921px image. Below the desktop edge it is cropped
+    // from the left; on desktop it is pinned to the page margin so widening
+    // the window only adds margins, never another row of grid cells.
+    left: "var(--landing-grid-left)",
+    width: "1921px",
     zIndex: -1,
     pointerEvents: "none",
     maxWidth: "none",
@@ -33,7 +38,7 @@ export const styles = {
     right: "var(--landing-header-inset)",
     minHeight: "var(--landing-nav-height)",
     padding: "var(--landing-nav-padding-block) var(--landing-nav-padding-inline)",
-    borderRadius: "var(--radius-full)",
+    borderRadius: "var(--radius-container)",
     background: "var(--color-background-surface)",
     backdropFilter: "blur(var(--spacing-4))",
   },
@@ -63,19 +68,13 @@ export const styles = {
   changelog: { display: "var(--landing-changelog-display)" },
   inkAsset: { flexShrink: 0 },
   menuButton: { display: "var(--landing-menu-display)" },
-  themeSegment: {
-    width: "var(--landing-theme-segment-size)",
-    height: "var(--landing-theme-segment-size)",
-    minHeight: "var(--landing-theme-segment-size)",
+  themeToggle: {
+    width: "var(--landing-theme-toggle-size)",
+    height: "var(--landing-theme-toggle-size)",
+    minHeight: "var(--landing-theme-toggle-size)",
     padding: 0,
-    borderRadius: "var(--radius-full)",
-    border: 0,
-  },
-  toggle: {
-    background: "var(--color-surface-control)",
-    border: "var(--border-width) solid var(--color-surface-control-border)",
-    borderRadius: "var(--radius-full)",
-    padding: "var(--spacing-0-5)",
+    borderRadius: "var(--radius-inner)",
+    color: "var(--color-ink-muted)",
   },
   hero: {
     paddingBlock: "var(--landing-stage-top) var(--landing-stage-bottom)",
@@ -171,13 +170,21 @@ export const styles = {
     marginBlock: "var(--landing-cta-margin-block)",
     marginInline: "var(--landing-cta-margin-inline)",
     display: "var(--landing-cta-display)",
-    gap: "var(--spacing-4)",
+    gap: "var(--landing-cta-gap)",
+  },
+  action: { flexShrink: 0 },
+  actionIcon: {
+    flexShrink: 0,
+    width: "var(--landing-action-icon-size)",
+    height: "var(--landing-action-icon-size)",
   },
   command: {
     border: "var(--border-width) solid var(--color-border-emphasized)",
     borderRadius: "var(--radius-element)",
     minHeight: "var(--landing-control-height)",
     paddingInline: "var(--landing-command-padding)",
+    gap: "var(--landing-command-gap)",
+    flexShrink: 0,
   },
   commandText: {
     fontFamily: "var(--font-family-code)",
@@ -223,7 +230,7 @@ export const styles = {
     alignSelf: "center",
     fontFamily: "var(--font-family-code)",
     fontSize: "var(--landing-index-link-size)",
-    lineHeight: "1.5rem",
+    lineHeight: "var(--landing-index-label-leading)",
     letterSpacing: "0.12em",
   },
   status: {

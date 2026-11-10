@@ -56,6 +56,37 @@ const features = [
   },
 ] as const;
 
+function SunIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <circle cx="6" cy="6" r="2.075" stroke="currentColor" strokeWidth="1.25" />
+      <path
+        d="M6 0.7V1.95M6 10.05V11.3M0.7 6H1.95M10.05 6H11.3M2.26 2.26L3.13 3.13M9.74 2.26L8.87 3.13M2.26 9.74L3.13 8.87M9.74 9.74L8.87 8.87"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function MoonIcon() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="6.9375 6.9375 10.125 10.125"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M10.4697 6.93701C9.85399 7.73187 9.4873 8.72972 9.4873 9.81299C9.48741 12.4086 11.5918 14.5132 14.1875 14.5132C15.2709 14.5132 16.2676 14.1447 17.0625 13.5288C16.3678 15.5831 14.4265 17.0629 12.1377 17.063C9.26581 17.063 6.9375 14.7347 6.9375 11.8628C6.9375 9.57437 8.41605 7.63211 10.4697 6.93701Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 function MenuIcon() {
   return (
     <svg width="20" height="10" viewBox="0 0 20 10" fill="none" aria-hidden="true">
@@ -181,31 +212,16 @@ export function App() {
                 </Link>
               ))}
             </HStack>
-            <HStack vAlign="center" style={styles.toggle} role="group" aria-label="Color theme">
-              <IconButton
-                label="Use light theme"
-                tooltip="Light theme"
-                size="sm"
-                variant="ghost"
-                style={{ ...styles.themeSegment, backgroundColor: "var(--color-segment-light)" }}
-                aria-pressed={mode === "light"}
-                onClick={() => setMode("light")}
-                icon={<img src={assets.sun} alt="" style={styles.inkAsset} />}
-              />
-              <IconButton
-                label="Use dark theme"
-                tooltip="Dark theme"
-                size="sm"
-                variant="ghost"
-                style={{ ...styles.themeSegment, backgroundColor: "var(--color-segment-dark)" }}
-                aria-pressed={mode === "dark"}
-                onClick={() => setMode("dark")}
-                icon={<img src={assets.segmentDark} alt="" style={styles.inkAsset} />}
-              />
-            </HStack>
+            <IconButton
+              label={mode === "dark" ? "Use light theme" : "Use dark theme"}
+              size="sm"
+              variant="ghost"
+              style={styles.themeToggle}
+              onClick={() => setMode(mode === "dark" ? "light" : "dark")}
+              icon={mode === "dark" ? <SunIcon /> : <MoonIcon />}
+            />
             <IconButton
               label="Open menu"
-              tooltip="Menu"
               variant="ghost"
               size="sm"
               style={styles.menuButton}
@@ -249,7 +265,8 @@ export function App() {
               href={navigation[0].href}
               variant="primary"
               size="lg"
-              endContent={<img src={assets.arrowRight} alt="" style={styles.inkAsset} />}
+              style={styles.action}
+              endContent={<img src={assets.arrowRight} alt="" style={styles.actionIcon} />}
             />
             <HStack gap={3} vAlign="center" style={styles.command}>
               <Text type="code" style={styles.prompt} aria-hidden="true">
@@ -260,7 +277,6 @@ export function App() {
               </Text>
               <IconButton
                 label="Copy install command"
-                tooltip="Copy command"
                 variant="ghost"
                 size="sm"
                 onClick={copyInstallCommand}
