@@ -326,6 +326,18 @@ export const trajsTheme = defineTheme({
     },
     link: { base: { color: "inherit" } },
     "bottom-sheet": { base: { backgroundColor: "var(--color-background-card)" } },
+    // The phone menu belongs to the header, so it paints the header glass.
+    // The canvas underneath keeps rows legible over the artwork while a
+    // little of the page shows through.
+    popover: {
+      base: {
+        backgroundColor: "color-mix(in srgb, var(--color-background-body) 88%, transparent)",
+        backgroundImage:
+          "linear-gradient(var(--color-background-surface), var(--color-background-surface))",
+        backdropFilter: "blur(var(--spacing-4))",
+        borderRadius: "var(--radius-element)",
+      },
+    },
     button: {
       base: { fontWeight: "500", borderRadius: "var(--radius-element)" },
       "size:lg": {

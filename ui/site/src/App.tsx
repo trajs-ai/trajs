@@ -1,10 +1,10 @@
-import { BottomSheet } from "@astryxdesign/core/BottomSheet";
 import { Button } from "@astryxdesign/core/Button";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Heading } from "@astryxdesign/core/Heading";
 import { HStack } from "@astryxdesign/core/HStack";
 import { IconButton } from "@astryxdesign/core/IconButton";
 import { Link } from "@astryxdesign/core/Link";
+import { Popover } from "@astryxdesign/core/Popover";
 import { Text } from "@astryxdesign/core/Text";
 import { Theme } from "@astryxdesign/core/theme";
 import { VStack } from "@astryxdesign/core/VStack";
@@ -125,6 +125,11 @@ export function App() {
     return () => window.removeEventListener("scroll", update);
   }, []);
 
+  // The menu renders outside the header, so hiding the header closes it.
+  useEffect(() => {
+    if (!chromeVisible) setMenuOpen(false);
+  }, [chromeVisible]);
+
   useEffect(() => {
     const query = window.matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => setReducesMotion(query.matches);
@@ -216,16 +221,47 @@ export function App() {
               onClick={() => setMode(mode === "dark" ? "light" : "dark")}
               icon={mode === "dark" ? <SunIcon /> : <MoonIcon />}
             />
-            <IconButton
-              label="Open menu"
-              variant="ghost"
-              size="sm"
-              style={styles.menuButton}
-              aria-haspopup="dialog"
-              aria-expanded={menuOpen}
-              onClick={() => setMenuOpen(true)}
-              icon={<MenuIcon />}
-            />
+            <Popover
+              isOpen={menuOpen}
+              onOpenChange={setMenuOpen}
+              label="Menu"
+              placement="below"
+              alignment="end"
+              width={224}
+              padding={1}
+              content={
+                <VStack gap={0.5}>
+                  {navigation.map(({ label, href }) => (
+                    <Link
+                      key={label}
+                      href={href}
+                      color="inherit"
+                      type="inherit"
+                      style={styles.menuLink}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <HStack hAlign="between" vAlign="center" gap={3}>
+                        <Text type="inherit" style={styles.menuLabel}>
+                          {label}
+                        </Text>
+                        <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+                      </HStack>
+                    </Link>
+                  ))}
+                </VStack>
+              }
+            >
+              <IconButton
+                label="Open menu"
+                variant="ghost"
+                size="sm"
+                style={{
+                  ...styles.menuButton,
+                  background: menuOpen ? "var(--color-overlay-pressed)" : undefined,
+                }}
+                icon={<MenuIcon />}
+              />
+            </Popover>
           </HStack>
         </HStack>
         <Grid columns={2} align="start" style={styles.hero}>
@@ -303,32 +339,6 @@ export function App() {
         <Text as="p" role="status" aria-live="polite" style={styles.status}>
           {copyStatus}
         </Text>
-        <BottomSheet isOpen={menuOpen} onOpenChange={setMenuOpen} label="Menu" padding={6}>
-          <VStack gap={4}>
-            {navigation.map(({ label, href }) => (
-              <Link
-                key={label}
-                href={href}
-                color="inherit"
-                type="inherit"
-                style={styles.menuLink}
-                onClick={() => setMenuOpen(false)}
-              >
-                <HStack hAlign="between" vAlign="center" gap={4}>
-                  <Text type="inherit">{label}</Text>
-                  <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
-                </HStack>
-              </Link>
-            ))}
-            <Button
-              label="Get started"
-              href={navigation[0].href}
-              variant="primary"
-              size="lg"
-              onClick={() => setMenuOpen(false)}
-            />
-          </VStack>
-        </BottomSheet>
       </VStack>
     </Theme>
   );

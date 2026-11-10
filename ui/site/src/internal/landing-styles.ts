@@ -241,6 +241,15 @@ export const styles = {
   },
   menuLink: {
     display: "block",
-    paddingBlock: "var(--spacing-1-5)",
+    paddingBlock: "var(--spacing-2)",
+    paddingInline: "var(--spacing-3)",
+    borderRadius: "var(--radius-inner)",
+    color: "var(--color-ink-muted)",
+  },
+  menuLabel: {
+    fontSize: "0.9375rem",
+    fontWeight: 300,
+    letterSpacing: "0.08em",
+    lineHeight: 1.5,
   },
 } satisfies Record<string, CSSProperties>;

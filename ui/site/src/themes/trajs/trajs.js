@@ -229,6 +229,14 @@ export const trajsTheme = {
         "backgroundColor": "var(--color-background-card)"
       }
     },
+    "popover": {
+      "base": {
+        "backgroundColor": "color-mix(in srgb, var(--color-background-body) 88%, transparent)",
+        "backgroundImage": "linear-gradient(var(--color-background-surface), var(--color-background-surface))",
+        "backdropFilter": "blur(var(--spacing-4))",
+        "borderRadius": "var(--radius-element)"
+      }
+    },
     "button": {
       "base": {
         "fontWeight": "500",
