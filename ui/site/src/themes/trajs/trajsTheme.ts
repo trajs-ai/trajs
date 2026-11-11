@@ -54,6 +54,10 @@ export const trajsTheme = defineTheme({
     "--color-pasteboard": colorPair("pasteboard"),
     "--color-guide": colorPair("guide"),
     "--color-guide-strong": colorPair("guideStrong"),
+    // The sheet's graph paper is a step below the guide lines: present enough
+    // to read as drafted stock, quiet enough to sit behind body copy.
+    "--color-grid": colorPair("grid"),
+    "--color-grid-strong": colorPair("gridStrong"),
     "--color-ink-quiet": colorPair("quiet"),
     "--color-ink-muted": colorPair("muted"),
     "--color-ink-command": colorPair("command"),
@@ -69,11 +73,11 @@ export const trajsTheme = defineTheme({
     "--landing-page-top": "var(--landing-page-inline)",
     "--landing-page-bottom": "var(--landing-page-inline)",
     // The margin ruler measures in one 24px module with a longer mark every
-    // fourth one.
+    // fourth one; the marks themselves live in `landing-guides.tsx`. The
+    // sheet's graph paper shares that module, so the two read as one scale.
     "--landing-frame-outset": "1.5rem",
-    "--landing-ruler-unit": "1.5rem",
-    "--landing-ruler-major": "6rem",
     "--landing-ruler-display": "flex",
+    "--landing-grid-display": "block",
 
     // Header
     "--landing-nav-top": "clamp(1.5rem, 2vw, 2.5rem)",
@@ -307,8 +311,10 @@ export const trajsTheme = defineTheme({
           localTokens: {
             "--landing-page-inline": "1.25rem",
             // The phone layout is a single column in a 20px margin, so the
-            // frame outset stays small.
+            // frame outset stays small and the construction-sheet detailing
+            // (ruler and graph paper) steps out of the way.
             "--landing-ruler-display": "none",
+            "--landing-grid-display": "none",
             "--landing-frame-outset": "0.5rem",
             "--landing-nav-height": "3.25rem",
             "--landing-nav-padding-block": "0.5rem",

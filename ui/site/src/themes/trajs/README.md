@@ -27,7 +27,9 @@ scale, with the source's six- and ten-pixel intermediate gaps.
 
 Two colors belong to the landing page's construction sheet rather than to the
 Figma theme: `pasteboard` is the work surface the page frame sits on, and
-`guide` / `guideStrong` draw the frame, margin ruler and section rules.
+`guide` / `guideStrong` draw the frame, margin ruler and section rules. A
+second pair, `grid` / `gridStrong`, tints the sheet's graph paper at a step
+below the guides so the printed stock stays behind the copy.
 
 Color pairs are ordered light, then dark. The board's canvas fills are graphite
 and literal white, but light mode uses the neutral `#eeeeee` so large empty

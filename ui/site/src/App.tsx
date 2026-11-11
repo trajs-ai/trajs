@@ -364,6 +364,7 @@ export function App() {
             <VStack style={styles.art}>
               <VStack role="img" aria-label="TRAJS" style={styles.lockup}>
                 <VStack style={styles.symbol} aria-hidden="true">
+                  <VStack style={styles.grain} />
                   <VStack
                     style={{ ...styles.symbolMask, maskImage: `url("${assets.symbolFill}")` }}
                   >

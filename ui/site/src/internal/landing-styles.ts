@@ -36,6 +36,15 @@ const legalLabel: CSSProperties = {
   whiteSpace: "nowrap",
 };
 
+// A register mark on the frame: a small hollow diamond centered on a corner.
+const guideNode: CSSProperties = {
+  position: "absolute",
+  width: "0.4375rem",
+  height: "0.4375rem",
+  border: "1px solid var(--color-guide-strong)",
+  background: "var(--color-background-body)",
+};
+
 /**
  * Layout for the landing page. Every value that changes across the responsive
  * contract is a theme local token (see `themes/trajs/trajsTheme.ts`), so the
@@ -72,6 +81,15 @@ export const styles = {
     zIndex: -1,
     pointerEvents: "none",
   },
+  // The sheet's graph paper: one 24px module with a stronger line every
+  // fourth, drawn behind the grain so the plate reads as drafted stock. It
+  // takes no input and never repaints.
+  guideGrid: {
+    position: "absolute",
+    inset: 0,
+    display: "var(--landing-grid-display)",
+    pointerEvents: "none",
+  },
   // The grain belongs to the frame's plate, not the pasteboard around it, so
   // the margins stay clean and only the live area reads as printed stock. It
   // never takes input, and the tile is static: no repaint per frame, no motion
@@ -96,48 +114,53 @@ export const styles = {
   },
   // The ruler turns the corner: the same module continues along the frame's
   // top edge, so the sheet is calibrated on two sides while the live area
-  // stays completely clear of lines.
-  guideRuleTopMinor: {
+  // stays completely clear of lines. It is drawn as SVG rather than a
+  // repeating gradient so each graduation is a crisp 1px stroke that meets
+  // the border without a half-pixel blur.
+  guideRulerTop: {
     position: "absolute",
     display: "var(--landing-ruler-display)",
     bottom: "100%",
     left: 0,
-    right: 0,
-    height: "0.25rem",
-    backgroundImage:
-      "repeating-linear-gradient(to right, var(--color-guide) 0 1px, transparent 1px var(--landing-ruler-unit))",
+    width: "100%",
+    height: "1.25rem",
+    overflow: "visible",
   },
-  guideRuleTopMajor: {
-    position: "absolute",
-    display: "var(--landing-ruler-display)",
-    bottom: "100%",
-    left: 0,
-    right: 0,
-    height: "0.5rem",
-    backgroundImage:
-      "repeating-linear-gradient(to right, var(--color-guide-strong) 0 1px, transparent 1px var(--landing-ruler-major))",
-  },
-  // Both ticks start at the frame's top edge and sit outside its border, so
-  // the scale reads as one measured run without crossing the live area.
-  guideRuleMinor: {
+  guideRulerLeft: {
     position: "absolute",
     display: "var(--landing-ruler-display)",
     right: "100%",
     top: 0,
-    bottom: 0,
-    width: "0.25rem",
-    backgroundImage:
-      "repeating-linear-gradient(to bottom, var(--color-guide) 0 1px, transparent 1px var(--landing-ruler-unit))",
+    height: "100%",
+    width: "1.25rem",
+    overflow: "visible",
   },
-  guideRuleMajor: {
-    position: "absolute",
-    display: "var(--landing-ruler-display)",
-    right: "100%",
-    top: 0,
-    bottom: 0,
-    width: "0.5rem",
-    backgroundImage:
-      "repeating-linear-gradient(to bottom, var(--color-guide-strong) 0 1px, transparent 1px var(--landing-ruler-major))",
+  // The corner nodes pin the frame the way a drawing sheet pins its register
+  // marks: a hollow diamond centered on the corner, so it interrupts both
+  // rules it joins instead of stopping short of them.
+  guideNodeTopLeft: {
+    ...guideNode,
+    top: "-1px",
+    left: "-1px",
+    transform: "translate(-50%, -50%) rotate(45deg)",
+  },
+  guideNodeTopRight: {
+    ...guideNode,
+    top: "-1px",
+    right: "-1px",
+    transform: "translate(50%, -50%) rotate(45deg)",
+  },
+  guideNodeBottomLeft: {
+    ...guideNode,
+    bottom: "-1px",
+    left: "-1px",
+    transform: "translate(-50%, 50%) rotate(45deg)",
+  },
+  guideNodeBottomRight: {
+    ...guideNode,
+    bottom: "-1px",
+    right: "-1px",
+    transform: "translate(50%, 50%) rotate(45deg)",
   },
   header: {
     // The header floats over the page at every breakpoint, and only its
@@ -253,6 +276,11 @@ export const styles = {
     position: "absolute",
     inset: "0 auto 0 0",
     width: "var(--landing-symbol-width)",
+    // The mark is the sheet's one opaque island: the graph paper must not
+    // show through the frame's open triangles or between the shader's edges.
+    // The plate fill repeats the paper, so the island reads as plain stock
+    // rather than a flat block.
+    background: "var(--color-background-body)",
   },
   symbolMask: {
     position: "absolute",
