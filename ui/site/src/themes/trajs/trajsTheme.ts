@@ -41,6 +41,10 @@ export const trajsTheme = defineTheme({
   localTokens: {
     "--landing-header-blur": "0.75rem",
     "--landing-header-transition": "opacity 180ms ease, filter 220ms ease",
+    // The shader arrives after the first paint, so it settles out of a heavier
+    // blur than the header, over a long and unhurried run.
+    "--landing-shader-blur": "1.25rem",
+    "--landing-shader-transition": "opacity 900ms ease-out, filter 1800ms ease-out",
     "--landing-theme-toggle-size": "1.5rem",
     "--landing-prompt-size": "clamp(0.8125rem, 0.9896vw, 1.1875rem)",
     "--color-pasteboard": colorPair("pasteboard"),

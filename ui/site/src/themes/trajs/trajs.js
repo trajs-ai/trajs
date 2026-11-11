@@ -55,6 +55,8 @@ export const trajsTheme = {
   localTokens: {
     "--landing-header-blur": "0.75rem",
     "--landing-header-transition": "opacity 180ms ease, filter 220ms ease",
+    "--landing-shader-blur": "1.25rem",
+    "--landing-shader-transition": "opacity 900ms ease-out, filter 1800ms ease-out",
     "--landing-theme-toggle-size": "1.5rem",
     "--landing-prompt-size": "clamp(0.8125rem, 0.9896vw, 1.1875rem)",
     "--color-pasteboard": "light-dark(#e2e2e2, #0d0d0d)",
@@ -152,6 +154,8 @@ export const trajsTheme = {
   __localTokenOwners: {
     "--landing-header-blur": "trajs",
     "--landing-header-transition": "trajs",
+    "--landing-shader-blur": "trajs",
+    "--landing-shader-transition": "trajs",
     "--landing-theme-toggle-size": "trajs",
     "--landing-prompt-size": "trajs",
     "--color-pasteboard": "trajs",

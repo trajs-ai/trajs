@@ -9,7 +9,7 @@ import { Popover } from "@astryxdesign/core/Popover";
 import { Text } from "@astryxdesign/core/Text";
 import { Theme } from "@astryxdesign/core/theme";
 import { VStack } from "@astryxdesign/core/VStack";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState, type ComponentProps } from "react";
 
 import { defaultThemeSlug, themes } from "./astryx-themes";
 import { brandShaders, stillBrandShaders } from "./internal/brand-shader";
@@ -26,6 +26,38 @@ const ShaderFill = lazy(async () => {
 
   return { default: module.ShaderFill };
 });
+
+// The shader module and its GPU setup finish after the first paint, so the mark
+// fills in behind the header's blur instead of appearing all at once. The
+// canvas mounts transparent and reveals on the next frame, which gives the
+// transition a painted start state to move away from.
+function ShaderReveal({
+  shader,
+  reducesMotion,
+}: {
+  shader: ComponentProps<typeof ShaderFill>["shader"];
+  reducesMotion: boolean;
+}) {
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setRevealed(true));
+
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return (
+    <ShaderFill
+      shader={shader}
+      style={{
+        ...styles.shader,
+        opacity: revealed ? 1 : 0,
+        filter: revealed ? "blur(0)" : "blur(var(--landing-shader-blur))",
+        transition: reducesMotion ? "none" : "var(--landing-shader-transition)",
+      }}
+    />
+  );
+}
 
 const navigation = [
   { label: "DOCS", href: `${repository}#readme` },
@@ -354,7 +386,7 @@ export function App() {
               <VStack style={styles.symbol} aria-hidden="true">
                 <VStack style={{ ...styles.symbolMask, maskImage: `url("${assets.symbolFill}")` }}>
                   <Suspense fallback={null}>
-                    <ShaderFill shader={shader} style={styles.shader} />
+                    <ShaderReveal shader={shader} reducesMotion={reducesMotion} />
                   </Suspense>
                 </VStack>
                 <img src={assets.symbolOutline} alt="" style={styles.outline} />
