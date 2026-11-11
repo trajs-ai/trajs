@@ -191,6 +191,11 @@ export const styles = {
     paddingBlock: "var(--landing-stage-top) var(--landing-stage-bottom)",
     width: "var(--landing-hero-width)",
     marginInline: "var(--landing-hero-margin)",
+    // A visual micro-adjustment only: the grid keeps its centered layout box,
+    // while the desktop rule slides its contents left by half the amount the
+    // ink itself overhangs to the right. The offset is zero at the smaller
+    // breakpoints, where the composition is centered by construction.
+    transform: "translateX(calc(-1 * var(--landing-hero-optical-offset)))",
     gridTemplateColumns: "var(--landing-hero-columns)",
     gridTemplateAreas: "var(--landing-hero-areas)",
     columnGap: "var(--landing-hero-column-gap)",

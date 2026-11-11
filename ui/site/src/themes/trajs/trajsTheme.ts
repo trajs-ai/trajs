@@ -98,6 +98,13 @@ export const trajsTheme = defineTheme({
     "--landing-hero-width": "auto",
     "--landing-hero-margin": "0",
     "--landing-hero-align": "start",
+    // The composition's ink sits right of its column: the headline is ragged
+    // on the left while the CTA row runs to the art column's right edge, which
+    // leaves about 106px more air on the left than on the right at the board's
+    // scale. The desktop rule slides the whole grid back by half that
+    // difference, so the ink reads centered and every internal relationship
+    // stays intact.
+    "--landing-hero-optical-offset": "0rem",
     "--landing-heading-top": "clamp(0rem, 13.3333vw - 12rem, 4rem)",
     "--landing-heading-align": "end",
     "--landing-display-size": "clamp(3rem, 2.5625rem + 4.896vw, 8.4375rem)",
@@ -192,6 +199,10 @@ export const trajsTheme = defineTheme({
             "--landing-stage-bottom": "min(6rem, 5vw, 8.8888889svh)",
             "--landing-hero-width": `min(100%, ${desktopContentWidth}px, 160svh)`,
             "--landing-hero-margin": "auto",
+            // 52px at the 1920 board, scaling with the composition's own
+            // width and height so it keeps the same optical balance when the
+            // board shrinks.
+            "--landing-hero-optical-offset": "min(3.25rem, 2.7083333vw, 4.8148148svh)",
             "--landing-hero-column-gap": "min(2.5rem, 2.0833333vw, 3.7037037svh)",
             "--landing-heading-top": "min(4rem, 3.3333333vw, 5.9259259svh)",
             "--landing-display-size": "min(8.4375rem, 7.03125vw, 12.5svh)",
