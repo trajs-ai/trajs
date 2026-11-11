@@ -74,7 +74,6 @@ export const trajsTheme = defineTheme({
     "--landing-ruler-unit": "1.5rem",
     "--landing-ruler-major": "6rem",
     "--landing-ruler-display": "flex",
-    "--landing-index-rule-gap": "2.5rem",
 
     // Header
     "--landing-nav-top": "clamp(1.5rem, 2vw, 2.5rem)",
@@ -128,9 +127,7 @@ export const trajsTheme = defineTheme({
     "--landing-action-padding": "clamp(1rem, 1.4583vw, 1.75rem)",
     "--landing-command-padding": "clamp(0.875rem, 1.0417vw, 1.25rem)",
 
-    // Index
-    "--landing-index-columns": "repeat(3, minmax(0, 1fr))",
-    "--landing-index-gap": "clamp(3rem, 2.5vw + 1.2rem, 4.5rem)",
+    // Labels and body copy shared by the footer and the status line.
     "--landing-index-body-size": "clamp(1rem, 0.75rem + 0.4167vw, 1.25rem)",
     "--landing-index-body-leading": "clamp(1.5rem, 1.25rem + 0.625vw, 2rem)",
     "--landing-index-label-size": "clamp(0.875rem, 0.75rem + 0.3125vw, 1.125rem)",
@@ -138,12 +135,9 @@ export const trajsTheme = defineTheme({
     "--landing-index-link-size": "clamp(0.8125rem, 0.5rem + 0.4167vw, 1rem)",
     "--landing-changelog-display": "flex",
     "--landing-card-gap": "1.25rem",
-    "--landing-card-columns": "minmax(0, 1fr)",
-    "--landing-card-areas": '"head" "body" "link"',
-    "--landing-card-link-justify": "start",
 
-    // Footer: the brand block and its two link groups sit on the same three
-    // tracks as the index above, so the two bands read as one measured grid.
+    // Footer: the brand block and its two link groups share three tracks, so
+    // the band reads as one measured grid.
     "--landing-footer-gap": "4.5rem",
     "--landing-footer-padding": "2.5rem",
     "--landing-footer-bottom": "1.5rem",
@@ -205,7 +199,6 @@ export const trajsTheme = defineTheme({
             "--landing-command-gap": "min(0.75rem, 0.625vw, 1.1111111svh)",
             "--landing-action-icon-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
             "--landing-cta-margin-block": "0 min(1rem, 0.8333333vw, 1.4814815svh)",
-            "--landing-index-gap": "min(4.5rem, 3.75vw, 6.6666667svh)",
             "--landing-index-body-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
             "--landing-index-body-leading": "min(2rem, 1.6666667vw, 2.962963svh)",
             "--landing-index-label-size": "min(1.125rem, 0.9375vw, 1.6666667svh)",
@@ -218,25 +211,26 @@ export const trajsTheme = defineTheme({
       {
         // Tablet: the header keeps the desktop's floating, reveal-on-scroll
         // behavior while its contents reflow; the hero becomes a centered
-        // art + headline pair with the CTAs underneath, and the index keeps
-        // three columns. This holds from md up to the desktop edge.
+        // art + headline pair with the CTAs underneath. This holds from md up
+        // to the desktop edge.
         when: { width: { from: "md", below: "xl" } },
         value: {
           localTokens: {
             "--landing-page-inline": "2.5rem",
             "--landing-frame-outset": "1rem",
-            "--landing-index-rule-gap": "1.75rem",
             "--landing-nav-height": "5.5rem",
             // The tablet header keeps its 834 board spacing and tightens just
             // enough for the 720px edge, where the 640px hero still fits.
             "--landing-nav-padding-inline": "clamp(2rem, 14.035vw - 4.3125rem, 3rem)",
             "--landing-nav-gap": "clamp(1.25rem, 7.018vw - 1.906rem, 1.75rem)",
             // The tablet block is the 834 × 1112 board. Below that height the
-            // stage gaps close so the index stays on the first screen; the
-            // fixed header overlays the top band instead of taking flow space.
+            // stage's top gap closes so the sheet stays on the first screen;
+            // the fixed header overlays the top band instead of taking flow
+            // space.
             "--landing-stage-top": "clamp(6.875rem, calc(10rem - (1112px - 100svh) * 0.34), 10rem)",
-            "--landing-stage-bottom":
-              "clamp(6.875rem, calc(10rem - (1112px - 100svh) * 0.34), 10rem)",
+            // With the index cards gone, the hero's lower gap is the sheet's
+            // closing space rather than a break before another row.
+            "--landing-stage-bottom": "6rem",
             "--landing-hero-areas": '"art headline" "ctas ctas"',
             "--landing-hero-columns": "minmax(0, 190fr) minmax(0, 395fr)",
             "--landing-hero-column-gap": "3.5rem",
@@ -266,7 +260,6 @@ export const trajsTheme = defineTheme({
             "--landing-control-height": "3.5rem",
             "--landing-action-padding": "1.75rem",
             "--landing-command-padding": "1.25rem",
-            "--landing-index-gap": "1.5rem",
             "--landing-index-body-size": "1rem",
             "--landing-index-body-leading": "1.5625rem",
             "--landing-index-label-size": "0.9375rem",
@@ -288,17 +281,16 @@ export const trajsTheme = defineTheme({
       },
       {
         // Phone: one column all the way down. The nav becomes a menu sheet,
-        // the symbol sits above the headline, the CTAs move into that sheet,
-        // and the index cards put their link on the head row.
+        // the symbol sits above the headline, and the CTAs move into that
+        // sheet.
         when: { width: { below: "md" } },
         value: {
           localTokens: {
             "--landing-page-inline": "1.25rem",
             // The phone layout is a single column in a 20px margin, so the
-            // frame outset and index rule stay small.
+            // frame outset stays small.
             "--landing-ruler-display": "none",
             "--landing-frame-outset": "0.5rem",
-            "--landing-index-rule-gap": "1.5rem",
             "--landing-nav-height": "3.25rem",
             "--landing-nav-padding-block": "0.5rem",
             "--landing-nav-padding-inline": "1rem",
@@ -328,15 +320,11 @@ export const trajsTheme = defineTheme({
             "--landing-symbol-width": "100%",
             "--landing-wordmark-display": "none",
             "--landing-cta-display": "none",
-            "--landing-index-columns": "minmax(0, 1fr)",
-            "--landing-index-gap": "1rem",
             "--landing-index-body-size": "0.9375rem",
             "--landing-index-body-leading": "1.4375rem",
             "--landing-index-label-size": "0.9375rem",
             "--landing-index-link-size": "0.8125rem",
             "--landing-card-gap": "0.5rem",
-            "--landing-card-areas": '"head link" "body body"',
-            "--landing-card-link-justify": "end",
             // The phone footer stacks the brand over its two link groups, and
             // the legal line drops a size so it still fits one row.
             "--landing-footer-gap": "2.5rem",

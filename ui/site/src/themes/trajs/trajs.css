@@ -150,7 +150,6 @@
     --landing-ruler-unit: 1.5rem;
     --landing-ruler-major: 6rem;
     --landing-ruler-display: flex;
-    --landing-index-rule-gap: 2.5rem;
     --landing-nav-top: clamp(1.5rem, 2vw, 2.5rem);
     --landing-nav-height: clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem);
     --landing-nav-padding-block: 1rem;
@@ -196,8 +195,6 @@
     --landing-control-height: clamp(3rem, 2.9167vw, 3.5rem);
     --landing-action-padding: clamp(1rem, 1.4583vw, 1.75rem);
     --landing-command-padding: clamp(0.875rem, 1.0417vw, 1.25rem);
-    --landing-index-columns: repeat(3, minmax(0, 1fr));
-    --landing-index-gap: clamp(3rem, 2.5vw + 1.2rem, 4.5rem);
     --landing-index-body-size: clamp(1rem, 0.75rem + 0.4167vw, 1.25rem);
     --landing-index-body-leading: clamp(1.5rem, 1.25rem + 0.625vw, 2rem);
     --landing-index-label-size: clamp(0.875rem, 0.75rem + 0.3125vw, 1.125rem);
@@ -205,9 +202,6 @@
     --landing-index-link-size: clamp(0.8125rem, 0.5rem + 0.4167vw, 1rem);
     --landing-changelog-display: flex;
     --landing-card-gap: 1.25rem;
-    --landing-card-columns: minmax(0, 1fr);
-    --landing-card-areas: "head" "body" "link";
-    --landing-card-link-justify: start;
     --landing-footer-gap: 4.5rem;
     --landing-footer-padding: 2.5rem;
     --landing-footer-bottom: 1.5rem;
@@ -371,7 +365,6 @@
     --landing-command-gap: min(0.75rem, 0.625vw, 1.1111111svh);
     --landing-action-icon-size: min(1.25rem, 1.0416667vw, 1.8518519svh);
     --landing-cta-margin-block: 0 min(1rem, 0.8333333vw, 1.4814815svh);
-    --landing-index-gap: min(4.5rem, 3.75vw, 6.6666667svh);
     --landing-index-body-size: min(1.25rem, 1.0416667vw, 1.8518519svh);
     --landing-index-body-leading: min(2rem, 1.6666667vw, 2.962963svh);
     --landing-index-label-size: min(1.125rem, 0.9375vw, 1.6666667svh);
@@ -387,12 +380,11 @@
     :scope {
     --landing-page-inline: 2.5rem;
     --landing-frame-outset: 1rem;
-    --landing-index-rule-gap: 1.75rem;
     --landing-nav-height: 5.5rem;
     --landing-nav-padding-inline: clamp(2rem, 14.035vw - 4.3125rem, 3rem);
     --landing-nav-gap: clamp(1.25rem, 7.018vw - 1.906rem, 1.75rem);
     --landing-stage-top: clamp(6.875rem, calc(10rem - (1112px - 100svh) * 0.34), 10rem);
-    --landing-stage-bottom: clamp(6.875rem, calc(10rem - (1112px - 100svh) * 0.34), 10rem);
+    --landing-stage-bottom: 6rem;
     --landing-hero-areas: "art headline" "ctas ctas";
     --landing-hero-columns: minmax(0, 190fr) minmax(0, 395fr);
     --landing-hero-column-gap: 3.5rem;
@@ -422,7 +414,6 @@
     --landing-control-height: 3.5rem;
     --landing-action-padding: 1.75rem;
     --landing-command-padding: 1.25rem;
-    --landing-index-gap: 1.5rem;
     --landing-index-body-size: 1rem;
     --landing-index-body-leading: 1.5625rem;
     --landing-index-label-size: 0.9375rem;
@@ -447,7 +438,6 @@
     --landing-page-inline: 1.25rem;
     --landing-ruler-display: none;
     --landing-frame-outset: 0.5rem;
-    --landing-index-rule-gap: 1.5rem;
     --landing-nav-height: 3.25rem;
     --landing-nav-padding-block: 0.5rem;
     --landing-nav-padding-inline: 1rem;
@@ -472,15 +462,11 @@
     --landing-symbol-width: 100%;
     --landing-wordmark-display: none;
     --landing-cta-display: none;
-    --landing-index-columns: minmax(0, 1fr);
-    --landing-index-gap: 1rem;
     --landing-index-body-size: 0.9375rem;
     --landing-index-body-leading: 1.4375rem;
     --landing-index-label-size: 0.9375rem;
     --landing-index-link-size: 0.8125rem;
     --landing-card-gap: 0.5rem;
-    --landing-card-areas: "head link" "body body";
-    --landing-card-link-justify: end;
     --landing-footer-gap: 2.5rem;
     --landing-footer-padding: 1.5rem;
     --landing-footer-bottom: 1rem;

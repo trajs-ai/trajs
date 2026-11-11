@@ -17,8 +17,8 @@ const markPlacement: CSSProperties = {
 const grainTile =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='144' height='144'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='144' height='144' filter='url(%23grain)'/%3E%3C/svg%3E\")";
 
-// The index cards and the footer both end in a labeled pointer, so they share
-// the sheet's one label treatment and only place it differently.
+// The footer ends in a labeled pointer, so it takes the sheet's one label
+// treatment.
 const linkLabel: CSSProperties = {
   fontFamily: "var(--font-family-code)",
   fontSize: "var(--landing-index-link-size)",
@@ -27,7 +27,7 @@ const linkLabel: CSSProperties = {
 };
 
 // The legal line is the same mono label one step down, so it can set its own
-// size without inheriting the index link's.
+// size without inheriting the footer link's.
 const legalLabel: CSSProperties = {
   fontFamily: "var(--font-family-code)",
   fontSize: "var(--landing-footer-legal-size)",
@@ -309,50 +309,15 @@ export const styles = {
     fontWeight: 500,
     color: "var(--color-ink-quiet)",
   },
-  indexSection: {
-    position: "relative",
-    borderBlockStart: "1px solid var(--color-guide-strong)",
-    paddingBlockStart: "var(--landing-index-rule-gap)",
-  },
-  index: {
-    position: "relative",
-    gridTemplateColumns: "var(--landing-index-columns)",
-    gap: "var(--landing-index-gap)",
-    alignItems: "stretch",
-  },
-  indexItem: {
-    display: "grid",
-    minWidth: 0,
-    gridTemplateColumns: "var(--landing-card-columns)",
-    gridTemplateRows: "auto 1fr auto",
-    gridTemplateAreas: "var(--landing-card-areas)",
-    rowGap: "var(--landing-card-gap)",
-    columnGap: "var(--landing-card-gap)",
-    alignContent: "start",
-    alignItems: "start",
-  },
-  indexHead: { gridArea: "head", minWidth: 0 },
-  indexBody: {
-    gridArea: "body",
-    fontSize: "var(--landing-index-body-size)",
-    lineHeight: "var(--landing-index-body-leading)",
-    letterSpacing: "0.01em",
-  },
-  indexLink: {
-    ...linkLabel,
-    gridArea: "link",
-    justifySelf: "var(--landing-card-link-justify)",
-    alignSelf: "center",
-  },
   status: {
     fontSize: "var(--landing-index-link-size)",
     color: "var(--color-text-secondary)",
     minHeight: "var(--spacing-6)",
   },
   footer: {
-    // The footer is detached from the sheet: it repeats the index's section
-    // rule over a labeled grid, but it sits below the frame's bottom border on
-    // the pasteboard, so it reads as the page's footer rather than the sheet's
+    // The footer is detached from the sheet: it opens with a rule over a
+    // labeled grid, but it sits below the frame's bottom border on the
+    // pasteboard, so it reads as the page's footer rather than the sheet's
     // last row.
     borderBlockStart: "1px solid var(--color-guide-strong)",
     marginBlockStart: "var(--landing-footer-gap)",

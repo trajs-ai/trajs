@@ -67,30 +67,9 @@ const navigation = [
   { label: "GITHUB", href: repository },
 ];
 
-const features = [
-  {
-    title: "RECORD",
-    icon: "record",
-    description: "Capture every thought, tool call and observation as a typed, timestamped step.",
-    link: navigation[0],
-  },
-  {
-    title: "ANALYSIS",
-    icon: "analysis",
-    description: "Replay any run, diff two trajectories, and profile tokens, latency and cost.",
-    link: navigation[1],
-  },
-  {
-    title: "EXCHANGE",
-    icon: "exchange",
-    description: "One portable file. Share a link, export to JSONL, or open it in any runtime.",
-    link: navigation[2],
-  },
-] as const;
-
 const license = `${repository}/blob/main/LICENSE`;
 
-// The index already names the three ideas; the footer names where to read
+// The hero already names the three ideas; the footer names where to read
 // about them and where the project lives.
 const footerGroups = [
   {
@@ -427,27 +406,6 @@ export function App() {
               </ClickableCard>
             </HStack>
           </Grid>
-          <VStack style={styles.indexSection}>
-            <Grid aria-label="Explore TRAJS" columns={3} style={styles.index}>
-              {features.map(({ title, icon, description, link }) => (
-                <VStack as="article" key={title} style={styles.indexItem}>
-                  <HStack gap={2} vAlign="center" style={styles.indexHead}>
-                    <img src={assets[icon]} alt="" style={styles.inkAsset} />
-                    <Heading level={2}>{title}</Heading>
-                  </HStack>
-                  <Text as="p" color="secondary" style={styles.indexBody}>
-                    {description}
-                  </Text>
-                  <Link href={link.href} color="inherit" type="inherit" style={styles.indexLink}>
-                    <HStack gap={2} vAlign="center">
-                      <Text type="inherit">{link.label}</Text>
-                      <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
-                    </HStack>
-                  </Link>
-                </VStack>
-              ))}
-            </Grid>
-          </VStack>
           <Text as="p" role="status" aria-live="polite" style={styles.status}>
             {copyStatus}
           </Text>
