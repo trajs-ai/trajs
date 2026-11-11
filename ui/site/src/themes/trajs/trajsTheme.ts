@@ -338,10 +338,10 @@ export const trajsTheme = defineTheme({
           localTokens: {
             "--landing-page-inline": "1.25rem",
             // The phone layout is a single column in a 20px margin, so the
-            // frame outset stays small and the construction-sheet detailing
-            // (ruler and graph paper) steps out of the way.
+            // frame outset stays small and the ruler steps out of the way.
+            // The graph paper stays: it is the sheet's floor at every size,
+            // and the phone frame is wide enough to carry the same module.
             "--landing-ruler-display": "none",
-            "--landing-grid-display": "none",
             "--landing-frame-outset": "0.5rem",
             "--landing-nav-height": "3.25rem",
             "--landing-nav-padding-block": "0.5rem",

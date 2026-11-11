@@ -448,7 +448,6 @@ export const trajsTheme = {
           "localTokens": {
             "--landing-page-inline": "1.25rem",
             "--landing-ruler-display": "none",
-            "--landing-grid-display": "none",
             "--landing-frame-outset": "0.5rem",
             "--landing-nav-height": "3.25rem",
             "--landing-nav-padding-block": "0.5rem",
