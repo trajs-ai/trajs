@@ -46,8 +46,6 @@ export const trajsTheme = defineTheme({
     "--color-pasteboard": colorPair("pasteboard"),
     "--color-guide": colorPair("guide"),
     "--color-guide-strong": colorPair("guideStrong"),
-    "--color-grid": colorPair("grid"),
-    "--color-grid-major": colorPair("gridMajor"),
     "--color-ink-quiet": colorPair("quiet"),
     "--color-ink-muted": colorPair("muted"),
     "--color-ink-command": colorPair("command"),
@@ -62,12 +60,11 @@ export const trajsTheme = defineTheme({
     "--landing-page-inline": "clamp(2.5rem, 4vw, 6rem)",
     "--landing-page-top": "var(--landing-page-inline)",
     "--landing-page-bottom": "var(--landing-page-inline)",
-    // The frame is outset from the live area by its own token. Its grid uses
-    // one measuring module and a heavier rule every four modules; the margin
-    // ruler repeats those same intervals.
+    // The margin ruler measures in one 24px module with a longer mark every
+    // fourth one.
     "--landing-frame-outset": "1.5rem",
-    "--landing-grid-unit": "1.5rem",
-    "--landing-grid-major": "6rem",
+    "--landing-ruler-unit": "1.5rem",
+    "--landing-ruler-major": "6rem",
     "--landing-ruler-display": "flex",
     "--landing-index-rule-gap": "2.5rem",
 
@@ -260,6 +257,7 @@ export const trajsTheme = defineTheme({
             "--landing-page-inline": "1.25rem",
             // The phone layout is a single column in a 20px margin, so the
             // frame outset and index rule stay small.
+            "--landing-ruler-display": "none",
             "--landing-frame-outset": "0.5rem",
             "--landing-index-rule-gap": "1.5rem",
             "--landing-nav-height": "3.25rem",

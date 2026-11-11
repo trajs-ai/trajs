@@ -3,10 +3,9 @@ import { VStack } from "@astryxdesign/core/VStack";
 import { styles } from "./landing-styles";
 
 /**
- * The construction grid behind the landing page. A single frame carries a
- * two-tier graph-paper grid: fine modules for scale and heavier 96px rules for
- * structure. A margin ruler repeats the same two intervals from the frame's
- * top edge, so the scale and the grid share one origin.
+ * The construction sheet behind the landing page: the page frame and the
+ * margin ruler. The ruler keeps one tick per 24px module and a longer mark
+ * every 96px, both measured from the frame's top edge.
  */
 export function LandingGuides() {
   return (

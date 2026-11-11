@@ -131,8 +131,6 @@
     --color-pasteboard: light-dark(#e2e2e2, #0d0d0d);
     --color-guide: light-dark(#17171733, #ffffff24);
     --color-guide-strong: light-dark(#17171745, #ffffff3d);
-    --color-grid: light-dark(#17171707, #f2f2ef06);
-    --color-grid-major: light-dark(#1717170f, #f2f2ef0e);
     --color-ink-quiet: light-dark(#7b7b80, #6e6e75);
     --color-ink-muted: light-dark(#6b6b70, #c4c4ca);
     --color-ink-command: light-dark(#353539, #e4e4e2);
@@ -145,8 +143,8 @@
     --landing-page-top: var(--landing-page-inline);
     --landing-page-bottom: var(--landing-page-inline);
     --landing-frame-outset: 1.5rem;
-    --landing-grid-unit: 1.5rem;
-    --landing-grid-major: 6rem;
+    --landing-ruler-unit: 1.5rem;
+    --landing-ruler-major: 6rem;
     --landing-ruler-display: flex;
     --landing-index-rule-gap: 2.5rem;
     --landing-nav-top: clamp(1.5rem, 2vw, 2.5rem);
@@ -419,6 +417,7 @@
   @scope ([data-astryx-theme="trajs"]) to ([data-astryx-theme]) {
     :scope {
     --landing-page-inline: 1.25rem;
+    --landing-ruler-display: none;
     --landing-frame-outset: 0.5rem;
     --landing-index-rule-gap: 1.5rem;
     --landing-nav-height: 3.25rem;
