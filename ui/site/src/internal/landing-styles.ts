@@ -11,6 +11,25 @@ const markPlacement: CSSProperties = {
   transform: "rotate(90deg)",
 };
 
+// The index cards and the footer both end in a labeled pointer, so they share
+// the sheet's one label treatment and only place it differently.
+const linkLabel: CSSProperties = {
+  fontFamily: "var(--font-family-code)",
+  fontSize: "var(--landing-index-link-size)",
+  lineHeight: "var(--landing-index-label-leading)",
+  letterSpacing: "0.12em",
+};
+
+// The legal line is the same mono label one step down, so it can set its own
+// size without inheriting the index link's.
+const legalLabel: CSSProperties = {
+  fontFamily: "var(--font-family-code)",
+  fontSize: "var(--landing-footer-legal-size)",
+  lineHeight: "var(--landing-index-label-leading)",
+  letterSpacing: "var(--landing-footer-legal-tracking)",
+  whiteSpace: "nowrap",
+};
+
 /**
  * Layout for the landing page. Every value that changes across the responsive
  * contract is a theme local token (see `themes/trajs/trajsTheme.ts`), so the
@@ -274,18 +293,75 @@ export const styles = {
     letterSpacing: "0.01em",
   },
   indexLink: {
+    ...linkLabel,
     gridArea: "link",
     justifySelf: "var(--landing-card-link-justify)",
     alignSelf: "center",
-    fontFamily: "var(--font-family-code)",
-    fontSize: "var(--landing-index-link-size)",
-    lineHeight: "var(--landing-index-label-leading)",
-    letterSpacing: "0.12em",
   },
   status: {
     fontSize: "var(--landing-index-link-size)",
     color: "var(--color-text-secondary)",
     minHeight: "var(--spacing-6)",
+  },
+  footer: {
+    // The footer closes the sheet the way the index opens it: a section rule
+    // over a labeled grid, with the legal line as the last measured row.
+    borderBlockStart: "1px solid var(--color-guide-strong)",
+    marginBlockStart: "var(--landing-footer-gap)",
+    paddingBlockStart: "var(--landing-footer-padding)",
+    paddingBlockEnd: "var(--landing-footer-bottom)",
+  },
+  footerIndex: {
+    gridTemplateColumns: "var(--landing-footer-columns)",
+    columnGap: "var(--landing-footer-column-gap)",
+    rowGap: "var(--landing-footer-row-gap)",
+    alignItems: "start",
+  },
+  footerBrand: {
+    display: "grid",
+    rowGap: "var(--landing-footer-brand-gap)",
+    alignContent: "start",
+    minWidth: 0,
+  },
+  footerAbout: {
+    fontSize: "var(--landing-index-body-size)",
+    lineHeight: "var(--landing-index-body-leading)",
+    letterSpacing: "0.01em",
+    maxWidth: "var(--landing-footer-about-width)",
+  },
+  footerGroup: {
+    display: "grid",
+    rowGap: "var(--landing-card-gap)",
+    alignContent: "start",
+    minWidth: 0,
+  },
+  footerLinks: {
+    display: "grid",
+    rowGap: "var(--landing-footer-link-gap)",
+    justifyItems: "start",
+  },
+  footerLink: {
+    ...linkLabel,
+    fontSize: "var(--landing-footer-link-size)",
+  },
+  footerLegal: {
+    borderBlockStart: "1px solid var(--color-guide-strong)",
+    marginBlockStart: "var(--landing-footer-legal-gap)",
+    paddingBlockStart: "var(--landing-footer-legal-padding)",
+    gap: "var(--spacing-4)",
+  },
+  footerMeta: {
+    gap: "var(--landing-footer-meta-gap)",
+    minWidth: 0,
+  },
+  footerLegalText: {
+    ...legalLabel,
+    color: "var(--color-ink-muted)",
+  },
+  footerLegalLabel: legalLabel,
+  footerLegalLink: {
+    color: "var(--color-text-primary)",
+    whiteSpace: "nowrap",
   },
   menuLink: {
     display: "block",

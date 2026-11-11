@@ -132,7 +132,22 @@ export const trajsTheme = {
     "--landing-card-gap": "1.25rem",
     "--landing-card-columns": "minmax(0, 1fr)",
     "--landing-card-areas": "\"head\" \"body\" \"link\"",
-    "--landing-card-link-justify": "start"
+    "--landing-card-link-justify": "start",
+    "--landing-footer-gap": "4.5rem",
+    "--landing-footer-padding": "2.5rem",
+    "--landing-footer-bottom": "1.5rem",
+    "--landing-footer-columns": "repeat(3, minmax(0, 1fr))",
+    "--landing-footer-column-gap": "4.5rem",
+    "--landing-footer-row-gap": "0rem",
+    "--landing-footer-brand-gap": "1.5rem",
+    "--landing-footer-about-width": "22rem",
+    "--landing-footer-link-gap": "0.75rem",
+    "--landing-footer-link-size": "var(--landing-index-link-size)",
+    "--landing-footer-legal-gap": "4rem",
+    "--landing-footer-legal-padding": "1.5rem",
+    "--landing-footer-legal-size": "0.8125rem",
+    "--landing-footer-legal-tracking": "0.12em",
+    "--landing-footer-meta-gap": "1.5rem"
   },
   __localTokenOwners: {
     "--landing-header-blur": "trajs",
@@ -214,7 +229,22 @@ export const trajsTheme = {
     "--landing-card-gap": "trajs",
     "--landing-card-columns": "trajs",
     "--landing-card-areas": "trajs",
-    "--landing-card-link-justify": "trajs"
+    "--landing-card-link-justify": "trajs",
+    "--landing-footer-gap": "trajs",
+    "--landing-footer-padding": "trajs",
+    "--landing-footer-bottom": "trajs",
+    "--landing-footer-columns": "trajs",
+    "--landing-footer-column-gap": "trajs",
+    "--landing-footer-row-gap": "trajs",
+    "--landing-footer-brand-gap": "trajs",
+    "--landing-footer-about-width": "trajs",
+    "--landing-footer-link-gap": "trajs",
+    "--landing-footer-link-size": "trajs",
+    "--landing-footer-legal-gap": "trajs",
+    "--landing-footer-legal-padding": "trajs",
+    "--landing-footer-legal-size": "trajs",
+    "--landing-footer-legal-tracking": "trajs",
+    "--landing-footer-meta-gap": "trajs"
   },
   __localTokenLineage: ["trajs"],
   components: {
@@ -387,7 +417,16 @@ export const trajsTheme = {
             "--landing-index-body-leading": "1.5625rem",
             "--landing-index-label-size": "0.9375rem",
             "--landing-index-link-size": "0.875rem",
-            "--landing-card-gap": "1rem"
+            "--landing-card-gap": "1rem",
+            "--landing-footer-gap": "3rem",
+            "--landing-footer-padding": "2rem",
+            "--landing-footer-bottom": "1.25rem",
+            "--landing-footer-columns": "minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr)",
+            "--landing-footer-column-gap": "1.5rem",
+            "--landing-footer-brand-gap": "1.25rem",
+            "--landing-footer-about-width": "none",
+            "--landing-footer-legal-gap": "3rem",
+            "--landing-footer-legal-padding": "1.25rem"
           }
         }
       },
@@ -435,7 +474,21 @@ export const trajsTheme = {
             "--landing-index-link-size": "0.8125rem",
             "--landing-card-gap": "0.5rem",
             "--landing-card-areas": "\"head link\" \"body body\"",
-            "--landing-card-link-justify": "end"
+            "--landing-card-link-justify": "end",
+            "--landing-footer-gap": "2.5rem",
+            "--landing-footer-padding": "1.5rem",
+            "--landing-footer-bottom": "1rem",
+            "--landing-footer-columns": "minmax(0, 1fr)",
+            "--landing-footer-column-gap": "0rem",
+            "--landing-footer-row-gap": "2.5rem",
+            "--landing-footer-brand-gap": "1rem",
+            "--landing-footer-about-width": "none",
+            "--landing-footer-link-gap": "0.625rem",
+            "--landing-footer-legal-gap": "2rem",
+            "--landing-footer-legal-padding": "1rem",
+            "--landing-footer-legal-size": "0.75rem",
+            "--landing-footer-legal-tracking": "0.06em",
+            "--landing-footer-meta-gap": "0.75rem"
           }
         }
       }

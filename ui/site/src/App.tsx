@@ -56,6 +56,31 @@ const features = [
   },
 ] as const;
 
+const license = `${repository}/blob/main/LICENSE`;
+
+// The index already names the three ideas; the footer names where to read
+// about them and where the project lives.
+const footerGroups = [
+  {
+    title: "RESOURCES",
+    label: "Resources",
+    links: [
+      { label: "DOCUMENTATION", href: `${repository}#readme` },
+      { label: "EXAMPLES", href: `${repository}/tree/main/examples` },
+      { label: "CHANGELOG", href: `${repository}/blob/main/packages/core/CHANGELOG.md` },
+    ],
+  },
+  {
+    title: "COMMUNITY",
+    label: "Community",
+    links: [
+      { label: "GITHUB", href: repository },
+      { label: "DISCUSSIONS", href: `${repository}/discussions` },
+      { label: "ISSUES", href: `${repository}/issues` },
+    ],
+  },
+] as const;
+
 function SunIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 12 12" fill="none" aria-hidden="true">
@@ -113,6 +138,20 @@ function MenuIcon() {
     <svg width="20" height="10" viewBox="0 0 20 10" fill="none" aria-hidden="true">
       <rect width="20" height="2" fill="currentColor" />
       <rect y="8" width="20" height="2" fill="currentColor" />
+    </svg>
+  );
+}
+
+function ArrowUpIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path
+        d="M6 10.5V1.5M2 5.5L6 1.5L10 5.5"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -200,7 +239,7 @@ export function App() {
 
   return (
     <Theme theme={themes[defaultThemeSlug]} mode={mode}>
-      <VStack as="main" style={styles.page}>
+      <VStack as="main" id="top" style={styles.page}>
         <LandingGuides />
         <HStack
           as="header"
@@ -377,6 +416,70 @@ export function App() {
         <Text as="p" role="status" aria-live="polite" style={styles.status}>
           {copyStatus}
         </Text>
+        <VStack as="footer" style={styles.footer}>
+          <Grid columns={3} style={styles.footerIndex}>
+            <VStack style={styles.footerBrand}>
+              <Link href={import.meta.env.BASE_URL} color="inherit" type="inherit">
+                <HStack gap={2} vAlign="center" style={styles.brand}>
+                  <img src={assets.logoMark} alt="" style={styles.brandMark} />
+                  <Text type="inherit">TRAJS</Text>
+                </HStack>
+              </Link>
+              <Text as="p" color="secondary" style={styles.footerAbout}>
+                Record, analyze and exchange agent trajectories.
+              </Text>
+            </VStack>
+            {footerGroups.map((group) => (
+              <VStack
+                as="nav"
+                key={group.title}
+                aria-label={group.label}
+                style={styles.footerGroup}
+              >
+                <Heading level={2}>{group.title}</Heading>
+                <VStack style={styles.footerLinks}>
+                  {group.links.map(({ label, href }) => (
+                    <Link
+                      key={label}
+                      href={href}
+                      color="inherit"
+                      type="inherit"
+                      style={styles.footerLink}
+                    >
+                      <HStack gap={1.5} vAlign="center">
+                        <Text type="inherit">{label}</Text>
+                        <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+                      </HStack>
+                    </Link>
+                  ))}
+                </VStack>
+              </VStack>
+            ))}
+          </Grid>
+          <HStack vAlign="center" hAlign="between" wrap="wrap" style={styles.footerLegal}>
+            <HStack vAlign="center" wrap="wrap" style={styles.footerMeta}>
+              <Text type="code" style={styles.footerLegalText}>
+                © {new Date().getFullYear()} TRAJS
+              </Text>
+              <Link href={license} color="inherit" type="inherit" style={styles.footerLegalLink}>
+                <HStack gap={1.5} vAlign="center">
+                  <Text type="inherit" style={styles.footerLegalLabel}>
+                    MIT LICENSE
+                  </Text>
+                  <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+                </HStack>
+              </Link>
+            </HStack>
+            <Link href="#top" color="inherit" type="inherit" style={styles.footerLegalLink}>
+              <HStack gap={1.5} vAlign="center">
+                <Text type="inherit" style={styles.footerLegalLabel}>
+                  BACK TO TOP
+                </Text>
+                <ArrowUpIcon />
+              </HStack>
+            </Link>
+          </HStack>
+        </VStack>
       </VStack>
     </Theme>
   );
