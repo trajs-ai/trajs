@@ -14,7 +14,7 @@ import { lazy, Suspense, useEffect, useState, type ComponentProps } from "react"
 import { defaultThemeSlug, themes } from "./astryx-themes";
 import { brandShaders, stillBrandShaders } from "./internal/brand-shader";
 import { landingAssets } from "./internal/landing-assets";
-import { LandingGuides } from "./internal/landing-guides";
+import { LandingGuides, LandingMarks } from "./internal/landing-guides";
 import { styles } from "./internal/landing-styles";
 import { palette, type ColorMode } from "./themes/trajs/palette";
 
@@ -59,15 +59,24 @@ function ShaderReveal({
   );
 }
 
+const changelog = `${repository}/blob/main/packages/core/CHANGELOG.md`;
+
 const navigation = [
   { label: "DOCS", href: `${repository}#readme` },
   { label: "EXAMPLES", href: `${repository}/tree/main/examples` },
   { label: "BLOG", href: `${repository}/discussions` },
-  { label: "CHANGELOG", href: `${repository}/blob/main/packages/core/CHANGELOG.md` },
+  { label: "CHANGELOG", href: changelog },
   { label: "GITHUB", href: repository },
 ];
 
 const license = `${repository}/blob/main/LICENSE`;
+
+// The release line is copy, so it is updated with the site instead of derived
+// from the package; it points at the changelog the navigation links.
+const notice = {
+  label: "// TRAJS 0.0.0-ALPHA.4 · CHANGELOG",
+  href: changelog,
+};
 
 // The hero already names the three ideas; the footer names where to read
 // about them and where the project lives.
@@ -78,7 +87,7 @@ const footerGroups = [
     links: [
       { label: "DOCUMENTATION", href: `${repository}#readme` },
       { label: "EXAMPLES", href: `${repository}/tree/main/examples` },
-      { label: "CHANGELOG", href: `${repository}/blob/main/packages/core/CHANGELOG.md` },
+      { label: "CHANGELOG", href: changelog },
     ],
   },
   {
@@ -253,6 +262,13 @@ export function App() {
       <VStack id="top" style={styles.page}>
         <VStack as="main" style={styles.sheet}>
           <LandingGuides />
+          <Link href={notice.href} color="inherit" type="inherit" style={styles.notice}>
+            <HStack gap={1.5} vAlign="center">
+              <Text type="inherit">{notice.label}</Text>
+              <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+            </HStack>
+          </Link>
+          <LandingMarks />
           <HStack
             as="header"
             vAlign="center"

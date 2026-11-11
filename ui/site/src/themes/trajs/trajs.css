@@ -151,6 +151,10 @@
     --landing-frame-outset: 1.5rem;
     --landing-ruler-display: flex;
     --landing-grid-display: block;
+    --landing-notice-height: 2.5rem;
+    --landing-notice-padding-inline: 2.5rem;
+    --landing-notice-size: 0.8125rem;
+    --landing-notice-tracking: 0.12em;
     --landing-nav-top: clamp(1.5rem, 2vw, 2.5rem);
     --landing-nav-height: clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem);
     --landing-nav-padding-block: 1rem;
@@ -447,6 +451,10 @@
     --landing-page-inline: 1.25rem;
     --landing-ruler-display: none;
     --landing-frame-outset: 0.5rem;
+    --landing-notice-height: 2.25rem;
+    --landing-notice-padding-inline: 1rem;
+    --landing-notice-size: 0.75rem;
+    --landing-notice-tracking: 0.08em;
     --landing-nav-height: 3.25rem;
     --landing-nav-padding-block: 0.5rem;
     --landing-nav-padding-inline: 1rem;

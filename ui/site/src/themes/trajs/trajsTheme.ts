@@ -85,6 +85,13 @@ export const trajsTheme = defineTheme({
     "--landing-ruler-display": "flex",
     "--landing-grid-display": "block",
 
+    // Masthead: the band that opens the sheet. Its one label reads as the
+    // page's title row, not a second header.
+    "--landing-notice-height": "2.5rem",
+    "--landing-notice-padding-inline": "2.5rem",
+    "--landing-notice-size": "0.8125rem",
+    "--landing-notice-tracking": "0.12em",
+
     // Header
     "--landing-nav-top": "clamp(1.5rem, 2vw, 2.5rem)",
     "--landing-nav-height": "clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem)",
@@ -343,6 +350,12 @@ export const trajsTheme = defineTheme({
             // and the phone frame is wide enough to carry the same module.
             "--landing-ruler-display": "none",
             "--landing-frame-outset": "0.5rem",
+            // The phone band drops a size and tightens tracking so the release
+            // line stays on one row.
+            "--landing-notice-height": "2.25rem",
+            "--landing-notice-padding-inline": "1rem",
+            "--landing-notice-size": "0.75rem",
+            "--landing-notice-tracking": "0.08em",
             "--landing-nav-height": "3.25rem",
             "--landing-nav-padding-block": "0.5rem",
             "--landing-nav-padding-inline": "1rem",

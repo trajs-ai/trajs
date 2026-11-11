@@ -106,9 +106,11 @@ function SheetGrid() {
  * line stepped up, so the plate, the scale and the corner marks all measure
  * from the same origin. The ruler keeps a longer mark every 96px and the
  * longest every 384px, so the sheet is calibrated without a single line
- * entering the live area. Hollow diamonds pin the four corners, where the
- * frame closes on itself. The grain is clipped to the frame's own plate, so
+ * entering the live area. The grain is clipped to the frame's own plate, so
  * the pasteboard around it stays plain.
+ *
+ * The corner marks live in `LandingMarks`, above this layer, so the masthead
+ * can reach the plate's top edge.
  */
 export function LandingGuides() {
   return (
@@ -118,11 +120,23 @@ export function LandingGuides() {
         <VStack style={styles.grain} />
         <RulerTicks edge="top" />
         <RulerTicks edge="left" />
-        <VStack style={styles.guideNodeTopLeft} />
-        <VStack style={styles.guideNodeTopRight} />
-        <VStack style={styles.guideNodeBottomLeft} />
-        <VStack style={styles.guideNodeBottomRight} />
       </VStack>
+    </VStack>
+  );
+}
+
+/**
+ * The four register marks that pin the frame's corners. They paint above the
+ * content, because the sheet's top row is an opaque band that reaches the
+ * frame's own edge.
+ */
+export function LandingMarks() {
+  return (
+    <VStack aria-hidden="true" style={styles.guideMarks}>
+      <VStack style={styles.guideNodeTopLeft} />
+      <VStack style={styles.guideNodeTopRight} />
+      <VStack style={styles.guideNodeBottomLeft} />
+      <VStack style={styles.guideNodeBottomRight} />
     </VStack>
   );
 }

@@ -162,6 +162,34 @@ export const styles = {
     right: "-1px",
     transform: "translate(50%, 50%) rotate(45deg)",
   },
+  // The sheet's masthead: an opaque band that closes the frame's top edge. It
+  // reaches the frame's corners and repeats their border, so the plate opens on
+  // the band instead of a gap of graph paper. It scrolls away with the sheet.
+  notice: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "var(--landing-notice-height)",
+    paddingBlock: "var(--spacing-2)",
+    paddingInline: "var(--landing-notice-padding-inline)",
+    margin: "calc(-1 * var(--landing-frame-outset)) calc(-1 * var(--landing-frame-outset)) 0",
+    border: "1px solid var(--color-guide-strong)",
+    background: "var(--color-background-body)",
+    color: "var(--color-ink-muted)",
+    fontFamily: "var(--font-family-code)",
+    fontSize: "var(--landing-notice-size)",
+    lineHeight: "var(--landing-index-label-leading)",
+    letterSpacing: "var(--landing-notice-tracking)",
+    whiteSpace: "nowrap",
+  },
+  // The corner marks paint above the masthead, so the band can close the
+  // frame's top edge without clipping them.
+  guideMarks: {
+    position: "absolute",
+    inset: "calc(-1 * var(--landing-frame-outset))",
+    zIndex: 1,
+    pointerEvents: "none",
+  },
   header: {
     // The header floats over the page at every breakpoint, and only its
     // contents reflow.
