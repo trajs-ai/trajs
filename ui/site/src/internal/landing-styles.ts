@@ -57,9 +57,12 @@ export const styles = {
   },
   // The sheet is the main content only: the frame draws its plate and closes
   // the border above the footer, which stands on the pasteboard outside it.
+  // The plate fills the window less the page's own margins, so the first screen
+  // is all sheet and the footer waits below the fold.
   sheet: {
     position: "relative",
     isolation: "isolate",
+    minHeight: "calc(100svh - var(--landing-page-top) - var(--landing-page-bottom))",
   },
   // The page isolates its own stacking context, so this negative layer stays
   // above the page fill and behind the content.
@@ -189,6 +192,12 @@ export const styles = {
   },
   hero: {
     paddingBlock: "var(--landing-stage-top) var(--landing-stage-bottom)",
+    // The sheet is a full window tall, so the height left over splits into
+    // equal margins above and below the composition and the hero sits centered
+    // in the plate. When the composition and its stage gaps need more than the
+    // window, the auto margins collapse and the sheet grows past the fold
+    // instead of pushing the hero off the top edge.
+    marginBlock: "auto",
     width: "var(--landing-hero-width)",
     marginInline: "var(--landing-hero-margin)",
     // A visual micro-adjustment only: the grid keeps its centered layout box,
