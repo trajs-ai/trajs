@@ -1,6 +1,9 @@
 export const palette = {
   light: {
     canvas: "#eeeeee",
+    pasteboard: "#e2e2e2",
+    guide: "#17171733",
+    guideStrong: "#17171745",
     ink: "#171717",
     secondary: "#5f5f66",
     muted: "#6b6b70",
@@ -20,6 +23,9 @@ export const palette = {
   },
   dark: {
     canvas: "#171717",
+    pasteboard: "#0d0d0d",
+    guide: "#ffffff24",
+    guideStrong: "#ffffff3d",
     ink: "#f2f2ef",
     secondary: "#9c9ca3",
     muted: "#c4c4ca",

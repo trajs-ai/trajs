@@ -24,21 +24,92 @@ export const styles = {
     // Revealing the header needs scroll travel. Short pages reserve enough
     // travel even when their content fits in the window.
     minHeight: "calc(100svh + max(var(--landing-nav-height), 5rem))",
-    background: "var(--color-background-body)",
+    // The page is a pasteboard: the frame paints the board the content sits
+    // on, and the margins around it fall back to the darker work surface.
+    background: "var(--color-pasteboard)",
     color: "var(--color-text-primary)",
     padding: "var(--landing-page-top) var(--landing-page-inline) var(--landing-page-bottom)",
   },
-  grid: {
+  // The page isolates its own stacking context, so this negative layer stays
+  // above the page fill and behind the content.
+  guides: {
     position: "absolute",
     inset: 0,
-    // The board is a fixed 1921px image. Below the desktop edge it is cropped
-    // from the left; on desktop it is pinned to the page margin so widening
-    // the window only adds margins, never another row of grid cells.
-    left: "var(--landing-grid-left)",
-    width: "1921px",
     zIndex: -1,
     pointerEvents: "none",
-    maxWidth: "none",
+  },
+  // The frame stands off the live area by the frame outset, so no line of
+  // copy or control ever touches the trim.
+  guideFrame: {
+    position: "absolute",
+    insetBlock:
+      "calc(var(--landing-page-top) - var(--landing-frame-outset)) calc(var(--landing-page-bottom) - var(--landing-frame-outset))",
+    insetInline:
+      "calc(var(--landing-page-inline) - var(--landing-frame-outset)) calc(var(--landing-page-inline) - var(--landing-frame-outset))",
+    background: "var(--color-background-body)",
+    border: "1px solid var(--color-guide-strong)",
+  },
+  // Margin ruler: a fine comb against the trim edge with a heavier tick on
+  // the 96px module the desktop board is built on.
+  guideRuleMinor: {
+    position: "absolute",
+    display: "var(--landing-guide-margin-display)",
+    right: "100%",
+    top: 0,
+    bottom: 0,
+    width: "0.375rem",
+    backgroundImage:
+      "repeating-linear-gradient(to bottom, var(--color-guide) 0 1px, transparent 1px 1rem)",
+  },
+  guideRuleMajor: {
+    position: "absolute",
+    display: "var(--landing-guide-margin-display)",
+    right: "100%",
+    top: 0,
+    bottom: 0,
+    width: "0.75rem",
+    backgroundImage:
+      "repeating-linear-gradient(to bottom, var(--color-guide-strong) 0 1px, transparent 1px 6rem)",
+  },
+  cropTopLeft: {
+    position: "absolute",
+    display: "var(--landing-guide-margin-display)",
+    left: "-0.625rem",
+    top: "-0.625rem",
+    width: "0.625rem",
+    height: "0.625rem",
+    borderTop: "1px solid var(--color-guide-strong)",
+    borderLeft: "1px solid var(--color-guide-strong)",
+  },
+  cropTopRight: {
+    position: "absolute",
+    display: "var(--landing-guide-margin-display)",
+    right: "-0.625rem",
+    top: "-0.625rem",
+    width: "0.625rem",
+    height: "0.625rem",
+    borderTop: "1px solid var(--color-guide-strong)",
+    borderRight: "1px solid var(--color-guide-strong)",
+  },
+  cropBottomLeft: {
+    position: "absolute",
+    display: "var(--landing-guide-margin-display)",
+    left: "-0.625rem",
+    bottom: "-0.625rem",
+    width: "0.625rem",
+    height: "0.625rem",
+    borderBottom: "1px solid var(--color-guide-strong)",
+    borderLeft: "1px solid var(--color-guide-strong)",
+  },
+  cropBottomRight: {
+    position: "absolute",
+    display: "var(--landing-guide-margin-display)",
+    right: "-0.625rem",
+    bottom: "-0.625rem",
+    width: "0.625rem",
+    height: "0.625rem",
+    borderBottom: "1px solid var(--color-guide-strong)",
+    borderRight: "1px solid var(--color-guide-strong)",
   },
   header: {
     // The header floats on the page frame at every breakpoint, as on the
@@ -162,13 +233,6 @@ export const styles = {
     top: "-15.3003%",
     transform: "rotate(-90deg)",
   },
-  // The artwork only draws the mark's edges, so the page's grid would show
-  // through it. This fill gives the mark an opaque plate in the page colour.
-  symbolBackdrop: {
-    ...markPlacement,
-    aspectRatio: "507.323 / 316.34",
-    background: "var(--color-background-body)",
-  },
   outline: markPlacement,
   wordmark: {
     position: "absolute",
@@ -219,6 +283,31 @@ export const styles = {
     fontSize: "var(--landing-prompt-size)",
     fontWeight: 500,
     color: "var(--color-ink-quiet)",
+  },
+  indexSection: {
+    position: "relative",
+    borderBlockStart: "1px solid var(--color-guide-strong)",
+    paddingBlockStart: "var(--landing-index-rule-gap)",
+  },
+  // The guides run down the middle of each gutter so they divide the columns
+  // without tracing the copy.
+  indexGuides: {
+    position: "absolute",
+    inset: 0,
+    display: "var(--landing-index-guide-display)",
+    pointerEvents: "none",
+  },
+  indexGuide: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    borderInlineStart: "1px dashed var(--color-guide)",
+  },
+  indexGuideFirst: {
+    left: "calc((100% - 2 * var(--landing-index-gap)) / 3 + var(--landing-index-gap) / 2)",
+  },
+  indexGuideSecond: {
+    left: "calc(2 * (100% - 2 * var(--landing-index-gap)) / 3 + var(--landing-index-gap) * 1.5)",
   },
   index: {
     position: "relative",

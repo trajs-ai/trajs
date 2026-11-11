@@ -14,6 +14,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { defaultThemeSlug, themes } from "./astryx-themes";
 import { brandShaders, stillBrandShaders } from "./internal/brand-shader";
 import { landingAssets } from "./internal/landing-assets";
+import { IndexGuides, LandingGuides } from "./internal/landing-guides";
 import { styles } from "./internal/landing-styles";
 import { palette, type ColorMode } from "./themes/trajs/palette";
 
@@ -200,7 +201,7 @@ export function App() {
   return (
     <Theme theme={themes[defaultThemeSlug]} mode={mode}>
       <VStack as="main" style={styles.page}>
-        <img src={assets.patternGrid} alt="" aria-hidden="true" style={styles.grid} />
+        <LandingGuides />
         <HStack
           as="header"
           vAlign="center"
@@ -312,7 +313,6 @@ export function App() {
           <VStack style={styles.art}>
             <VStack role="img" aria-label="TRAJS" style={styles.lockup}>
               <VStack style={styles.symbol} aria-hidden="true">
-                <VStack style={styles.symbolBackdrop} />
                 <VStack style={{ ...styles.symbolMask, maskImage: `url("${assets.symbolFill}")` }}>
                   <Suspense fallback={null}>
                     <ShaderFill shader={shader} style={styles.shader} />
@@ -353,25 +353,28 @@ export function App() {
             </ClickableCard>
           </HStack>
         </Grid>
-        <Grid aria-label="Explore TRAJS" columns={3} style={styles.index}>
-          {features.map(({ title, icon, description, link }) => (
-            <VStack as="article" key={title} style={styles.indexItem}>
-              <HStack gap={2} vAlign="center" style={styles.indexHead}>
-                <img src={assets[icon]} alt="" style={styles.inkAsset} />
-                <Heading level={2}>{title}</Heading>
-              </HStack>
-              <Text as="p" color="secondary" style={styles.indexBody}>
-                {description}
-              </Text>
-              <Link href={link.href} color="inherit" type="inherit" style={styles.indexLink}>
-                <HStack gap={2} vAlign="center">
-                  <Text type="inherit">{link.label}</Text>
-                  <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+        <VStack style={styles.indexSection}>
+          <IndexGuides />
+          <Grid aria-label="Explore TRAJS" columns={3} style={styles.index}>
+            {features.map(({ title, icon, description, link }) => (
+              <VStack as="article" key={title} style={styles.indexItem}>
+                <HStack gap={2} vAlign="center" style={styles.indexHead}>
+                  <img src={assets[icon]} alt="" style={styles.inkAsset} />
+                  <Heading level={2}>{title}</Heading>
                 </HStack>
-              </Link>
-            </VStack>
-          ))}
-        </Grid>
+                <Text as="p" color="secondary" style={styles.indexBody}>
+                  {description}
+                </Text>
+                <Link href={link.href} color="inherit" type="inherit" style={styles.indexLink}>
+                  <HStack gap={2} vAlign="center">
+                    <Text type="inherit">{link.label}</Text>
+                    <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+                  </HStack>
+                </Link>
+              </VStack>
+            ))}
+          </Grid>
+        </VStack>
         <Text as="p" role="status" aria-live="polite" style={styles.status}>
           {copyStatus}
         </Text>

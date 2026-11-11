@@ -1,11 +1,6 @@
 import { defineTheme } from "@astryxdesign/core/theme";
 
-import {
-  desktopBoardWidth,
-  desktopBreakpoint,
-  desktopContentWidth,
-  tabletBreakpoint,
-} from "./layout";
+import { desktopBreakpoint, desktopContentWidth, tabletBreakpoint } from "./layout";
 import { colorPair } from "./palette";
 
 export const trajsTheme = defineTheme({
@@ -48,6 +43,9 @@ export const trajsTheme = defineTheme({
     "--landing-header-transition": "opacity 180ms ease, filter 220ms ease",
     "--landing-theme-toggle-size": "1.5rem",
     "--landing-prompt-size": "clamp(0.8125rem, 0.9896vw, 1.1875rem)",
+    "--color-pasteboard": colorPair("pasteboard"),
+    "--color-guide": colorPair("guide"),
+    "--color-guide-strong": colorPair("guideStrong"),
     "--color-ink-quiet": colorPair("quiet"),
     "--color-ink-muted": colorPair("muted"),
     "--color-ink-command": colorPair("command"),
@@ -62,10 +60,12 @@ export const trajsTheme = defineTheme({
     "--landing-page-inline": "5vw",
     "--landing-page-top": "clamp(3rem, 1.5rem + 1.6667vw, 3.5rem)",
     "--landing-page-bottom": "5rem",
-    // The exported board grid is 1921 pixels wide because its outer strokes
-    // sit on half pixels. Tablet and phone crop it from the left; desktop
-    // pins it so the board's own 5vw margin lands on the page's margin.
-    "--landing-grid-left": "0",
+    // The margin furniture only appears where the margin is wide enough to
+    // hold it, and the frame is outset from the live area by its own token.
+    "--landing-guide-margin-display": "flex",
+    "--landing-frame-outset": "1.5rem",
+    "--landing-index-guide-display": "block",
+    "--landing-index-rule-gap": "2.5rem",
 
     // Header
     "--landing-nav-height": "clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem)",
@@ -157,7 +157,6 @@ export const trajsTheme = defineTheme({
             // height-derived board width, centered, so a short window narrows
             // the composition instead of letting it overflow.
             "--landing-page-inline": `max(5vw, calc(50vw - ${desktopContentWidth / 2}px), calc(50vw - 80svh))`,
-            "--landing-grid-left": `calc(var(--landing-page-inline) - ${desktopBoardWidth * 0.05}px)`,
             "--landing-page-top": "min(clamp(3rem, 1.5rem + 1.6667vw, 3.5rem), 5.1851852svh)",
             "--landing-page-bottom": "min(5rem, 7.4074074svh)",
             "--landing-nav-height": "min(clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem), 8.1481481svh)",
@@ -202,6 +201,8 @@ export const trajsTheme = defineTheme({
         value: {
           localTokens: {
             "--landing-page-inline": "2.5rem",
+            "--landing-frame-outset": "1rem",
+            "--landing-index-rule-gap": "1.75rem",
             "--landing-page-top": "2.5rem",
             "--landing-page-bottom": "2.5rem",
             "--landing-nav-height": "5.5rem",
@@ -261,6 +262,12 @@ export const trajsTheme = defineTheme({
         value: {
           localTokens: {
             "--landing-page-inline": "1.25rem",
+            // The phone layout is a single column in a 20px margin, so the
+            // sheet keeps only its page frame and the index rule.
+            "--landing-guide-margin-display": "none",
+            "--landing-frame-outset": "0.5rem",
+            "--landing-index-guide-display": "none",
+            "--landing-index-rule-gap": "1.5rem",
             "--landing-page-top": "1rem",
             "--landing-page-bottom": "2rem",
             "--landing-nav-height": "3.25rem",

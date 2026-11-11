@@ -128,6 +128,9 @@
     --landing-header-transition: opacity 180ms ease, filter 220ms ease;
     --landing-theme-toggle-size: 1.5rem;
     --landing-prompt-size: clamp(0.8125rem, 0.9896vw, 1.1875rem);
+    --color-pasteboard: light-dark(#e2e2e2, #0d0d0d);
+    --color-guide: light-dark(#17171733, #ffffff24);
+    --color-guide-strong: light-dark(#17171745, #ffffff3d);
     --color-ink-quiet: light-dark(#7b7b80, #6e6e75);
     --color-ink-muted: light-dark(#6b6b70, #c4c4ca);
     --color-ink-command: light-dark(#353539, #e4e4e2);
@@ -139,7 +142,10 @@
     --landing-page-inline: 5vw;
     --landing-page-top: clamp(3rem, 1.5rem + 1.6667vw, 3.5rem);
     --landing-page-bottom: 5rem;
-    --landing-grid-left: 0;
+    --landing-guide-margin-display: flex;
+    --landing-frame-outset: 1.5rem;
+    --landing-index-guide-display: block;
+    --landing-index-rule-gap: 2.5rem;
     --landing-nav-height: clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem);
     --landing-nav-padding-block: 1rem;
     --landing-nav-padding-inline: 3rem;
@@ -321,7 +327,6 @@
     :scope {
     --size-element-lg: var(--landing-control-height);
     --landing-page-inline: max(5vw, calc(50vw - 864px), calc(50vw - 80svh));
-    --landing-grid-left: calc(var(--landing-page-inline) - 96px);
     --landing-page-top: min(clamp(3rem, 1.5rem + 1.6667vw, 3.5rem), 5.1851852svh);
     --landing-page-bottom: min(5rem, 7.4074074svh);
     --landing-nav-height: min(clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem), 8.1481481svh);
@@ -361,6 +366,8 @@
   @scope ([data-astryx-theme="trajs"]) to ([data-astryx-theme]) {
     :scope {
     --landing-page-inline: 2.5rem;
+    --landing-frame-outset: 1rem;
+    --landing-index-rule-gap: 1.75rem;
     --landing-page-top: 2.5rem;
     --landing-page-bottom: 2.5rem;
     --landing-nav-height: 5.5rem;
@@ -411,6 +418,10 @@
   @scope ([data-astryx-theme="trajs"]) to ([data-astryx-theme]) {
     :scope {
     --landing-page-inline: 1.25rem;
+    --landing-guide-margin-display: none;
+    --landing-frame-outset: 0.5rem;
+    --landing-index-guide-display: none;
+    --landing-index-rule-gap: 1.5rem;
     --landing-page-top: 1rem;
     --landing-page-bottom: 2rem;
     --landing-nav-height: 3.25rem;

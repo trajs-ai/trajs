@@ -13,12 +13,10 @@ import lightRecord from "../assets/figma/light/icon.svg";
 import lightAnalysis from "../assets/figma/light/icon1.svg";
 import lightExchange from "../assets/figma/light/icon2.svg";
 import lightLogoMark from "../assets/figma/light/logo-mark.svg";
-import lightPatternGrid from "../assets/figma/light/pattern-grid.svg";
 import lightSymbolFill from "../assets/figma/light/symbol-fill.svg";
 import lightSymbolOutline from "../assets/figma/light/symbol-outline.svg";
 import lightWordmark from "../assets/figma/light/wordmark.svg";
 import darkLogoMark from "../assets/figma/logo-mark.svg";
-import darkPatternGrid from "../assets/figma/pattern-grid.svg";
 import darkSymbolFill from "../assets/figma/symbol-fill.svg";
 import darkSymbolOutline from "../assets/figma/symbol-outline.svg";
 import darkWordmark from "../assets/figma/wordmark.svg";
@@ -33,7 +31,6 @@ export const landingAssets = {
     analysis: lightAnalysis,
     exchange: lightExchange,
     logoMark: lightLogoMark,
-    patternGrid: lightPatternGrid,
     symbolFill: lightSymbolFill,
     symbolOutline: lightSymbolOutline,
     wordmark: lightWordmark,
@@ -47,7 +44,6 @@ export const landingAssets = {
     analysis: darkAnalysis,
     exchange: darkExchange,
     logoMark: darkLogoMark,
-    patternGrid: darkPatternGrid,
     symbolFill: darkSymbolFill,
     symbolOutline: darkSymbolOutline,
     wordmark: darkWordmark,
