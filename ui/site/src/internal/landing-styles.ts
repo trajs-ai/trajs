@@ -271,7 +271,11 @@ export const styles = {
     gridArea: "var(--landing-cta-area)",
     alignSelf: "var(--landing-cta-align)",
     justifySelf: "var(--landing-cta-justify)",
-    marginBlock: "var(--landing-cta-margin-block)",
+    // On desktop the row is placed from the top of the art column so that its
+    // bottom edge lands on the last headline line's baseline; the tablet
+    // layout resets the offset.
+    position: "relative",
+    top: "var(--landing-cta-offset)",
     marginInline: "var(--landing-cta-margin-inline)",
     display: "var(--landing-cta-display)",
     gap: "var(--landing-cta-gap)",

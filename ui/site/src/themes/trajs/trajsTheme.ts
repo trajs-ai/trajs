@@ -110,9 +110,16 @@ export const trajsTheme = defineTheme({
     "--landing-wordmark-offset": "0.409469",
     "--landing-cta-display": "flex",
     "--landing-cta-area": "art",
-    "--landing-cta-align": "end",
+    // The CTA row rests its bottom edge on the last headline line's baseline
+    // instead of on the art's bottom edge, so the controls sit just under
+    // "Exchange." at every desktop size. The baseline is found from the
+    // heading's own metrics: its top offset, its three line boxes, and the
+    // share of a line box that falls below the baseline.
+    "--landing-cta-align": "start",
     "--landing-cta-justify": "start",
-    "--landing-cta-margin-block": "0 1rem",
+    "--landing-cta-baseline": "calc(var(--landing-display-size) * 0.2)",
+    "--landing-cta-offset":
+      "calc(var(--landing-heading-top) + var(--landing-display-size) * var(--landing-display-leading) * 3 - var(--landing-cta-baseline) - var(--landing-control-height))",
     "--landing-cta-margin-inline":
       "calc(var(--landing-lockup-width) * var(--landing-wordmark-offset)) 0",
     "--landing-cta-gap": "var(--spacing-4)",
@@ -156,18 +163,18 @@ export const trajsTheme = defineTheme({
   },
   adaptations: {
     // The desktop hero is a position-sensitive composition: the art keeps its
-    // lockup ratio and the CTA row is pinned to the art column. It only holds
-    // together at the width of the 1440 board and above, so xl is the design's
-    // own desktop edge rather than the default 1280. Everything narrower uses
-    // the tablet composition, which is a centered, width-insensitive block.
+    // lockup ratio and the CTA row sits in the art column with its bottom on
+    // the last headline line's baseline. It only holds together at the width of
+    // the 1440 board and above, so xl is the design's own desktop edge rather
+    // than the default 1280. Everything narrower uses the tablet composition,
+    // which is a centered, width-insensitive block.
     widthBreakpoints: { md: tabletBreakpoint, xl: desktopBreakpoint },
     rules: [
       {
         // Desktop type and controls scale from the board without enlarging
         // the page margins in short windows. The hero width follows the same
         // 1080-tall board scale (1728px / 1080px = 160svh) so the artwork
-        // shrinks with the display and the CTA row stays level with the last
-        // headline line.
+        // shrinks with the display and keeps the board's proportions.
         when: { width: { from: "xl" } },
         value: {
           // The button's own height must follow the same scale as its width
@@ -198,7 +205,6 @@ export const trajsTheme = defineTheme({
             "--landing-cta-gap": "min(1rem, 0.8333333vw, 1.4814815svh)",
             "--landing-command-gap": "min(0.75rem, 0.625vw, 1.1111111svh)",
             "--landing-action-icon-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
-            "--landing-cta-margin-block": "0 min(1rem, 0.8333333vw, 1.4814815svh)",
             "--landing-index-body-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
             "--landing-index-body-leading": "min(2rem, 1.6666667vw, 2.962963svh)",
             "--landing-index-label-size": "min(1.125rem, 0.9375vw, 1.6666667svh)",
@@ -250,7 +256,9 @@ export const trajsTheme = defineTheme({
             "--landing-cta-area": "ctas",
             "--landing-cta-align": "start",
             "--landing-cta-justify": "start",
-            "--landing-cta-margin-block": "0",
+            // The tablet CTAs sit in their own row below the art, where the
+            // headline's baseline is no longer their anchor.
+            "--landing-cta-offset": "0",
             "--landing-cta-margin-inline": "0",
             "--landing-changelog-display": "none",
             "--landing-action-size": "1.4375rem",
