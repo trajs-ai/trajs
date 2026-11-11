@@ -54,6 +54,29 @@ export const styles = {
       "var(--landing-grid-unit) var(--landing-grid-unit), var(--landing-grid-unit) var(--landing-grid-unit), var(--landing-grid-major) var(--landing-grid-major), var(--landing-grid-major) var(--landing-grid-major)",
     border: "1px solid var(--color-guide-strong)",
   },
+  // The ruler repeats the grid's two intervals from the same origin. Fine
+  // ticks stay short; every fourth one reaches farther so the margin reads as
+  // a scale instead of a comb.
+  guideRuleMinor: {
+    position: "absolute",
+    display: "var(--landing-ruler-display)",
+    right: "100%",
+    top: 0,
+    bottom: 0,
+    width: "0.25rem",
+    backgroundImage:
+      "repeating-linear-gradient(to bottom, var(--color-guide) 0 1px, transparent 1px var(--landing-grid-unit))",
+  },
+  guideRuleMajor: {
+    position: "absolute",
+    display: "var(--landing-ruler-display)",
+    right: "100%",
+    top: 0,
+    bottom: 0,
+    width: "0.5rem",
+    backgroundImage:
+      "repeating-linear-gradient(to bottom, var(--color-guide-strong) 0 1px, transparent 1px var(--landing-grid-major))",
+  },
   header: {
     // The header floats over the page at every breakpoint, and only its
     // contents reflow.

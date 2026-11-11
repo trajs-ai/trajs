@@ -63,10 +63,12 @@ export const trajsTheme = defineTheme({
     "--landing-page-top": "var(--landing-page-inline)",
     "--landing-page-bottom": "var(--landing-page-inline)",
     // The frame is outset from the live area by its own token. Its grid uses
-    // one measuring module and a heavier rule every four modules.
+    // one measuring module and a heavier rule every four modules; the margin
+    // ruler repeats those same intervals.
     "--landing-frame-outset": "1.5rem",
     "--landing-grid-unit": "1.5rem",
     "--landing-grid-major": "6rem",
+    "--landing-ruler-display": "flex",
     "--landing-index-rule-gap": "2.5rem",
 
     // Header

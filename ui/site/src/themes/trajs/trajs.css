@@ -147,6 +147,7 @@
     --landing-frame-outset: 1.5rem;
     --landing-grid-unit: 1.5rem;
     --landing-grid-major: 6rem;
+    --landing-ruler-display: flex;
     --landing-index-rule-gap: 2.5rem;
     --landing-nav-top: clamp(1.5rem, 2vw, 2.5rem);
     --landing-nav-height: clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem);
