@@ -310,7 +310,7 @@ export const trajsTheme = {
             "--landing-brand-size": "min(1.25rem, 1.8518519svh)",
             "--landing-stage-top": "min(calc(var(--landing-nav-height) + min(3rem, 2.5vw)), 12.5925926svh)",
             "--landing-stage-bottom": "min(6rem, 5vw, 8.8888889svh)",
-            "--landing-hero-width": "min(100%, 1728px, 176svh)",
+            "--landing-hero-width": "min(100%, 1728px, 160svh)",
             "--landing-hero-margin": "auto",
             "--landing-hero-column-gap": "min(2.5rem, 2.0833333vw, 3.7037037svh)",
             "--landing-heading-top": "min(4rem, 3.3333333vw, 5.9259259svh)",

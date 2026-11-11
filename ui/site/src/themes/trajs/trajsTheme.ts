@@ -144,8 +144,10 @@ export const trajsTheme = defineTheme({
     rules: [
       {
         // Desktop type and controls scale from the board without enlarging
-        // the page margins in short windows. The hero keeps a separate width
-        // cap so wide screens preserve the proportions of the artwork.
+        // the page margins in short windows. The hero width follows the same
+        // 1080-tall board scale (1728px / 1080px = 160svh) so the artwork
+        // shrinks with the display and the CTA row stays level with the last
+        // headline line.
         when: { width: { from: "xl" } },
         value: {
           // The button's own height must follow the same scale as its width
@@ -161,7 +163,7 @@ export const trajsTheme = defineTheme({
             "--landing-stage-top":
               "min(calc(var(--landing-nav-height) + min(3rem, 2.5vw)), 12.5925926svh)",
             "--landing-stage-bottom": "min(6rem, 5vw, 8.8888889svh)",
-            "--landing-hero-width": `min(100%, ${desktopContentWidth}px, 176svh)`,
+            "--landing-hero-width": `min(100%, ${desktopContentWidth}px, 160svh)`,
             "--landing-hero-margin": "auto",
             "--landing-hero-column-gap": "min(2.5rem, 2.0833333vw, 3.7037037svh)",
             "--landing-heading-top": "min(4rem, 3.3333333vw, 5.9259259svh)",
