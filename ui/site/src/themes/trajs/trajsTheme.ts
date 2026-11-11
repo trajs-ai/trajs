@@ -3,6 +3,12 @@ import { defineTheme } from "@astryxdesign/core/theme";
 import { desktopBreakpoint, desktopContentWidth, tabletBreakpoint } from "./layout";
 import { colorPair } from "./palette";
 
+// The tablet composition is drawn on the 834 × 1112 board, where the hero block
+// is 640 wide; every size inside the block is a fraction of that width, so one
+// block width scales the whole composition without breaking its relationships.
+const tabletBlock = "var(--landing-tablet-block)";
+const tabletBlockSize = (ratio: number) => `calc(${tabletBlock} * ${ratio})`;
+
 export const trajsTheme = defineTheme({
   name: "trajs",
   typography: {
@@ -102,6 +108,10 @@ export const trajsTheme = defineTheme({
     "--landing-hero-width": "auto",
     "--landing-hero-margin": "0",
     "--landing-hero-align": "start",
+    // The tablet composition's one scale: the hero block's width. Only the
+    // tablet rule consumes it; the desktop composition is drawn on the board's
+    // own proportions instead.
+    "--landing-tablet-block": "40rem",
     // The composition's ink sits right of its column: the headline is ragged
     // on the left while the CTA row runs to the art column's right edge, which
     // leaves about 106px more air on the left than on the right at the board's
@@ -236,6 +246,10 @@ export const trajsTheme = defineTheme({
         // to the desktop edge.
         when: { width: { from: "md", below: "xl" } },
         value: {
+          // The button's own height follows the composition's scale here too,
+          // so the control grows with the art and headline instead of staying
+          // at the base size.
+          tokens: { "--size-element-lg": "var(--landing-control-height)" },
           localTokens: {
             "--landing-page-inline": "2.5rem",
             "--landing-frame-outset": "1rem",
@@ -252,16 +266,26 @@ export const trajsTheme = defineTheme({
             // With the index cards gone, the hero's lower gap is the sheet's
             // closing space rather than a break before another row.
             "--landing-stage-bottom": "6rem",
+            // The tablet board's block is 640 wide on a 754-wide sheet, so it
+            // holds at 640 until the sheet is wider than the board and then
+            // grows with the viewport, reaching 85% of the sheet at the
+            // desktop edge. It never grows past the first screen: the headline
+            // and the art keep the board's ratios, so the block is 0.675 of its
+            // width tall, and the guard below stops it where that height would
+            // run into the sheet's own padding. The status line under the hero
+            // takes a further 1.5rem.
+            "--landing-tablet-block":
+              "clamp(40rem, calc(40rem + (100vw - 834px) * 0.85148), calc((100svh - var(--landing-page-top) - var(--landing-page-bottom) - var(--landing-stage-top) - var(--landing-stage-bottom) - 1.5rem) * 1.4817))",
             "--landing-hero-areas": '"art headline" "ctas ctas"',
             "--landing-hero-columns": "minmax(0, 190fr) minmax(0, 395fr)",
-            "--landing-hero-column-gap": "3.5rem",
-            "--landing-hero-row-gap": "4rem",
-            "--landing-hero-width": "40rem",
+            "--landing-hero-column-gap": tabletBlockSize(56 / 640),
+            "--landing-hero-row-gap": tabletBlockSize(64 / 640),
+            "--landing-hero-width": tabletBlock,
             "--landing-hero-margin": "auto",
             "--landing-hero-align": "center",
             "--landing-heading-top": "0rem",
             "--landing-heading-align": "start",
-            "--landing-display-size": "5.625rem",
+            "--landing-display-size": tabletBlockSize(90 / 640),
             "--landing-display-leading": "1.1556",
             "--landing-art-align": "center",
             "--landing-lockup-width": "100%",
@@ -276,13 +300,16 @@ export const trajsTheme = defineTheme({
             "--landing-cta-offset": "0",
             "--landing-cta-margin-inline": "0",
             "--landing-changelog-display": "none",
-            "--landing-action-size": "1.4375rem",
-            "--landing-command-size": "1.25rem",
-            "--landing-command-leading": "1.5rem",
-            "--landing-prompt-size": "1.1875rem",
-            "--landing-control-height": "3.5rem",
-            "--landing-action-padding": "1.75rem",
-            "--landing-command-padding": "1.25rem",
+            "--landing-action-size": tabletBlockSize(23 / 640),
+            "--landing-command-size": tabletBlockSize(20 / 640),
+            "--landing-command-leading": tabletBlockSize(24 / 640),
+            "--landing-prompt-size": tabletBlockSize(19 / 640),
+            "--landing-control-height": tabletBlockSize(56 / 640),
+            "--landing-action-padding": tabletBlockSize(28 / 640),
+            "--landing-command-padding": tabletBlockSize(20 / 640),
+            "--landing-cta-gap": tabletBlockSize(16 / 640),
+            "--landing-command-gap": tabletBlockSize(12 / 640),
+            "--landing-action-icon-size": tabletBlockSize(20 / 640),
             "--landing-index-body-size": "1rem",
             "--landing-index-body-leading": "1.5625rem",
             "--landing-index-label-size": "0.9375rem",
