@@ -46,6 +46,8 @@ export const trajsTheme = defineTheme({
     "--color-pasteboard": colorPair("pasteboard"),
     "--color-guide": colorPair("guide"),
     "--color-guide-strong": colorPair("guideStrong"),
+    "--color-grid": colorPair("grid"),
+    "--color-grid-major": colorPair("gridMajor"),
     "--color-ink-quiet": colorPair("quiet"),
     "--color-ink-muted": colorPair("muted"),
     "--color-ink-command": colorPair("command"),
@@ -57,17 +59,18 @@ export const trajsTheme = defineTheme({
 
     // Page frame: desktop is the base; the adaptation rules below override
     // these for the tablet (md) and phone (below md) layouts.
-    "--landing-page-inline": "5vw",
-    "--landing-page-top": "clamp(3rem, 1.5rem + 1.6667vw, 3.5rem)",
-    "--landing-page-bottom": "5rem",
-    // The margin furniture only appears where the margin is wide enough to
-    // hold it, and the frame is outset from the live area by its own token.
-    "--landing-guide-margin-display": "flex",
+    "--landing-page-inline": "clamp(2.5rem, 4vw, 6rem)",
+    "--landing-page-top": "var(--landing-page-inline)",
+    "--landing-page-bottom": "var(--landing-page-inline)",
+    // The frame is outset from the live area by its own token. Its grid uses
+    // one measuring module and a heavier rule every four modules.
     "--landing-frame-outset": "1.5rem",
-    "--landing-index-guide-display": "block",
+    "--landing-grid-unit": "1.5rem",
+    "--landing-grid-major": "6rem",
     "--landing-index-rule-gap": "2.5rem",
 
     // Header
+    "--landing-nav-top": "clamp(1.5rem, 2vw, 2.5rem)",
     "--landing-nav-height": "clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem)",
     "--landing-nav-padding-block": "1rem",
     "--landing-nav-padding-inline": "3rem",
@@ -98,12 +101,14 @@ export const trajsTheme = defineTheme({
     "--landing-lockup-aspect": "877.239 / 500.003",
     "--landing-symbol-width": "35.2262%",
     "--landing-wordmark-display": "block",
+    "--landing-wordmark-offset": "0.409469",
     "--landing-cta-display": "flex",
     "--landing-cta-area": "art",
     "--landing-cta-align": "end",
-    "--landing-cta-justify": "end",
+    "--landing-cta-justify": "start",
     "--landing-cta-margin-block": "0 1rem",
-    "--landing-cta-margin-inline": "0 1rem",
+    "--landing-cta-margin-inline":
+      "calc(var(--landing-lockup-width) * var(--landing-wordmark-offset)) 0",
     "--landing-cta-gap": "var(--spacing-4)",
     "--landing-command-gap": "var(--spacing-3)",
     "--landing-action-icon-size": "1.25rem",
@@ -139,13 +144,9 @@ export const trajsTheme = defineTheme({
     widthBreakpoints: { md: tabletBreakpoint, xl: desktopBreakpoint },
     rules: [
       {
-        // Desktop is the 1920 × 1080 board scaled uniformly until it fits the
-        // window. A size is the smallest of its board value, its share of a
-        // 1920-wide viewport and its share of a 1080-tall viewport. A wide
-        // window scales from its width and a short one from its height, so the
-        // whole composition stays in view. Above 1920 × 1080 every value pins
-        // to the board and the page margins take the extra space. The height
-        // terms keep a maximized window from pushing the index below the fold.
+        // Desktop type and controls scale from the board without enlarging
+        // the page margins in short windows. The hero keeps a separate width
+        // cap so wide screens preserve the proportions of the artwork.
         when: { width: { from: "xl" } },
         value: {
           // The button's own height must follow the same scale as its width
@@ -153,12 +154,6 @@ export const trajsTheme = defineTheme({
           // narrow desktop.
           tokens: { "--size-element-lg": "var(--landing-control-height)" },
           localTokens: {
-            // Content width follows the 16:9 board. It is 90% of the
-            // height-derived board width, centered, so a short window narrows
-            // the composition instead of letting it overflow.
-            "--landing-page-inline": `max(5vw, calc(50vw - ${desktopContentWidth / 2}px), calc(50vw - 80svh))`,
-            "--landing-page-top": "min(clamp(3rem, 1.5rem + 1.6667vw, 3.5rem), 5.1851852svh)",
-            "--landing-page-bottom": "min(5rem, 7.4074074svh)",
             "--landing-nav-height": "min(clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem), 8.1481481svh)",
             "--landing-nav-padding-inline": "min(3rem, 4.4444444svh)",
             "--landing-nav-gap": "min(1.75rem, 2.5925926svh)",
@@ -166,7 +161,9 @@ export const trajsTheme = defineTheme({
             "--landing-brand-size": "min(1.25rem, 1.8518519svh)",
             "--landing-stage-top":
               "min(calc(var(--landing-nav-height) + min(3rem, 2.5vw)), 12.5925926svh)",
-            "--landing-stage-bottom": "min(8rem, 6.6666667vw, 11.8518519svh)",
+            "--landing-stage-bottom": "min(6rem, 5vw, 8.8888889svh)",
+            "--landing-hero-width": `min(100%, ${desktopContentWidth}px, 176svh)`,
+            "--landing-hero-margin": "auto",
             "--landing-hero-column-gap": "min(2.5rem, 2.0833333vw, 3.7037037svh)",
             "--landing-heading-top": "min(4rem, 3.3333333vw, 5.9259259svh)",
             "--landing-display-size": "min(8.4375rem, 7.03125vw, 12.5svh)",
@@ -181,7 +178,6 @@ export const trajsTheme = defineTheme({
             "--landing-command-gap": "min(0.75rem, 0.625vw, 1.1111111svh)",
             "--landing-action-icon-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
             "--landing-cta-margin-block": "0 min(1rem, 0.8333333vw, 1.4814815svh)",
-            "--landing-cta-margin-inline": "0 min(1rem, 0.8333333vw, 1.4814815svh)",
             "--landing-index-gap": "min(4.5rem, 3.75vw, 6.6666667svh)",
             "--landing-index-body-size": "min(1.25rem, 1.0416667vw, 1.8518519svh)",
             "--landing-index-body-leading": "min(2rem, 1.6666667vw, 2.962963svh)",
@@ -203,8 +199,6 @@ export const trajsTheme = defineTheme({
             "--landing-page-inline": "2.5rem",
             "--landing-frame-outset": "1rem",
             "--landing-index-rule-gap": "1.75rem",
-            "--landing-page-top": "2.5rem",
-            "--landing-page-bottom": "2.5rem",
             "--landing-nav-height": "5.5rem",
             // The tablet header keeps its 834 board spacing and tightens just
             // enough for the 720px edge, where the 640px hero still fits.
@@ -263,13 +257,9 @@ export const trajsTheme = defineTheme({
           localTokens: {
             "--landing-page-inline": "1.25rem",
             // The phone layout is a single column in a 20px margin, so the
-            // sheet keeps only its page frame and the index rule.
-            "--landing-guide-margin-display": "none",
+            // frame outset and index rule stay small.
             "--landing-frame-outset": "0.5rem",
-            "--landing-index-guide-display": "none",
             "--landing-index-rule-gap": "1.5rem",
-            "--landing-page-top": "1rem",
-            "--landing-page-bottom": "2rem",
             "--landing-nav-height": "3.25rem",
             "--landing-nav-padding-block": "0.5rem",
             "--landing-nav-padding-inline": "1rem",

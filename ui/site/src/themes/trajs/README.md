@@ -25,9 +25,10 @@ The display is 135/144 at weight 250 on the source canvas. Body copy is 20/32
 at weight 300. Navigation is 15 at weight 300. Spacing follows the four-pixel
 scale, with the source's six- and ten-pixel intermediate gaps.
 
-Two colors belong to the landing page's construction sheet rather than to the
-Figma theme: `pasteboard` is the work surface the page frame sits on, and
-`guide` / `guideStrong` draw the frame, column guides, ruler and crop brackets.
+Four colors belong to the landing page's construction sheet rather than to the
+Figma theme: `pasteboard` is the work surface the page frame sits on, `guide` /
+`guideStrong` draw the frame and section rules, and `grid` / `gridMajor` draw
+the two tiers of the drafting grid inside that frame.
 
 Color pairs are ordered light, then dark. The board's canvas fills are graphite
 and literal white, but light mode uses the neutral `#eeeeee` so large empty

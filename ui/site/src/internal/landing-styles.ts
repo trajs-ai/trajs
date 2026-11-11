@@ -38,85 +38,28 @@ export const styles = {
     zIndex: -1,
     pointerEvents: "none",
   },
-  // The frame stands off the live area by the frame outset, so no line of
-  // copy or control ever touches the trim.
+  // The frame stands off the live area by the frame outset. It carries a
+  // graph-paper grid at two scales, the same way a drafting sheet separates
+  // its fine measuring modules from its heavier structural rules.
   guideFrame: {
     position: "absolute",
     insetBlock:
       "calc(var(--landing-page-top) - var(--landing-frame-outset)) calc(var(--landing-page-bottom) - var(--landing-frame-outset))",
     insetInline:
       "calc(var(--landing-page-inline) - var(--landing-frame-outset)) calc(var(--landing-page-inline) - var(--landing-frame-outset))",
-    background: "var(--color-background-body)",
+    backgroundColor: "var(--color-background-body)",
+    backgroundImage:
+      "linear-gradient(to right, var(--color-grid) 1px, transparent 1px), linear-gradient(to bottom, var(--color-grid) 1px, transparent 1px), linear-gradient(to right, var(--color-grid-major) 1px, transparent 1px), linear-gradient(to bottom, var(--color-grid-major) 1px, transparent 1px)",
+    backgroundSize:
+      "var(--landing-grid-unit) var(--landing-grid-unit), var(--landing-grid-unit) var(--landing-grid-unit), var(--landing-grid-major) var(--landing-grid-major), var(--landing-grid-major) var(--landing-grid-major)",
     border: "1px solid var(--color-guide-strong)",
   },
-  // Margin ruler: a fine comb against the trim edge with a heavier tick on
-  // the 96px module the desktop board is built on.
-  guideRuleMinor: {
-    position: "absolute",
-    display: "var(--landing-guide-margin-display)",
-    right: "100%",
-    top: 0,
-    bottom: 0,
-    width: "0.375rem",
-    backgroundImage:
-      "repeating-linear-gradient(to bottom, var(--color-guide) 0 1px, transparent 1px 1rem)",
-  },
-  guideRuleMajor: {
-    position: "absolute",
-    display: "var(--landing-guide-margin-display)",
-    right: "100%",
-    top: 0,
-    bottom: 0,
-    width: "0.75rem",
-    backgroundImage:
-      "repeating-linear-gradient(to bottom, var(--color-guide-strong) 0 1px, transparent 1px 6rem)",
-  },
-  cropTopLeft: {
-    position: "absolute",
-    display: "var(--landing-guide-margin-display)",
-    left: "-0.625rem",
-    top: "-0.625rem",
-    width: "0.625rem",
-    height: "0.625rem",
-    borderTop: "1px solid var(--color-guide-strong)",
-    borderLeft: "1px solid var(--color-guide-strong)",
-  },
-  cropTopRight: {
-    position: "absolute",
-    display: "var(--landing-guide-margin-display)",
-    right: "-0.625rem",
-    top: "-0.625rem",
-    width: "0.625rem",
-    height: "0.625rem",
-    borderTop: "1px solid var(--color-guide-strong)",
-    borderRight: "1px solid var(--color-guide-strong)",
-  },
-  cropBottomLeft: {
-    position: "absolute",
-    display: "var(--landing-guide-margin-display)",
-    left: "-0.625rem",
-    bottom: "-0.625rem",
-    width: "0.625rem",
-    height: "0.625rem",
-    borderBottom: "1px solid var(--color-guide-strong)",
-    borderLeft: "1px solid var(--color-guide-strong)",
-  },
-  cropBottomRight: {
-    position: "absolute",
-    display: "var(--landing-guide-margin-display)",
-    right: "-0.625rem",
-    bottom: "-0.625rem",
-    width: "0.625rem",
-    height: "0.625rem",
-    borderBottom: "1px solid var(--color-guide-strong)",
-    borderRight: "1px solid var(--color-guide-strong)",
-  },
   header: {
-    // The header floats on the page frame at every breakpoint, as on the
-    // desktop board. Only its contents reflow.
+    // The header floats over the page at every breakpoint, and only its
+    // contents reflow.
     position: "fixed",
     zIndex: 10,
-    top: "var(--landing-page-top)",
+    top: "var(--landing-nav-top)",
     left: "var(--landing-page-inline)",
     right: "var(--landing-page-inline)",
     minHeight: "var(--landing-nav-height)",
@@ -239,7 +182,7 @@ export const styles = {
     display: "var(--landing-wordmark-display)",
     width: "59.0538%",
     height: "auto",
-    left: "40.9469%",
+    left: "calc(var(--landing-wordmark-offset) * 100%)",
     top: "49.088%",
   },
   ctas: {
@@ -288,26 +231,6 @@ export const styles = {
     position: "relative",
     borderBlockStart: "1px solid var(--color-guide-strong)",
     paddingBlockStart: "var(--landing-index-rule-gap)",
-  },
-  // The guides run down the middle of each gutter so they divide the columns
-  // without tracing the copy.
-  indexGuides: {
-    position: "absolute",
-    inset: 0,
-    display: "var(--landing-index-guide-display)",
-    pointerEvents: "none",
-  },
-  indexGuide: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    borderInlineStart: "1px dashed var(--color-guide)",
-  },
-  indexGuideFirst: {
-    left: "calc((100% - 2 * var(--landing-index-gap)) / 3 + var(--landing-index-gap) / 2)",
-  },
-  indexGuideSecond: {
-    left: "calc(2 * (100% - 2 * var(--landing-index-gap)) / 3 + var(--landing-index-gap) * 1.5)",
   },
   index: {
     position: "relative",

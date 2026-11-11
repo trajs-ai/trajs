@@ -14,7 +14,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { defaultThemeSlug, themes } from "./astryx-themes";
 import { brandShaders, stillBrandShaders } from "./internal/brand-shader";
 import { landingAssets } from "./internal/landing-assets";
-import { IndexGuides, LandingGuides } from "./internal/landing-guides";
+import { LandingGuides } from "./internal/landing-guides";
 import { styles } from "./internal/landing-styles";
 import { palette, type ColorMode } from "./themes/trajs/palette";
 
@@ -354,7 +354,6 @@ export function App() {
           </HStack>
         </Grid>
         <VStack style={styles.indexSection}>
-          <IndexGuides />
           <Grid aria-label="Explore TRAJS" columns={3} style={styles.index}>
             {features.map(({ title, icon, description, link }) => (
               <VStack as="article" key={title} style={styles.indexItem}>
