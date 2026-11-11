@@ -96,9 +96,9 @@
     --font-family-body: "Google Sans Flex", system-ui, sans-serif;
     --font-family-heading: "Google Sans Flex", system-ui, sans-serif;
     --font-family-code: "IBM Plex Mono", ui-monospace, monospace;
-    --color-background-body: light-dark(#ffffff, #171717);
+    --color-background-body: light-dark(#eeeeee, #171717);
     --color-background-surface: light-dark(#ffffff33, #ffffff14);
-    --color-background-card: light-dark(#ffffff, #171717);
+    --color-background-card: light-dark(#eeeeee, #171717);
     --color-background-muted: light-dark(#0000000f, #ffffff1f);
     --color-text-primary: light-dark(#171717, #f2f2ef);
     --color-text-secondary: light-dark(#5f5f66, #9c9ca3);

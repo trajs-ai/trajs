@@ -1,6 +1,6 @@
 export const palette = {
   light: {
-    canvas: "#ffffff",
+    canvas: "#eeeeee",
     ink: "#171717",
     secondary: "#5f5f66",
     muted: "#6b6b70",

@@ -10,7 +10,7 @@ geometry is the current target; responsive layout is deferred.
 
 | Figma role                            | Astryx role                                    |
 | ------------------------------------- | ---------------------------------------------- |
-| Canvas `#ffffff` / `#171717`          | `--color-background-body`                      |
+| Canvas `#eeeeee` / `#171717`          | `--color-background-body`                      |
 | Ink `#171717` / `#f2f2ef`             | `--color-text-primary`                         |
 | Supporting ink `#5f5f66` / `#9c9ca3`  | `--color-text-secondary`                       |
 | Glass `#ffffff33` / `#ffffff14`       | `--color-background-surface`                   |
@@ -25,9 +25,11 @@ The display is 135/144 at weight 250 on the source canvas. Body copy is 20/32
 at weight 300. Navigation is 15 at weight 300. Spacing follows the four-pixel
 scale, with the source's six- and ten-pixel intermediate gaps.
 
-Color pairs are ordered light, then dark. The board's canvas fills are literal
-white and graphite; they take precedence over the separate `color/canvas`
-variable, whose values are also retained in the snapshot.
+Color pairs are ordered light, then dark. The board's canvas fills are graphite
+and literal white, but light mode uses the neutral `#eeeeee` so large empty
+areas sit below full brightness. The board's literal fills take precedence over
+the separate `color/canvas` variable, whose values are also retained in the
+snapshot.
 
 Theme values live in Astryx's scoped theme, including color-scheme pairs.
 `src/internal/landing-styles.ts` maps page-specific geometry to these tokens;
