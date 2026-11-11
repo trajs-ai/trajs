@@ -40,6 +40,10 @@ export const trajsTheme = defineTheme({
   },
   localTokens: {
     "--landing-header-blur": "0.75rem",
+    // The grain is one 144px turbulence tile repeated across the sheet; the
+    // alpha of the tile keeps it regular instead of animated.
+    "--landing-grain-size": "9rem",
+    "--landing-grain-opacity": "0.12",
     "--landing-header-transition": "opacity 180ms ease, filter 220ms ease",
     // The shader arrives after the first paint, so it settles out of a heavier
     // blur than the header, over a long and unhurried run.

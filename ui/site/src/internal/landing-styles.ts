@@ -11,6 +11,12 @@ const markPlacement: CSSProperties = {
   transform: "rotate(90deg)",
 };
 
+// One seamless turbulence tile, tiled at a fixed module. The filter leaves its
+// alpha so the speckle composites itself over the board, which reads as the
+// same regular grain in both color modes instead of a haze.
+const grainTile =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='144' height='144'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='144' height='144' filter='url(%23grain)'/%3E%3C/svg%3E\")";
+
 // The index cards and the footer both end in a labeled pointer, so they share
 // the sheet's one label treatment and only place it differently.
 const linkLabel: CSSProperties = {
@@ -57,6 +63,19 @@ export const styles = {
     zIndex: -1,
     pointerEvents: "none",
   },
+  // The grain belongs to the frame's plate, not the pasteboard around it, so
+  // the margins stay clean and only the live area reads as printed stock. It
+  // never takes input, and the tile is static: no repaint per frame, no motion
+  // to reduce.
+  grain: {
+    position: "absolute",
+    inset: 0,
+    pointerEvents: "none",
+    backgroundImage: grainTile,
+    backgroundSize: "var(--landing-grain-size) var(--landing-grain-size)",
+    backgroundRepeat: "repeat",
+    opacity: "var(--landing-grain-opacity)",
+  },
   // The frame stands off the live area, so no line of copy or control ever
   // touches the trim.
   guideFrame: {
@@ -67,6 +86,29 @@ export const styles = {
       "calc(var(--landing-page-inline) - var(--landing-frame-outset)) calc(var(--landing-page-inline) - var(--landing-frame-outset))",
     background: "var(--color-background-body)",
     border: "1px solid var(--color-guide-strong)",
+  },
+  // The ruler turns the corner: the same module continues along the frame's
+  // top edge, so the sheet is calibrated on two sides while the live area
+  // stays completely clear of lines.
+  guideRuleTopMinor: {
+    position: "absolute",
+    display: "var(--landing-ruler-display)",
+    bottom: "100%",
+    left: 0,
+    right: 0,
+    height: "0.25rem",
+    backgroundImage:
+      "repeating-linear-gradient(to right, var(--color-guide) 0 1px, transparent 1px var(--landing-ruler-unit))",
+  },
+  guideRuleTopMajor: {
+    position: "absolute",
+    display: "var(--landing-ruler-display)",
+    bottom: "100%",
+    left: 0,
+    right: 0,
+    height: "0.5rem",
+    backgroundImage:
+      "repeating-linear-gradient(to right, var(--color-guide-strong) 0 1px, transparent 1px var(--landing-ruler-major))",
   },
   // Both ticks start at the frame's top edge and sit outside its border, so
   // the scale reads as one measured run without crossing the live area.

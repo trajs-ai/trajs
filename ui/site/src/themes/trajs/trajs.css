@@ -125,6 +125,8 @@
     --color-on-warning-muted: light-dark(#88650B, #7F6513);
     --color-on-error-muted: light-dark(#C0072E, #BD0C31);
     --landing-header-blur: 0.75rem;
+    --landing-grain-size: 9rem;
+    --landing-grain-opacity: 0.12;
     --landing-header-transition: opacity 180ms ease, filter 220ms ease;
     --landing-shader-blur: 1.25rem;
     --landing-shader-transition: opacity 900ms ease-out, filter 1800ms ease-out;
