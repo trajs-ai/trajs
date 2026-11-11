@@ -55,6 +55,12 @@ export const styles = {
     color: "var(--color-text-primary)",
     padding: "var(--landing-page-top) var(--landing-page-inline) var(--landing-page-bottom)",
   },
+  // The sheet is the main content only: the frame draws its plate and closes
+  // the border above the footer, which stands on the pasteboard outside it.
+  sheet: {
+    position: "relative",
+    isolation: "isolate",
+  },
   // The page isolates its own stacking context, so this negative layer stays
   // above the page fill and behind the content.
   guides: {
@@ -77,13 +83,11 @@ export const styles = {
     opacity: "var(--landing-grain-opacity)",
   },
   // The frame stands off the live area, so no line of copy or control ever
-  // touches the trim.
+  // touches the trim. It wraps the sheet only and stops above the footer, so
+  // the footer reads as a separate block instead of the sheet's last row.
   guideFrame: {
     position: "absolute",
-    insetBlock:
-      "calc(var(--landing-page-top) - var(--landing-frame-outset)) calc(var(--landing-page-bottom) - var(--landing-frame-outset))",
-    insetInline:
-      "calc(var(--landing-page-inline) - var(--landing-frame-outset)) calc(var(--landing-page-inline) - var(--landing-frame-outset))",
+    inset: "calc(-1 * var(--landing-frame-outset))",
     background: "var(--color-background-body)",
     border: "1px solid var(--color-guide-strong)",
   },
@@ -346,8 +350,10 @@ export const styles = {
     minHeight: "var(--spacing-6)",
   },
   footer: {
-    // The footer closes the sheet the way the index opens it: a section rule
-    // over a labeled grid, with the legal line as the last measured row.
+    // The footer is detached from the sheet: it repeats the index's section
+    // rule over a labeled grid, but it sits below the frame's bottom border on
+    // the pasteboard, so it reads as the page's footer rather than the sheet's
+    // last row.
     borderBlockStart: "1px solid var(--color-guide-strong)",
     marginBlockStart: "var(--landing-footer-gap)",
     paddingBlockStart: "var(--landing-footer-padding)",

@@ -271,183 +271,187 @@ export function App() {
 
   return (
     <Theme theme={themes[defaultThemeSlug]} mode={mode}>
-      <VStack as="main" id="top" style={styles.page}>
-        <LandingGuides />
-        <HStack
-          as="header"
-          vAlign="center"
-          gap={4}
-          style={{
-            ...styles.header,
-            opacity: chromeVisible ? 1 : 0,
-            filter: chromeVisible ? "blur(0)" : "blur(var(--landing-header-blur))",
-            pointerEvents: chromeVisible ? "auto" : "none",
-            transition: reducesMotion ? "none" : "var(--landing-header-transition)",
-          }}
-          inert={!chromeVisible}
-          aria-hidden={!chromeVisible}
-        >
-          <Link href={import.meta.env.BASE_URL} color="inherit" type="inherit">
-            <HStack gap={2} vAlign="center" style={styles.brand}>
-              <img src={assets.logoMark} alt="" style={styles.brandMark} />
-              <Text type="inherit">TRAJS</Text>
-            </HStack>
-          </Link>
-          <HStack vAlign="center" style={styles.headerEnd}>
-            <HStack as="nav" aria-label="Main navigation" vAlign="center" style={styles.nav}>
-              {navigation.map(({ label, href }) => (
-                <Link
-                  key={label}
-                  href={href}
-                  color="inherit"
-                  type="inherit"
-                  style={
-                    label === "CHANGELOG"
-                      ? { ...styles.navLink, ...styles.changelog }
-                      : styles.navLink
-                  }
-                >
-                  <HStack gap={1.5} vAlign="center">
-                    <Text type="inherit">{label}</Text>
-                    {label === "GITHUB" && (
-                      <img src={assets.arrow} alt="" style={styles.inkAsset} />
-                    )}
-                  </HStack>
-                </Link>
-              ))}
-            </HStack>
-            <IconButton
-              label={mode === "dark" ? "Use light theme" : "Use dark theme"}
-              size="sm"
-              variant="ghost"
-              style={styles.themeToggle}
-              onClick={() => setMode(mode === "dark" ? "light" : "dark")}
-              icon={mode === "dark" ? <SunIcon /> : <MoonIcon />}
-            />
-            <Popover
-              isOpen={menuOpen}
-              onOpenChange={setMenuOpen}
-              label="Menu"
-              placement="below"
-              alignment="end"
-              width={224}
-              padding={1}
-              content={
-                <VStack gap={0.5}>
-                  {navigation.map(({ label, href }) => (
-                    <Link
-                      key={label}
-                      href={href}
-                      color="inherit"
-                      type="inherit"
-                      style={styles.menuLink}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <HStack hAlign="between" vAlign="center" gap={3}>
-                        <Text type="inherit" style={styles.menuLabel}>
-                          {label}
-                        </Text>
-                        <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
-                      </HStack>
-                    </Link>
-                  ))}
-                </VStack>
-              }
-            >
+      <VStack id="top" style={styles.page}>
+        <VStack as="main" style={styles.sheet}>
+          <LandingGuides />
+          <HStack
+            as="header"
+            vAlign="center"
+            gap={4}
+            style={{
+              ...styles.header,
+              opacity: chromeVisible ? 1 : 0,
+              filter: chromeVisible ? "blur(0)" : "blur(var(--landing-header-blur))",
+              pointerEvents: chromeVisible ? "auto" : "none",
+              transition: reducesMotion ? "none" : "var(--landing-header-transition)",
+            }}
+            inert={!chromeVisible}
+            aria-hidden={!chromeVisible}
+          >
+            <Link href={import.meta.env.BASE_URL} color="inherit" type="inherit">
+              <HStack gap={2} vAlign="center" style={styles.brand}>
+                <img src={assets.logoMark} alt="" style={styles.brandMark} />
+                <Text type="inherit">TRAJS</Text>
+              </HStack>
+            </Link>
+            <HStack vAlign="center" style={styles.headerEnd}>
+              <HStack as="nav" aria-label="Main navigation" vAlign="center" style={styles.nav}>
+                {navigation.map(({ label, href }) => (
+                  <Link
+                    key={label}
+                    href={href}
+                    color="inherit"
+                    type="inherit"
+                    style={
+                      label === "CHANGELOG"
+                        ? { ...styles.navLink, ...styles.changelog }
+                        : styles.navLink
+                    }
+                  >
+                    <HStack gap={1.5} vAlign="center">
+                      <Text type="inherit">{label}</Text>
+                      {label === "GITHUB" && (
+                        <img src={assets.arrow} alt="" style={styles.inkAsset} />
+                      )}
+                    </HStack>
+                  </Link>
+                ))}
+              </HStack>
               <IconButton
-                label="Open menu"
-                variant="ghost"
+                label={mode === "dark" ? "Use light theme" : "Use dark theme"}
                 size="sm"
-                style={{
-                  ...styles.menuButton,
-                  background: menuOpen ? "var(--color-overlay-pressed)" : undefined,
-                }}
-                icon={<MenuIcon />}
+                variant="ghost"
+                style={styles.themeToggle}
+                onClick={() => setMode(mode === "dark" ? "light" : "dark")}
+                icon={mode === "dark" ? <SunIcon /> : <MoonIcon />}
               />
-            </Popover>
+              <Popover
+                isOpen={menuOpen}
+                onOpenChange={setMenuOpen}
+                label="Menu"
+                placement="below"
+                alignment="end"
+                width={224}
+                padding={1}
+                content={
+                  <VStack gap={0.5}>
+                    {navigation.map(({ label, href }) => (
+                      <Link
+                        key={label}
+                        href={href}
+                        color="inherit"
+                        type="inherit"
+                        style={styles.menuLink}
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <HStack hAlign="between" vAlign="center" gap={3}>
+                          <Text type="inherit" style={styles.menuLabel}>
+                            {label}
+                          </Text>
+                          <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+                        </HStack>
+                      </Link>
+                    ))}
+                  </VStack>
+                }
+              >
+                <IconButton
+                  label="Open menu"
+                  variant="ghost"
+                  size="sm"
+                  style={{
+                    ...styles.menuButton,
+                    background: menuOpen ? "var(--color-overlay-pressed)" : undefined,
+                  }}
+                  icon={<MenuIcon />}
+                />
+              </Popover>
+            </HStack>
           </HStack>
-        </HStack>
-        <Grid columns={2} align="start" style={styles.hero}>
-          <VStack style={styles.headline}>
-            <Heading level={1} type="display-1" style={styles.heading}>
-              <Text as="span" display="block" type="inherit" style={styles.headlineLine}>
-                Record.
-              </Text>
-              <Text as="span" display="block" type="inherit" style={styles.analysisLine}>
-                Analysis.
-              </Text>
-              <Text as="span" display="block" type="inherit" style={styles.headlineLine}>
-                Exchange.
-              </Text>
-            </Heading>
-          </VStack>
-          <VStack style={styles.art}>
-            <VStack role="img" aria-label="TRAJS" style={styles.lockup}>
-              <VStack style={styles.symbol} aria-hidden="true">
-                <VStack style={{ ...styles.symbolMask, maskImage: `url("${assets.symbolFill}")` }}>
-                  <Suspense fallback={null}>
-                    <ShaderReveal shader={shader} reducesMotion={reducesMotion} />
-                  </Suspense>
-                </VStack>
-                <img src={assets.symbolOutline} alt="" style={styles.outline} />
-              </VStack>
-              <img src={assets.wordmark} alt="" style={styles.wordmark} />
-            </VStack>
-          </VStack>
-          <HStack vAlign="center" style={styles.ctas}>
-            <Button
-              label="Get started"
-              href={navigation[0].href}
-              variant="primary"
-              size="lg"
-              style={styles.action}
-              endContent={<img src={assets.arrowRight} alt="" style={styles.actionIcon} />}
-            />
-            <ClickableCard
-              label={`Copy install command: ${installCommand}`}
-              onClick={copyInstallCommand}
-              variant="transparent"
-              padding={0}
-              style={styles.command}
-            >
-              <Text type="code" style={styles.prompt} aria-hidden="true">
-                $
-              </Text>
-              <Text as="p" type="code" style={styles.commandText}>
-                {installCommand}
-              </Text>
-              {installCopied ? (
-                <CheckIcon />
-              ) : (
-                <img src={assets.copy} alt="" style={styles.inkAsset} />
-              )}
-            </ClickableCard>
-          </HStack>
-        </Grid>
-        <VStack style={styles.indexSection}>
-          <Grid aria-label="Explore TRAJS" columns={3} style={styles.index}>
-            {features.map(({ title, icon, description, link }) => (
-              <VStack as="article" key={title} style={styles.indexItem}>
-                <HStack gap={2} vAlign="center" style={styles.indexHead}>
-                  <img src={assets[icon]} alt="" style={styles.inkAsset} />
-                  <Heading level={2}>{title}</Heading>
-                </HStack>
-                <Text as="p" color="secondary" style={styles.indexBody}>
-                  {description}
+          <Grid columns={2} align="start" style={styles.hero}>
+            <VStack style={styles.headline}>
+              <Heading level={1} type="display-1" style={styles.heading}>
+                <Text as="span" display="block" type="inherit" style={styles.headlineLine}>
+                  Record.
                 </Text>
-                <Link href={link.href} color="inherit" type="inherit" style={styles.indexLink}>
-                  <HStack gap={2} vAlign="center">
-                    <Text type="inherit">{link.label}</Text>
-                    <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
-                  </HStack>
-                </Link>
+                <Text as="span" display="block" type="inherit" style={styles.analysisLine}>
+                  Analysis.
+                </Text>
+                <Text as="span" display="block" type="inherit" style={styles.headlineLine}>
+                  Exchange.
+                </Text>
+              </Heading>
+            </VStack>
+            <VStack style={styles.art}>
+              <VStack role="img" aria-label="TRAJS" style={styles.lockup}>
+                <VStack style={styles.symbol} aria-hidden="true">
+                  <VStack
+                    style={{ ...styles.symbolMask, maskImage: `url("${assets.symbolFill}")` }}
+                  >
+                    <Suspense fallback={null}>
+                      <ShaderReveal shader={shader} reducesMotion={reducesMotion} />
+                    </Suspense>
+                  </VStack>
+                  <img src={assets.symbolOutline} alt="" style={styles.outline} />
+                </VStack>
+                <img src={assets.wordmark} alt="" style={styles.wordmark} />
               </VStack>
-            ))}
+            </VStack>
+            <HStack vAlign="center" style={styles.ctas}>
+              <Button
+                label="Get started"
+                href={navigation[0].href}
+                variant="primary"
+                size="lg"
+                style={styles.action}
+                endContent={<img src={assets.arrowRight} alt="" style={styles.actionIcon} />}
+              />
+              <ClickableCard
+                label={`Copy install command: ${installCommand}`}
+                onClick={copyInstallCommand}
+                variant="transparent"
+                padding={0}
+                style={styles.command}
+              >
+                <Text type="code" style={styles.prompt} aria-hidden="true">
+                  $
+                </Text>
+                <Text as="p" type="code" style={styles.commandText}>
+                  {installCommand}
+                </Text>
+                {installCopied ? (
+                  <CheckIcon />
+                ) : (
+                  <img src={assets.copy} alt="" style={styles.inkAsset} />
+                )}
+              </ClickableCard>
+            </HStack>
           </Grid>
+          <VStack style={styles.indexSection}>
+            <Grid aria-label="Explore TRAJS" columns={3} style={styles.index}>
+              {features.map(({ title, icon, description, link }) => (
+                <VStack as="article" key={title} style={styles.indexItem}>
+                  <HStack gap={2} vAlign="center" style={styles.indexHead}>
+                    <img src={assets[icon]} alt="" style={styles.inkAsset} />
+                    <Heading level={2}>{title}</Heading>
+                  </HStack>
+                  <Text as="p" color="secondary" style={styles.indexBody}>
+                    {description}
+                  </Text>
+                  <Link href={link.href} color="inherit" type="inherit" style={styles.indexLink}>
+                    <HStack gap={2} vAlign="center">
+                      <Text type="inherit">{link.label}</Text>
+                      <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+                    </HStack>
+                  </Link>
+                </VStack>
+              ))}
+            </Grid>
+          </VStack>
+          <Text as="p" role="status" aria-live="polite" style={styles.status}>
+            {copyStatus}
+          </Text>
         </VStack>
-        <Text as="p" role="status" aria-live="polite" style={styles.status}>
-          {copyStatus}
-        </Text>
         <VStack as="footer" style={styles.footer}>
           <Grid columns={3} style={styles.footerIndex}>
             <VStack style={styles.footerBrand}>

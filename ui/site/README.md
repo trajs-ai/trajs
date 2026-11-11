@@ -47,12 +47,15 @@ it through blur, opacity and translation; returning to the top hides it again.
 Hidden navigation is inert. Reduced-motion preferences disable this transition
 and render a still frame of the brand shader.
 
-The footer is not drawn on the board. It extends the sheet's own index anatomy:
-a section rule opens the same three-column grid as the index, where the brand
-block carries the page's one-line premise and the RESOURCES and COMMUNITY groups
-use the index link's mono label. A second rule closes the sheet with the
-copyright, the license and a back-to-top link. The tablet keeps three columns
-with tighter gutters; phones stack the groups and drop the legal line a size.
+The footer is not drawn on the board, and it is detached from the sheet: the
+frame's border closes after the index, and the footer stands below it on the
+darker pasteboard, separated by the same gap the rest of the page uses. It
+extends the sheet's own index anatomy: a section rule opens the same
+three-column grid as the index, where the brand block carries the page's
+one-line premise and the RESOURCES and COMMUNITY groups use the index link's
+mono label. A second rule closes the footer with the copyright, the license and
+a back-to-top link. The tablet keeps three columns with tighter gutters; phones
+stack the groups and drop the legal line a size.
 
 The mark uses the original exported shader with the official
 `@figma/expressive-components` runtime. It requires WebGPU on HTTPS or localhost.
