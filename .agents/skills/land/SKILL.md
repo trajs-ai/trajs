@@ -1,10 +1,10 @@
 ---
 name: land
 description: >-
-  Merge this thread's changes into the trajs repository by committing them and
-  pushing to origin. Use only when the user has explicitly requested a merge,
-  such as the Merge Changes action or a request to merge or push the thread's
-  work. Do not invoke for review, preparation, or passing checks alone.
+  Merge this thread's changes by committing them and pushing to `origin`. Use
+  only when the user has explicitly requested a merge, such as the Merge Changes
+  action or a request to merge or push the thread's work. Do not invoke for
+  review, preparation, or passing checks alone.
 disable-model-invocation: true
 metadata:
   delta-action: land
@@ -12,11 +12,10 @@ metadata:
 
 # Merge
 
-Merging means the thread's work is committed and pushed to `origin`
-(https://github.com/trajs-ai/trajs.git). An explicit merge request — the Merge
-Changes action or equivalent user language — is the trigger: proceed with this
-workflow instead of asking whether to merge. Stop only for the blockers under
-Gates and Divergence.
+Merging means the thread's work is committed and pushed to `origin`. An explicit
+merge request — the Merge Changes action or equivalent user language — is the
+trigger: proceed with this workflow instead of asking whether to merge. Stop only
+for the blockers under Gates and Divergence.
 
 That frontmatter is the whole Delta contract, and its values are not free:
 `metadata.delta-action: land` is what makes this skill selectable under Merge
@@ -26,8 +25,8 @@ and is lowercase `land` even though the action is called Merge; the default
 
 ## 1. Preflight (read-only)
 
-- `git remote -v`: the merge target is `origin`. If `origin` is missing or
-  points somewhere else, stop and report instead of guessing.
+- `git remote -v`: the merge target is `origin`, whatever it points at. If
+  `origin` is missing, stop and report instead of guessing.
 - `git status --short --branch`: note the current branch and the uncommitted and
   untracked work; that work is what gets merged.
 - `git fetch origin` then `git rev-parse --verify origin/main`: find out whether
@@ -97,7 +96,8 @@ success.
   in and push again; a stale branch is not a reason to stop.
 - If `main` is protected against direct pushes, push a branch and open a pull
   request with `gh pr create` instead. Check first with
-  `gh api repos/trajs-ai/trajs/branches/main/protection`.
+  `gh api repos/<owner>/<repo>/branches/main/protection`, taking `<owner>/<repo>`
+  from the `origin` URL.
 - Never force-push.
 
 ## 6. Confirm
@@ -139,8 +139,11 @@ message: outside any code fence, the whole element alone on its own line, with
 nothing after it.
 
 ```text
-<land-result outcome="landed" target="main" target-url="https://github.com/trajs-ai/trajs/tree/main" commit="abc1234" commit-url="https://github.com/trajs-ai/trajs/commit/abc1234" />
+<land-result outcome="landed" target="main" target-url="https://github.com/<owner>/<repo>/tree/main" commit="abc1234" commit-url="https://github.com/<owner>/<repo>/commit/abc1234" />
 ```
+
+- Build both URLs from the `origin` URL; `<owner>/<repo>` above is a placeholder,
+  not a link to copy.
 
 - `outcome` is `landed` only once Confirm saw the commit on the target ref. Use
   `failed` when Gates stopped the merge, and put the blocking reason in the
@@ -163,8 +166,7 @@ after the retried push.
 
 ## Gates
 
-Stop and report without bypassing when: `origin` is not the expected repository;
-a `related` test or a changed package's `build` fails for a reason other than
-having no test files; a merge needs a conflict resolved by hand; the push is rejected for
-a reason other than the remote having advanced; or the scope of the change is
-ambiguous.
+Stop and report without bypassing when: `origin` is missing; a `related` test or
+a changed package's `build` fails for a reason other than having no test files; a
+merge needs a conflict resolved by hand; the push is rejected for a reason other
+than the remote having advanced; or the scope of the change is ambiguous.
