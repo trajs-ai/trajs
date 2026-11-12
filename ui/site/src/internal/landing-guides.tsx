@@ -4,20 +4,40 @@ import { styles } from "./landing-styles";
 
 // The ruler keeps one graduation per 24px module, a longer one every fourth
 // module, and the longest every sixteenth, measured from the frame's
-// top-left corner. Every mark shares the frame's 1px weight, so rank is
-// carried by length and a step of color, and the scale stays a quiet margin
-// note rather than a second border.
+// top-left corner. Every mark shares the frame's 1px weight and one color, so
+// rank is carried by length alone and the scale stays a quiet margin note
+// rather than a second border.
 const RULER_MODULE = 24;
 const RULER_HEIGHT = 20;
+const RULER_TILE = RULER_MODULE * 16;
 
-const graduations = [
-  { every: RULER_MODULE, length: 6, color: "var(--color-guide)" },
-  { every: RULER_MODULE * 4, length: 11, color: "var(--color-guide-strong)" },
-  { every: RULER_MODULE * 16, length: 16, color: "var(--color-guide-strong)" },
-] as const;
+// One tile holds the whole sixteenth-module period, so every graduation is
+// drawn once: nested tiers would stack their alpha where a long mark sits on a
+// short one and grad the scale from dark to light.
+const graduations = Array.from(
+  { length: RULER_TILE / RULER_MODULE },
+  (_, index) => index * RULER_MODULE,
+);
+
+function markLength(offset: number) {
+  if (offset % RULER_TILE === 0) return 16;
+
+  return offset % (RULER_MODULE * 4) === 0 ? 11 : 6;
+}
 
 function RulerTicks({ edge }: { edge: "top" | "left" }) {
   const vertical = edge === "left";
+
+  // The stroke is centered on the pixel next to the edge it grows from, so it
+  // lands crisp at 1:1 and meets the frame's border without a seam or a
+  // half-pixel blur.
+  const marks = graduations.map((offset) => {
+    const end = RULER_HEIGHT - 0.5 - markLength(offset);
+
+    return vertical
+      ? `M${RULER_HEIGHT - 0.5} ${offset + 0.5}H${end}`
+      : `M${offset + 0.5} ${RULER_HEIGHT - 0.5}V${end}`;
+  });
 
   return (
     <svg
@@ -27,36 +47,25 @@ function RulerTicks({ edge }: { edge: "top" | "left" }) {
       style={vertical ? styles.guideRulerLeft : styles.guideRulerTop}
     >
       <defs>
-        {graduations.map(({ every, length, color }, index) => (
-          <pattern
-            key={every}
-            id={`trajs-ruler-${edge}-${index}`}
-            width={vertical ? RULER_HEIGHT : every}
-            height={vertical ? every : RULER_HEIGHT}
-            patternUnits="userSpaceOnUse"
-            // Each tier opens one of its own graduations in, so the corner
-            // node owns the datum and no mark doubles the node's outline.
-            // It also puts every long mark on a bold grid line.
-            patternTransform={vertical ? `translate(0 ${every})` : `translate(${every} 0)`}
-          >
-            <line
-              // The stroke is centered on the pixel next to the tile edge
-              // it grows from, so it lands crisp at 1:1 and meets the
-              // frame's border without a seam or a half-pixel blur.
-              x1={vertical ? RULER_HEIGHT - 0.5 : 0.5}
-              x2={vertical ? RULER_HEIGHT - 0.5 - length : 0.5}
-              y1={vertical ? 0.5 : RULER_HEIGHT - 0.5}
-              y2={vertical ? 0.5 : RULER_HEIGHT - 0.5 - length}
-              strokeWidth={1}
-              strokeLinecap="round"
-              style={{ stroke: color }}
-            />
-          </pattern>
-        ))}
+        <pattern
+          id={`trajs-ruler-${edge}`}
+          width={vertical ? RULER_HEIGHT : RULER_TILE}
+          height={vertical ? RULER_TILE : RULER_HEIGHT}
+          patternUnits="userSpaceOnUse"
+          // The tile opens one of its own graduations in, so the corner node
+          // owns the datum and no mark doubles the node's outline. It also
+          // puts every long mark on a bold grid line.
+          patternTransform={vertical ? `translate(0 ${RULER_TILE})` : `translate(${RULER_TILE} 0)`}
+        >
+          <path
+            d={marks.join("")}
+            strokeWidth={1}
+            strokeLinecap="round"
+            style={{ stroke: "var(--color-guide)" }}
+          />
+        </pattern>
       </defs>
-      {graduations.map(({ every }, index) => (
-        <rect key={every} width="100%" height="100%" fill={`url(#trajs-ruler-${edge}-${index})`} />
-      ))}
+      <rect width="100%" height="100%" fill={`url(#trajs-ruler-${edge})`} />
     </svg>
   );
 }
