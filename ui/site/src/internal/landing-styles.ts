@@ -106,11 +106,14 @@ export const styles = {
   // The frame stands off the live area, so no line of copy or control ever
   // touches the trim. It wraps the sheet only and stops above the footer, so
   // the footer reads as a separate block instead of the sheet's last row.
+  // The edge is an inset shadow rather than a border: a border would push the
+  // grid and both rulers a pixel off its own edge, so the scale would start a
+  // pixel away from the corner marks that pin it.
   guideFrame: {
     position: "absolute",
     inset: "calc(-1 * var(--landing-frame-outset))",
     background: "var(--color-background-body)",
-    border: "1px solid var(--color-guide-strong)",
+    boxShadow: "inset 0 0 0 1px var(--color-guide-strong)",
   },
   // The ruler turns the corner: the same module continues along the frame's
   // top edge, so the sheet is calibrated on two sides while the live area
@@ -137,29 +140,31 @@ export const styles = {
   },
   // The corner nodes pin the frame the way a drawing sheet pins its register
   // marks: a hollow diamond centered on the corner, so it interrupts both
-  // rules it joins instead of stopping short of them.
+  // rules it joins instead of stopping short of them. Half a pixel puts that
+  // center on the middle of the frame's 1px edge rather than on the box's
+  // outer coordinate, which would sit the mark half a pixel off both rules.
   guideNodeTopLeft: {
     ...guideNode,
-    top: "-1px",
-    left: "-1px",
+    top: "0.5px",
+    left: "0.5px",
     transform: "translate(-50%, -50%) rotate(45deg)",
   },
   guideNodeTopRight: {
     ...guideNode,
-    top: "-1px",
-    right: "-1px",
+    top: "0.5px",
+    right: "0.5px",
     transform: "translate(50%, -50%) rotate(45deg)",
   },
   guideNodeBottomLeft: {
     ...guideNode,
-    bottom: "-1px",
-    left: "-1px",
+    bottom: "0.5px",
+    left: "0.5px",
     transform: "translate(-50%, 50%) rotate(45deg)",
   },
   guideNodeBottomRight: {
     ...guideNode,
-    bottom: "-1px",
-    right: "-1px",
+    bottom: "0.5px",
+    right: "0.5px",
     transform: "translate(50%, 50%) rotate(45deg)",
   },
   // The sheet's masthead: an opaque band that closes the frame's top edge. It
