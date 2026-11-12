@@ -7,8 +7,37 @@
       name="description"
       content="Record. Analysis. Exchange. Capture, inspect and share agent trajectories with TRAJS."
     />
+    <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#171717" />
     <title>TRAJS — Record. Analysis. Exchange.</title>
+    <!--
+      The hero's display line is the largest thing on the first screen, so its
+      face is preloaded: the stylesheet is discovered late and the swap would
+      otherwise land after the first paint.
+    -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      crossorigin
+      href="/src/themes/trajs/fonts/google-sans-flex.woff2"
+    />
+    <!--
+      Only to keep the first paint from flashing the other mode: the page opens
+      dark unless the reader chose light, which is the same rule `App` applies.
+      The declared `color-scheme` paints the canvas before any stylesheet loads,
+      and `data-theme` is what the reset maps it from once they do.
+    -->
+    <script>
+      try {
+        var mode = localStorage.getItem("trajs-color-mode") === "light" ? "light" : "dark";
+
+        document.documentElement.dataset.theme = mode;
+        document.querySelector('meta[name="color-scheme"]').content = mode;
+      } catch {
+        /* Storage can be unavailable; the site still opens in its default mode. */
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

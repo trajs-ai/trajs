@@ -192,6 +192,7 @@ export function App() {
   const assets = landingAssets[mode];
   const shader = (reducesMotion ? stillBrandShaders : brandShaders)[mode];
   const [copyStatus, setCopyStatus] = useState("");
+  const [copyAttempt, setCopyAttempt] = useState(0);
   const [installCopied, setInstallCopied] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -223,8 +224,11 @@ export function App() {
 
   useEffect(() => {
     const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const colorScheme = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]');
 
     if (themeColor) themeColor.content = palette[mode].canvas;
+
+    if (colorScheme) colorScheme.content = mode;
 
     try {
       localStorage.setItem("trajs-color-mode", mode);
@@ -234,7 +238,9 @@ export function App() {
   }, [mode]);
 
   // The icon's copied state lasts exactly as long as its announcement, so the
-  // two never disagree.
+  // two never disagree. A repeat copy writes the same message, so the attempt
+  // counts alongside it and restarts the wait instead of letting the first one
+  // expire mid-announcement.
   useEffect(() => {
     if (!copyStatus) return;
 
@@ -244,7 +250,7 @@ export function App() {
     }, 2500);
 
     return () => window.clearTimeout(timer);
-  }, [copyStatus]);
+  }, [copyStatus, copyAttempt]);
 
   async function copyInstallCommand() {
     try {
@@ -255,6 +261,8 @@ export function App() {
       setInstallCopied(false);
       setCopyStatus("Copy unavailable. Select the command to copy it manually.");
     }
+
+    setCopyAttempt((attempt) => attempt + 1);
   }
 
   return (

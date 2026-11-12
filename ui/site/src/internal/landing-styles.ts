@@ -381,7 +381,9 @@ export const styles = {
     fontFamily: "var(--font-family-code)",
     fontSize: "var(--landing-prompt-size)",
     fontWeight: 500,
-    color: "var(--color-ink-quiet)",
+    // It carries the command's meaning with the command text, so it takes the
+    // same legible ink instead of the quieter role, which falls under AA here.
+    color: "var(--color-ink-muted)",
   },
   status: {
     fontSize: "var(--landing-index-link-size)",
@@ -443,7 +445,9 @@ export const styles = {
   },
   footerLegalText: {
     ...legalLabel,
-    color: "var(--color-ink-muted)",
+    // The footer stands on the pasteboard, where the muted ink drops to 4.09:1
+    // in light mode; the secondary ink keeps the line legible on both grounds.
+    color: "var(--color-text-secondary)",
   },
   footerLegalLabel: legalLabel,
   footerLegalLink: {
