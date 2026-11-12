@@ -128,6 +128,7 @@
     --landing-grain-size: 9rem;
     --landing-grain-opacity: 0.12;
     --landing-header-transition: opacity 180ms ease, filter 220ms ease;
+    --landing-mark-transition: opacity 800ms ease-in-out, stroke-dashoffset 800ms ease-in-out;
     --landing-shader-blur: 1.25rem;
     --landing-shader-transition: opacity 900ms ease-out, filter 1800ms ease-out;
     --landing-theme-toggle-size: 1.5rem;

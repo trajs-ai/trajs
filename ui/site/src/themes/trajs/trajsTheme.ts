@@ -51,6 +51,11 @@ export const trajsTheme = defineTheme({
     "--landing-grain-size": "9rem",
     "--landing-grain-opacity": "0.12",
     "--landing-header-transition": "opacity 180ms ease, filter 220ms ease",
+    // The mark is drawn before it is filled: the paper island and the wireframe
+    // arrive over one beat, and the shader waits for that beat to end rather
+    // than for a copy of its duration, so this is the only place the draw is
+    // timed. Each layer changes one of these two properties.
+    "--landing-mark-transition": "opacity 800ms ease-in-out, stroke-dashoffset 800ms ease-in-out",
     // The shader arrives after the first paint, so it settles out of a heavier
     // blur than the header, over a long and unhurried run.
     "--landing-shader-blur": "1.25rem",

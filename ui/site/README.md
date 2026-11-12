@@ -59,9 +59,15 @@ stack the groups and drop the legal line a size.
 
 The mark uses the original exported shader with the official
 `@figma/expressive-components` runtime. It requires WebGPU on HTTPS or localhost.
-The runtime leaves the fill empty when WebGPU is unavailable; the original
-outline and wordmark remain visible. The shader source is preserved verbatim
-under `src/internal/lib/custom-effects/`.
+The runtime leaves the fill empty when WebGPU is unavailable; the outline and
+wordmark remain visible. The shader source is preserved verbatim under
+`src/internal/lib/custom-effects/`.
+
+The mark arrives in two beats: its paper island fades up while the wireframe
+etches itself on, then the shader settles into the figure the lines closed
+(`src/internal/brand-mark.tsx`). The fill waits for the draw's transition to end
+rather than for a copy of its duration, so the draw is timed in one place,
+`--landing-mark-transition`. Reduced motion shows the finished mark at once.
 
 Navigation currently points at the project's GitHub README, examples,
 discussions and changelog. The BLOG label uses discussions until a blog

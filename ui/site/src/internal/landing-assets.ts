@@ -8,11 +8,9 @@ import lightArrowUpRight from "../assets/figma/light/icon-arrow-up-right12.svg";
 import lightCopy from "../assets/figma/light/icon-copy20.svg";
 import lightLogoMark from "../assets/figma/light/logo-mark.svg";
 import lightSymbolFill from "../assets/figma/light/symbol-fill.svg";
-import lightSymbolOutline from "../assets/figma/light/symbol-outline.svg";
 import lightWordmark from "../assets/figma/light/wordmark.svg";
 import darkLogoMark from "../assets/figma/logo-mark.svg";
 import darkSymbolFill from "../assets/figma/symbol-fill.svg";
-import darkSymbolOutline from "../assets/figma/symbol-outline.svg";
 import darkWordmark from "../assets/figma/wordmark.svg";
 
 export const landingAssets = {
@@ -23,7 +21,6 @@ export const landingAssets = {
     copy: lightCopy,
     logoMark: lightLogoMark,
     symbolFill: lightSymbolFill,
-    symbolOutline: lightSymbolOutline,
     wordmark: lightWordmark,
   },
   dark: {
@@ -33,7 +30,6 @@ export const landingAssets = {
     copy: darkCopy,
     logoMark: darkLogoMark,
     symbolFill: darkSymbolFill,
-    symbolOutline: darkSymbolOutline,
     wordmark: darkWordmark,
   },
 } as const;

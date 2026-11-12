@@ -1,11 +1,13 @@
 import type { CSSProperties } from "react";
 
 // The backdrop has to fill exactly the plate the outline draws, so both take
-// their placement from here.
+// their placement from here. Only the width comes from the layout: the ratio is
+// the exported viewBox's, so the plate keeps the artwork's proportions.
 const markPlacement: CSSProperties = {
   position: "absolute",
   width: "164.173%",
   maxWidth: "none",
+  aspectRatio: "507.323 / 316.34",
   left: "-32.0865%",
   top: "18.366%",
   transform: "rotate(90deg)",
@@ -309,10 +311,14 @@ export const styles = {
     position: "absolute",
     inset: "0 auto 0 0",
     width: "var(--landing-symbol-width)",
-    // The mark is the sheet's one opaque island: the graph paper must not
-    // show through the frame's open triangles or between the shader's edges.
-    // The plate fill repeats the paper, so the island reads as plain stock
-    // rather than a flat block.
+  },
+  // The mark is the sheet's one opaque island, so the graph paper must not show
+  // through the frame's open triangles or between the shader's edges. The fill
+  // repeats the paper, and it fades in with the wireframe, so the sheet is all
+  // there is until the mark draws itself.
+  symbolPlate: {
+    position: "absolute",
+    inset: 0,
     background: "var(--color-background-body)",
   },
   symbolMask: {
