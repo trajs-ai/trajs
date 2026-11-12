@@ -109,27 +109,25 @@ success.
 
 ## 7. Stop the dev servers
 
-If this thread started a dev server while developing frontend work, the merge
-is not done until that process is gone: the server outlives the thread, so once
-the change is merged nothing owns it any more. Stop it before you report the
-result. Frontend projects under `ui/` start one through `ui/scripts/dev-server.sh`;
-a server you started for any other package ends the same way.
+The merge is not done until no dev server of this thread is left. They outlive
+the thread, so once the change is merged nothing owns them. Stop every one the
+thread started, here and in a parent or subthread worktree: `stop` ends this
+checkout alone, so sweep the rest by pidfile.
 
 ```sh
 ui/scripts/dev-server.sh stop ui/<project>
 ui/scripts/dev-server.sh status ui/<project>   # exits 1 now
-pgrep -f -- 'portless run --name'              # nothing under this checkout's name
+pgrep -af 'portless run --name'                # each server leaves /tmp/<name>.pid
 ```
 
-`status` exiting 1 is the proof the URL is gone. `stop` is quiet when it has no
-pidfile for this checkout, which is not an error — but if `pgrep` still lists
-a server under this checkout's name (the URL's first label), end it by hand
-with `kill -TERM -<pgid>` (`ps -o pgid=` for that pid). `stop` also ends the
-shared portless proxy when this was the last checkout using it; the next
-`start` recreates both.
+`/tmp/<name>.pid` is the group leader of `https://<name>.localhost`. For each
+server whose command line runs under one of the thread's worktrees
+(`.delta/worktrees/<id>`), `kill -TERM -<pgid>` and delete the pidfile, then
+check `curl -skI` fails for its URL. The shared proxy exits with the last server;
+a later `start` recreates both. Leave another thread's worktree alone.
 
 A merge that stopped at Gates is not finished, so this step waits: keep the
-server while you keep working, and stop it when you stop.
+servers while you keep working, and stop them when you stop.
 
 ## Report
 
