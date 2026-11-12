@@ -360,7 +360,7 @@
     --landing-stage-bottom: min(6rem, 5vw, 8.8888889svh);
     --landing-hero-width: min(100%, 1728px, 160svh);
     --landing-hero-margin: auto;
-    --landing-hero-optical-offset: min(3.25rem, 2.7083333vw, 4.8148148svh);
+    --landing-hero-optical-offset: calc(var(--landing-display-size) * 0.2);
     --landing-hero-column-gap: min(2.5rem, 2.0833333vw, 3.7037037svh);
     --landing-heading-top: min(4rem, 3.3333333vw, 5.9259259svh);
     --landing-display-size: min(8.4375rem, 7.03125vw, 12.5svh);
