@@ -1,7 +1,5 @@
 import { VStack } from "@astryxdesign/core/VStack";
 
-import { styles } from "./landing-styles";
-
 // The ruler keeps one graduation per 24px module, a longer one every fourth
 // module, and the longest every sixteenth, measured from the frame's
 // top-left corner. Every mark shares the frame's 1px weight and one color, so
@@ -44,7 +42,7 @@ function RulerTicks({ edge }: { edge: "top" | "left" }) {
       aria-hidden="true"
       width={vertical ? RULER_HEIGHT : "100%"}
       height={vertical ? "100%" : RULER_HEIGHT}
-      style={vertical ? styles.guideRulerLeft : styles.guideRulerTop}
+      className={vertical ? "landing-ruler-left" : "landing-ruler-top"}
     >
       <defs>
         <pattern
@@ -61,7 +59,7 @@ function RulerTicks({ edge }: { edge: "top" | "left" }) {
             d={marks.join("")}
             strokeWidth={1}
             strokeLinecap="round"
-            style={{ stroke: "var(--color-guide)" }}
+            className="landing-ruler-ticks"
           />
         </pattern>
       </defs>
@@ -75,7 +73,7 @@ function RulerTicks({ edge }: { edge: "top" | "left" }) {
 // ruled notepaper. Both tiers are 1px and sit under the grain.
 function SheetGrid() {
   return (
-    <svg aria-hidden="true" width="100%" height="100%" style={styles.guideGrid}>
+    <svg aria-hidden="true" width="100%" height="100%" className="landing-guide-grid">
       <defs>
         <pattern
           id="trajs-sheet-grid-minor"
@@ -86,7 +84,7 @@ function SheetGrid() {
           <path
             d={`M0.5 0V${RULER_MODULE}M0 0.5H${RULER_MODULE}`}
             strokeWidth={1}
-            style={{ stroke: "var(--color-grid)" }}
+            className="landing-grid-minor"
           />
         </pattern>
         <pattern
@@ -98,7 +96,7 @@ function SheetGrid() {
           <path
             d={`M0.5 0V${RULER_MODULE * 4}M0 0.5H${RULER_MODULE * 4}`}
             strokeWidth={1}
-            style={{ stroke: "var(--color-grid-strong)" }}
+            className="landing-grid-major"
           />
         </pattern>
       </defs>
@@ -123,10 +121,10 @@ function SheetGrid() {
  */
 export function LandingGuides() {
   return (
-    <VStack aria-hidden="true" style={styles.guides}>
-      <VStack style={styles.guideFrame}>
+    <VStack aria-hidden="true" className="landing-guides">
+      <VStack className="landing-guide-frame">
         <SheetGrid />
-        <VStack style={styles.grain} />
+        <VStack className="landing-grain" />
         <RulerTicks edge="top" />
         <RulerTicks edge="left" />
       </VStack>
@@ -141,11 +139,11 @@ export function LandingGuides() {
  */
 export function LandingMarks() {
   return (
-    <VStack aria-hidden="true" style={styles.guideMarks}>
-      <VStack style={styles.guideNodeTopLeft} />
-      <VStack style={styles.guideNodeTopRight} />
-      <VStack style={styles.guideNodeBottomLeft} />
-      <VStack style={styles.guideNodeBottomRight} />
+    <VStack aria-hidden="true" className="landing-guide-marks">
+      <VStack className="landing-guide-node landing-guide-node--top-left" />
+      <VStack className="landing-guide-node landing-guide-node--top-right" />
+      <VStack className="landing-guide-node landing-guide-node--bottom-left" />
+      <VStack className="landing-guide-node landing-guide-node--bottom-right" />
     </VStack>
   );
 }

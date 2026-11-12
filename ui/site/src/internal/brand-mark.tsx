@@ -1,7 +1,12 @@
 import { VStack } from "@astryxdesign/core/VStack";
-import { lazy, Suspense, useEffect, useState, type ComponentProps } from "react";
-
-import { styles } from "./landing-styles";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useState,
+  type ComponentProps,
+  type CSSProperties,
+} from "react";
 
 const ShaderFill = lazy(async () => {
   const module = await import("@figma/expressive-components");
@@ -28,32 +33,19 @@ const outline = [
 // image: `pathLength` plus a dash pattern the length of the path turns the
 // stroke into a pen that stops wherever the offset says. The theme's ink
 // replaces the two exported fills, which carry those same two colors.
-function BrandOutline({
-  started,
-  reducesMotion,
-  onDrawn,
-}: {
-  started: boolean;
-  reducesMotion: boolean;
-  onDrawn: () => void;
-}) {
+function BrandOutline({ started, onDrawn }: { started: boolean; onDrawn: () => void }) {
   return (
     <svg
       aria-hidden="true"
       viewBox="0 0 507.323 316.34"
       preserveAspectRatio="none"
       overflow="visible"
-      style={styles.outline}
+      className="landing-outline"
     >
       <g
-        fill="none"
-        stroke="var(--color-text-primary)"
-        strokeWidth={7.32345}
-        style={{
-          strokeDasharray: "1 1",
-          strokeDashoffset: started ? 0 : 1,
-          transition: reducesMotion ? "none" : "var(--landing-mark-transition)",
-        }}
+        className={
+          started ? "landing-outline-path landing-outline-path--started" : "landing-outline-path"
+        }
         onTransitionEnd={(event) => {
           if (event.propertyName === "stroke-dashoffset") onDrawn();
         }}
@@ -70,15 +62,19 @@ function BrandOutline({
 // fills in behind the header's blur instead of appearing all at once. The
 // canvas mounts transparent and reveals on the next frame, which gives the
 // transition a painted start state to move away from.
-function ShaderReveal({
-  shader,
-  reducesMotion,
-  revealed,
-}: {
-  shader: BrandShader;
-  reducesMotion: boolean;
-  revealed: boolean;
-}) {
+
+// `ShaderFill` gives its canvas inline `width` and `height` of 100%, then merges
+// the caller's style after them, so a class cannot set the shader's own box.
+// Losing that box stretches the canvas across the mask wrapper and moves the
+// fill away from the figure the lines closed.
+const shaderBox: CSSProperties = {
+  width: "76.5708%",
+  height: "130.6006%",
+  left: "11.7146%",
+  top: "-15.3003%",
+};
+
+function ShaderReveal({ shader, revealed }: { shader: BrandShader; revealed: boolean }) {
   const [settled, setSettled] = useState(false);
 
   useEffect(() => {
@@ -92,12 +88,8 @@ function ShaderReveal({
   return (
     <ShaderFill
       shader={shader}
-      style={{
-        ...styles.shader,
-        opacity: settled ? 1 : 0,
-        filter: settled ? "blur(0)" : "blur(var(--landing-shader-blur))",
-        transition: reducesMotion ? "none" : "var(--landing-shader-transition)",
-      }}
+      className={settled ? "landing-shader landing-shader--settled" : "landing-shader"}
+      style={shaderBox}
     />
   );
 }
@@ -134,28 +126,23 @@ export function BrandMark({
   return (
     <>
       <VStack
-        style={{
-          ...styles.symbolPlate,
-          opacity: started ? 1 : 0,
-          transition: reducesMotion ? "none" : "var(--landing-mark-transition)",
-        }}
+        className={
+          started ? "landing-symbol-plate landing-symbol-plate--started" : "landing-symbol-plate"
+        }
       >
-        <VStack style={styles.grain} />
+        <VStack className="landing-grain" />
       </VStack>
-      <VStack style={{ ...styles.symbolMask, maskImage: `url("${mask}")` }}>
+      <VStack
+        className="landing-symbol-mask"
+        // SAFETY: React's CSSProperties has no index signature for custom
+        // properties, but every `--*` key is a valid declaration at runtime.
+        style={{ "--landing-symbol-mask": `url("${mask}")` } as CSSProperties}
+      >
         <Suspense fallback={null}>
-          <ShaderReveal
-            shader={shader}
-            reducesMotion={reducesMotion}
-            revealed={drawn || reducesMotion}
-          />
+          <ShaderReveal shader={shader} revealed={drawn || reducesMotion} />
         </Suspense>
       </VStack>
-      <BrandOutline
-        started={started}
-        reducesMotion={reducesMotion}
-        onDrawn={() => setDrawn(true)}
-      />
+      <BrandOutline started={started} onDrawn={() => setDrawn(true)} />
     </>
   );
 }

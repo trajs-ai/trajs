@@ -1,0 +1,982 @@
+/*
+ * The landing page's composition. The theme supplies the skin; the sheet's
+ * frame, its hero, its masthead, its footer and the widths they reflow at are
+ * this page's own geometry, held as `--landing-*` properties on the page root.
+ *
+ * Colors, gaps and radii come from theme tokens. A measurement with no token is
+ * a proportion of the board it was drawn on, named here rather than repeated in
+ * the markup.
+ *
+ * Responsive contract. Exactly one band applies at any width.
+ *   < 720px    phone, one column, the mark above the headline, the nav a menu
+ *   720-1439px tablet, a centered 640px block from the 834 × 1112 board
+ *   >= 1440px  desktop, the position-sensitive 1920 × 1080 board capped by height
+ */
+
+.landing-page {
+  /* The sheet's margins: the desktop board's are the base, and the tablet and
+     phone bands override them. */
+  --landing-page-inline: clamp(2.5rem, 4vw, 6rem);
+  --landing-page-top: var(--landing-page-inline);
+  --landing-page-bottom: var(--landing-page-inline);
+  --landing-frame-outset: 1.5rem;
+  --landing-ruler-display: flex;
+  --landing-grid-display: block;
+
+  /* The grain is one 144px turbulence tile repeated across the sheet; the alpha
+     of the tile keeps it regular instead of animated. */
+  --landing-grain-size: 9rem;
+  --landing-grain-opacity: 0.12;
+
+  /* Masthead: the band that opens the sheet. Its one label reads as the page's
+     title row, not a second header. */
+  --landing-notice-height: 2.5rem;
+  --landing-notice-padding-inline: 2.5rem;
+  --landing-notice-size: 0.8125rem;
+  --landing-notice-tracking: 0.12em;
+
+  /* Header */
+  --landing-nav-top: clamp(1.5rem, 2vw, 2.5rem);
+  --landing-nav-height: clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem);
+  --landing-nav-padding-block: 1rem;
+  --landing-nav-padding-inline: 3rem;
+  --landing-nav-gap: 1.75rem;
+  --landing-nav-font-size: 0.9375rem;
+  --landing-nav-tracking: 0.08em;
+  --landing-nav-display: flex;
+  --landing-menu-display: none;
+  --landing-brand-size: 1.25rem;
+  --landing-header-blur: 0.75rem;
+  --landing-header-transition: opacity 180ms ease, filter 220ms ease;
+  --landing-theme-toggle-size: 1.5rem;
+
+  /* Hero. The heading is the board's display: 135/144 at weight 250, with its
+     own optical width and roundness. */
+  --landing-stage-top: calc(var(--landing-nav-height) + 3rem);
+  --landing-stage-bottom: 8rem;
+  --landing-hero-areas: "headline art";
+  --landing-hero-columns: minmax(0, 678fr) minmax(0, 1010fr);
+  --landing-hero-column-gap: 2.5rem;
+  --landing-hero-row-gap: 0rem;
+  --landing-hero-width: auto;
+  --landing-hero-margin: 0;
+  --landing-hero-align: start;
+  /* The tablet composition's one scale: the hero block's width. Only the tablet
+     band consumes it; the desktop composition is drawn on the board's own
+     proportions instead. */
+  --landing-tablet-block: 40rem;
+  /* The composition's ink sits right of its column: the headline is ragged on
+     the left, while the CTA row runs to the art column's right edge. That leaves
+     about 106px more air on the left than on the right at the board's scale.
+     Centering the overhang reads one step left, so the desktop band slides the
+     grid back by a fifth of the display instead. */
+  --landing-hero-optical-offset: 0rem;
+  --landing-heading-top: clamp(0rem, 13.3333vw - 12rem, 4rem);
+  --landing-heading-align: end;
+  --landing-display-size: clamp(3rem, 2.5625rem + 4.896vw, 8.4375rem);
+  --landing-display-leading: 1.0666667;
+  --landing-display-weight: 250;
+  --landing-art-align: flex-start;
+  --landing-lockup-width: 86.85535%;
+  --landing-lockup-aspect: 877.239 / 500.003;
+  --landing-symbol-width: 35.2262%;
+  --landing-wordmark-display: block;
+  --landing-wordmark-offset: 0.409469;
+  --landing-cta-display: flex;
+  --landing-cta-area: art;
+  /* The CTA row rests its bottom edge on the last headline line's baseline
+     instead of on the art's bottom edge, so the controls sit just under
+     "Exchange." at every desktop size. The baseline is found from the heading's
+     own metrics: its top offset, its three line boxes, and the share of a line
+     box that falls below the baseline. */
+  --landing-cta-align: start;
+  --landing-cta-justify: start;
+  --landing-cta-baseline: calc(var(--landing-display-size) * 0.2);
+  --landing-cta-offset: calc(
+    var(--landing-heading-top) + var(--landing-display-size) * var(--landing-display-leading) * 3 -
+      var(--landing-cta-baseline) - var(--landing-control-height)
+  );
+  --landing-cta-margin-inline: calc(var(--landing-lockup-width) * var(--landing-wordmark-offset)) 0;
+  --landing-cta-gap: var(--spacing-4);
+  --landing-command-gap: var(--spacing-3);
+  --landing-action-icon-size: 1.25rem;
+
+  /* CTAs and controls */
+  --landing-action-size: clamp(0.9375rem, 1.1979vw, 1.4375rem);
+  --landing-command-size: clamp(0.875rem, 1.0417vw, 1.25rem);
+  --landing-command-leading: clamp(1.25rem, 1.25vw, 1.5rem);
+  --landing-control-height: clamp(3rem, 2.9167vw, 3.5rem);
+  --landing-action-padding: clamp(1rem, 1.4583vw, 1.75rem);
+  --landing-command-padding: clamp(0.875rem, 1.0417vw, 1.25rem);
+  --landing-prompt-size: clamp(0.8125rem, 0.9896vw, 1.1875rem);
+
+  /* Labels and body copy shared by the footer and the status line. */
+  --landing-index-body-size: clamp(1rem, 0.75rem + 0.4167vw, 1.25rem);
+  --landing-index-body-leading: clamp(1.5rem, 1.25rem + 0.625vw, 2rem);
+  --landing-index-label-size: clamp(0.875rem, 0.75rem + 0.3125vw, 1.125rem);
+  --landing-index-label-leading: 1.5rem;
+  --landing-index-link-size: clamp(0.8125rem, 0.5rem + 0.4167vw, 1rem);
+  --landing-changelog-display: flex;
+  --landing-card-gap: 1.25rem;
+
+  /* Footer: the brand block and its two link groups share three tracks, so the
+     band reads as one measured grid. */
+  --landing-footer-gap: 4.5rem;
+  --landing-footer-padding: 2.5rem;
+  --landing-footer-bottom: 1.5rem;
+  --landing-footer-columns: repeat(3, minmax(0, 1fr));
+  --landing-footer-column-gap: 4.5rem;
+  --landing-footer-row-gap: 0rem;
+  --landing-footer-brand-gap: 1.5rem;
+  --landing-footer-about-width: 22rem;
+  --landing-footer-link-gap: 0.75rem;
+  --landing-footer-link-size: var(--landing-index-link-size);
+  --landing-footer-legal-gap: 4rem;
+  --landing-footer-legal-padding: 1.5rem;
+  --landing-footer-legal-size: 0.8125rem;
+  --landing-footer-legal-tracking: 0.12em;
+  --landing-footer-meta-gap: 1.5rem;
+
+  /* The mark is drawn before it is filled: the paper island and the wireframe
+     arrive over one beat, and the shader waits for that beat to end rather than
+     for a copy of its duration, so this is the only place the draw is timed.
+     Each layer changes one of these two properties. */
+  --landing-mark-transition: opacity 800ms ease-in-out, stroke-dashoffset 800ms ease-in-out;
+  /* The shader arrives after the first paint, so it settles out of a heavier
+     blur than the header, over a long and unhurried run. */
+  --landing-shader-blur: 1.25rem;
+  --landing-shader-transition: opacity 900ms ease-out, filter 1800ms ease-out;
+}
+
+@media (width >= 720px) and (width < 1440px) {
+  .landing-page {
+    /* Tablet: the header keeps the desktop's floating, reveal-on-scroll
+       behavior while its contents reflow; the hero becomes a centered art +
+       headline pair with the CTAs underneath. This band stops at the desktop
+       edge, where the position-sensitive board takes over. */
+    --landing-page-inline: 2.5rem;
+    --landing-frame-outset: 1rem;
+    --landing-nav-height: 5.5rem;
+    /* The tablet header keeps its 834 board spacing and tightens just enough for
+       the 720px edge, where the 640px hero still fits. */
+    --landing-nav-padding-inline: clamp(2rem, 14.035vw - 4.3125rem, 3rem);
+    --landing-nav-gap: clamp(1.25rem, 7.018vw - 1.906rem, 1.75rem);
+    /* The tablet block is the 834 × 1112 board. Below that height the stage's
+       top gap closes so the sheet stays on the first screen; the fixed header
+       overlays the top band instead of taking flow space. */
+    --landing-stage-top: clamp(6.875rem, calc(10rem - (1112px - 100svh) * 0.34), 10rem);
+    /* With the index cards gone, the hero's lower gap is the sheet's closing
+       space rather than a break before another row. */
+    --landing-stage-bottom: 6rem;
+    /* The tablet board's block is 640 wide on a 754-wide sheet, so it holds at
+       640 until the sheet is wider than the board and then grows with the
+       viewport, reaching 85% of the sheet at the desktop edge. It never grows
+       past the first screen: the headline and the art keep the board's ratios,
+       so the block is 0.675 of its width tall, and the guard below stops it
+       where that height would run into the sheet's own padding. The status line
+       under the hero takes a further 1.5rem. */
+    --landing-tablet-block: clamp(
+      40rem,
+      calc(40rem + (100vw - 834px) * 0.85148),
+      calc(
+        (
+            100svh - var(--landing-page-top) - var(--landing-page-bottom) -
+              var(--landing-stage-top) - var(--landing-stage-bottom) - 1.5rem
+          ) *
+          1.4817
+      )
+    );
+    --landing-hero-areas: "art headline" "ctas ctas";
+    --landing-hero-columns: minmax(0, 190fr) minmax(0, 395fr);
+    --landing-hero-column-gap: calc(var(--landing-tablet-block) * 56 / 640);
+    --landing-hero-row-gap: calc(var(--landing-tablet-block) * 64 / 640);
+    --landing-hero-width: var(--landing-tablet-block);
+    --landing-hero-margin: auto;
+    --landing-hero-align: center;
+    --landing-heading-top: 0rem;
+    --landing-heading-align: start;
+    --landing-display-size: calc(var(--landing-tablet-block) * 90 / 640);
+    --landing-display-leading: 1.1556;
+    --landing-art-align: center;
+    --landing-lockup-width: 100%;
+    --landing-lockup-aspect: 190 / 307.426;
+    --landing-symbol-width: 100%;
+    --landing-wordmark-display: none;
+    --landing-cta-area: ctas;
+    --landing-cta-align: start;
+    --landing-cta-justify: start;
+    /* The tablet CTAs sit in their own row below the art, where the headline's
+       baseline is no longer their anchor. */
+    --landing-cta-offset: 0;
+    --landing-cta-margin-inline: 0;
+    --landing-changelog-display: none;
+    --landing-action-size: calc(var(--landing-tablet-block) * 23 / 640);
+    --landing-command-size: calc(var(--landing-tablet-block) * 20 / 640);
+    --landing-command-leading: calc(var(--landing-tablet-block) * 24 / 640);
+    --landing-prompt-size: calc(var(--landing-tablet-block) * 19 / 640);
+    --landing-control-height: calc(var(--landing-tablet-block) * 56 / 640);
+    --landing-action-padding: calc(var(--landing-tablet-block) * 28 / 640);
+    --landing-command-padding: calc(var(--landing-tablet-block) * 20 / 640);
+    --landing-cta-gap: calc(var(--landing-tablet-block) * 16 / 640);
+    --landing-command-gap: calc(var(--landing-tablet-block) * 12 / 640);
+    --landing-action-icon-size: calc(var(--landing-tablet-block) * 20 / 640);
+    --landing-index-body-size: 1rem;
+    --landing-index-body-leading: 1.5625rem;
+    --landing-index-label-size: 0.9375rem;
+    --landing-index-link-size: 0.875rem;
+    --landing-card-gap: 1rem;
+    /* The footer keeps three columns but tightens their gutters so the brand
+       block and both link groups still breathe. */
+    --landing-footer-gap: 3rem;
+    --landing-footer-padding: 2rem;
+    --landing-footer-bottom: 1.25rem;
+    --landing-footer-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+    --landing-footer-column-gap: 1.5rem;
+    --landing-footer-brand-gap: 1.25rem;
+    --landing-footer-about-width: none;
+    --landing-footer-legal-gap: 3rem;
+    --landing-footer-legal-padding: 1.25rem;
+  }
+}
+
+@media (width >= 1440px) {
+  .landing-page {
+    /* Desktop: the hero is a position-sensitive composition that only holds
+       together at the board's width and above. Type and controls scale from the
+       board without enlarging the page margins in short windows. The hero width
+       follows the same 1080-tall board scale (1728px / 1080px = 160svh), so the
+       artwork shrinks with the display and keeps the board's proportions. */
+    --landing-nav-height: min(clamp(4.75rem, 2.5rem + 2.5vw, 5.5rem), 8.1481481svh);
+    --landing-nav-padding-inline: min(3rem, 4.4444444svh);
+    --landing-nav-gap: min(1.75rem, 2.5925926svh);
+    --landing-nav-font-size: min(0.9375rem, 1.3888889svh);
+    --landing-brand-size: min(1.25rem, 1.8518519svh);
+    --landing-stage-top: min(calc(var(--landing-nav-height) + min(3rem, 2.5vw)), 12.5925926svh);
+    --landing-stage-bottom: min(6rem, 5vw, 8.8888889svh);
+    /* 1728px is the 1920 board less its two 5vw margins. */
+    --landing-hero-width: min(100%, 1728px, 160svh);
+    --landing-hero-margin: auto;
+    /* 27px at the 1920 board. */
+    --landing-hero-optical-offset: calc(var(--landing-display-size) * 0.2);
+    --landing-hero-column-gap: min(2.5rem, 2.0833333vw, 3.7037037svh);
+    --landing-heading-top: min(4rem, 3.3333333vw, 5.9259259svh);
+    --landing-display-size: min(8.4375rem, 7.03125vw, 12.5svh);
+    --landing-prompt-size: min(1.1875rem, 0.9895833vw, 1.7592593svh);
+    --landing-action-size: min(1.4375rem, 1.1979167vw, 2.1296296svh);
+    --landing-command-size: min(1.25rem, 1.0416667vw, 1.8518519svh);
+    --landing-command-leading: min(1.5rem, 1.25vw, 2.2222222svh);
+    --landing-control-height: min(3.5rem, 2.9166667vw, 5.1851852svh);
+    --landing-action-padding: min(1.75rem, 1.4583333vw, 2.5925926svh);
+    --landing-command-padding: min(1.25rem, 1.0416667vw, 1.8518519svh);
+    --landing-cta-gap: min(1rem, 0.8333333vw, 1.4814815svh);
+    --landing-command-gap: min(0.75rem, 0.625vw, 1.1111111svh);
+    --landing-action-icon-size: min(1.25rem, 1.0416667vw, 1.8518519svh);
+    --landing-index-body-size: min(1.25rem, 1.0416667vw, 1.8518519svh);
+    --landing-index-body-leading: min(2rem, 1.6666667vw, 2.962963svh);
+    --landing-index-label-size: min(1.125rem, 0.9375vw, 1.6666667svh);
+    --landing-index-label-leading: min(1.5rem, 1.25vw, 2.2222222svh);
+    --landing-index-link-size: min(1rem, 0.8333333vw, 1.4814815svh);
+    --landing-card-gap: min(1.25rem, 1.0416667vw, 1.8518519svh);
+  }
+}
+
+@media (width < 720px) {
+  .landing-page {
+    /* Phone: one column all the way down. The nav becomes a menu sheet, the
+       symbol sits above the headline, and the CTAs move into that sheet. */
+    --landing-page-inline: 1.25rem;
+    /* The phone layout is a single column in a 20px margin, so the frame outset
+       stays small and the ruler steps out of the way. The graph paper stays: it
+       is the sheet's floor at every size, and the phone frame is wide enough to
+       carry the same module. */
+    --landing-ruler-display: none;
+    --landing-frame-outset: 0.5rem;
+    /* The phone band drops a size and tightens tracking so the release line
+       stays on one row. */
+    --landing-notice-height: 2.25rem;
+    --landing-notice-padding-inline: 1rem;
+    --landing-notice-size: 0.75rem;
+    --landing-notice-tracking: 0.08em;
+    --landing-nav-height: 3.25rem;
+    --landing-nav-padding-block: 0.5rem;
+    --landing-nav-padding-inline: 1rem;
+    --landing-nav-display: none;
+    --landing-menu-display: flex;
+    /* The fixed header takes no space in the flow, so the stage reserves the
+       header band. */
+    --landing-stage-top: calc(var(--landing-nav-height) + 1.5rem);
+    --landing-stage-bottom: 1.5rem;
+    --landing-hero-areas: "art" "headline";
+    --landing-hero-columns: minmax(0, 1fr);
+    --landing-hero-column-gap: 0rem;
+    --landing-hero-row-gap: 1.5rem;
+    --landing-hero-width: auto;
+    --landing-hero-margin: 0;
+    --landing-hero-align: start;
+    --landing-heading-top: 0rem;
+    --landing-heading-align: center;
+    --landing-display-size: clamp(2.5rem, 15.276vw, 3.7236rem);
+    --landing-display-leading: 1.1;
+    --landing-art-align: center;
+    /* The phone composition is a fixed-size block from the 390 board, where the
+       symbol is 160.952 wide; the mark keeps that size instead of tracking the
+       viewport width. */
+    --landing-lockup-width: 10.0595rem;
+    --landing-lockup-aspect: 160.952 / 260.426;
+    --landing-symbol-width: 100%;
+    --landing-wordmark-display: none;
+    --landing-cta-display: none;
+    --landing-index-body-size: 0.9375rem;
+    --landing-index-body-leading: 1.4375rem;
+    --landing-index-label-size: 0.9375rem;
+    --landing-index-link-size: 0.8125rem;
+    --landing-card-gap: 0.5rem;
+    /* The phone footer stacks the brand over its two link groups, and the legal
+       line drops a size so it still fits one row. */
+    --landing-footer-gap: 2.5rem;
+    --landing-footer-padding: 1.5rem;
+    --landing-footer-bottom: 1rem;
+    --landing-footer-columns: minmax(0, 1fr);
+    --landing-footer-column-gap: 0rem;
+    --landing-footer-row-gap: 2.5rem;
+    --landing-footer-brand-gap: 1rem;
+    --landing-footer-about-width: none;
+    --landing-footer-link-gap: 0.625rem;
+    --landing-footer-legal-gap: 2rem;
+    --landing-footer-legal-padding: 1rem;
+    --landing-footer-legal-size: 0.75rem;
+    --landing-footer-legal-tracking: 0.06em;
+    --landing-footer-meta-gap: 0.75rem;
+  }
+}
+
+/* ── Page frame ─────────────────────────────────────────────────────────── */
+
+.landing-page {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* Revealing the header needs scroll travel. Short pages reserve enough travel
+     even when their content fits in the window. */
+  min-height: calc(100svh + max(var(--landing-nav-height), 5rem));
+  /* The page is a pasteboard: the frame paints the board the content sits on,
+     and the margins around it fall back to the darker work surface. */
+  background: var(--color-pasteboard);
+  color: var(--color-text-primary);
+  padding: var(--landing-page-top) var(--landing-page-inline) var(--landing-page-bottom);
+}
+
+/* The sheet is the main content only: the frame draws its plate and closes the
+   border above the footer, which stands on the pasteboard outside it. The plate
+   fills the window less the page's own margins, so the first screen is all sheet
+   and the footer waits below the fold. */
+.landing-sheet {
+  position: relative;
+  isolation: isolate;
+  min-height: calc(100svh - var(--landing-page-top) - var(--landing-page-bottom));
+}
+
+/* The page isolates its own stacking context, so this negative layer stays above
+   the page fill and behind the content. */
+.landing-guides {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* The sheet's graph paper: one 24px module with a stronger line every fourth,
+   drawn behind the grain so the plate reads as drafted stock. It takes no input
+   and never repaints. */
+.landing-guide-grid {
+  position: absolute;
+  inset: 0;
+  display: var(--landing-grid-display);
+  pointer-events: none;
+}
+
+/* Both tiers of the sheet's graph paper are 1px and one step below the guides. */
+.landing-grid-minor {
+  stroke: var(--color-grid);
+}
+
+.landing-grid-major {
+  stroke: var(--color-grid-strong);
+}
+
+/* The grain belongs to the frame's plate, not the pasteboard around it, so the
+   margins stay clean and only the live area reads as printed stock. It never
+   takes input, and the tile is static: no repaint per frame, no motion to
+   reduce. */
+.landing-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='144' height='144'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='144' height='144' filter='url(%23grain)'/%3E%3C/svg%3E");
+  background-size: var(--landing-grain-size) var(--landing-grain-size);
+  background-repeat: repeat;
+  opacity: var(--landing-grain-opacity);
+}
+
+/* The frame stands off the live area, so no line of copy or control ever touches
+   the trim. It wraps the sheet only and stops above the footer, so the footer
+   reads as a separate block instead of the sheet's last row. The edge is an
+   inset shadow rather than a border: a border would push the grid and both
+   rulers a pixel off its own edge, so the scale would start a pixel away from
+   the corner marks that pin it. */
+.landing-guide-frame {
+  position: absolute;
+  inset: calc(-1 * var(--landing-frame-outset));
+  background: var(--color-background-body);
+  box-shadow: inset 0 0 0 1px var(--color-guide-strong);
+}
+
+/* The ruler turns the corner: the same module continues along the frame's top
+   edge, so the sheet is calibrated on two sides while the live area stays
+   completely clear of lines. It is drawn as SVG rather than a repeating
+   gradient so each graduation is a crisp 1px stroke that meets the border
+   without a half-pixel blur. */
+.landing-ruler-top {
+  position: absolute;
+  display: var(--landing-ruler-display);
+  bottom: 100%;
+  left: 0;
+  width: 100%;
+  height: 1.25rem;
+  overflow: visible;
+}
+
+.landing-ruler-left {
+  position: absolute;
+  display: var(--landing-ruler-display);
+  right: 100%;
+  top: 0;
+  height: 100%;
+  width: 1.25rem;
+  overflow: visible;
+}
+
+/* Every mark shares the frame's 1px weight and one color, so rank is carried by
+   length alone and the scale stays a quiet margin note rather than a second
+   border. */
+.landing-ruler-ticks {
+  stroke: var(--color-guide);
+}
+
+/* A register mark on the frame: a small hollow diamond centered on a corner. The
+   corner nodes pin the frame the way a drawing sheet pins its register marks: it
+   interrupts both rules it joins instead of stopping short of them. Half a pixel
+   puts that center on the middle of the frame's 1px edge rather than on the box's
+   outer coordinate, which would sit the mark half a pixel off both rules. */
+.landing-guide-node {
+  position: absolute;
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border: 1px solid var(--color-guide-strong);
+  background: var(--color-background-body);
+}
+
+.landing-guide-node--top-left {
+  top: 0.5px;
+  left: 0.5px;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.landing-guide-node--top-right {
+  top: 0.5px;
+  right: 0.5px;
+  transform: translate(50%, -50%) rotate(45deg);
+}
+
+.landing-guide-node--bottom-left {
+  bottom: 0.5px;
+  left: 0.5px;
+  transform: translate(-50%, 50%) rotate(45deg);
+}
+
+.landing-guide-node--bottom-right {
+  bottom: 0.5px;
+  right: 0.5px;
+  transform: translate(50%, 50%) rotate(45deg);
+}
+
+/* The corner marks paint above the masthead, so the band can close the frame's
+   top edge without clipping them. */
+.landing-guide-marks {
+  position: absolute;
+  inset: calc(-1 * var(--landing-frame-outset));
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ── Masthead ───────────────────────────────────────────────────────────── */
+
+/* The sheet's masthead: an opaque band that closes the frame's top edge. It
+   reaches the frame's corners and repeats their border, so the plate opens on
+   the band instead of a gap of graph paper. It scrolls away with the sheet. */
+.landing-notice {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: var(--landing-notice-height);
+  padding-block: var(--spacing-2);
+  padding-inline: var(--landing-notice-padding-inline);
+  margin: calc(-1 * var(--landing-frame-outset)) calc(-1 * var(--landing-frame-outset)) 0;
+  border: 1px solid var(--color-guide-strong);
+  background: var(--color-background-body);
+  color: var(--color-ink-muted);
+  font-family: var(--font-family-code);
+  font-size: var(--landing-notice-size);
+  line-height: var(--landing-index-label-leading);
+  letter-spacing: var(--landing-notice-tracking);
+  white-space: nowrap;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+/* The header floats over the page at every breakpoint, and only its contents
+   reflow. It arrives with the scroll: blur, opacity and translation, and it is
+   inert while hidden (the layout props on the element carry that). */
+.landing-header {
+  position: fixed;
+  z-index: 10;
+  top: var(--landing-nav-top);
+  left: var(--landing-page-inline);
+  right: var(--landing-page-inline);
+  min-height: var(--landing-nav-height);
+  padding: var(--landing-nav-padding-block) var(--landing-nav-padding-inline);
+  border-radius: var(--radius-element);
+  background: var(--color-background-surface);
+  backdrop-filter: blur(var(--spacing-4));
+  opacity: 0;
+  filter: blur(var(--landing-header-blur));
+  pointer-events: none;
+  transition: var(--landing-header-transition);
+}
+
+.landing-header--visible {
+  opacity: 1;
+  filter: blur(0);
+  pointer-events: auto;
+}
+
+.landing-header-end {
+  margin-inline-start: auto;
+  gap: var(--spacing-6);
+}
+
+.landing-brand {
+  font-family: var(--font-wordmark);
+  font-size: var(--landing-brand-size);
+  font-weight: 300;
+  letter-spacing: 0.11em;
+}
+
+.landing-brand-mark {
+  transform: rotate(90deg);
+  margin-inline: var(--spacing-0-5);
+}
+
+.landing-nav {
+  display: var(--landing-nav-display);
+  gap: var(--landing-nav-gap);
+  color: var(--color-ink-muted);
+  font-size: var(--landing-nav-font-size);
+  letter-spacing: var(--landing-nav-tracking);
+  font-weight: 300;
+}
+
+.landing-nav-link {
+  font-size: inherit;
+  font-weight: inherit;
+  white-space: nowrap;
+}
+
+.landing-changelog {
+  display: var(--landing-changelog-display);
+}
+
+.landing-ink-asset {
+  flex-shrink: 0;
+}
+
+/* The phone menu's trigger, and the sheet it opens. */
+.landing-menu-button {
+  display: var(--landing-menu-display);
+}
+
+.landing-menu-button--open {
+  background: var(--color-overlay-pressed);
+}
+
+.landing-menu-link {
+  display: block;
+  padding-block: var(--spacing-2);
+  padding-inline: var(--spacing-3);
+  border-radius: var(--radius-inner);
+  color: var(--color-ink-muted);
+}
+
+.landing-menu-label {
+  font-size: 0.9375rem;
+  font-weight: 300;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+}
+
+.landing-theme-toggle {
+  width: var(--landing-theme-toggle-size);
+  height: var(--landing-theme-toggle-size);
+  min-height: var(--landing-theme-toggle-size);
+  padding: 0;
+  border-radius: var(--radius-inner);
+  color: var(--color-ink-muted);
+}
+
+/* ── Hero ───────────────────────────────────────────────────────────────── */
+
+.landing-hero {
+  padding-block: var(--landing-stage-top) var(--landing-stage-bottom);
+  /* The sheet is a full window tall, so the height left over splits into equal
+     margins above and below the composition and the hero sits centered in the
+     plate. When the composition and its stage gaps need more than the window,
+     the auto margins collapse and the sheet grows past the fold instead of
+     pushing the hero off the top edge. */
+  margin-block: auto;
+  width: var(--landing-hero-width);
+  margin-inline: var(--landing-hero-margin);
+  /* A visual micro-adjustment only: the grid keeps its centered layout box,
+     while the desktop band slides its contents left by half the amount the ink
+     itself overhangs to the right. The offset is zero at the smaller
+     breakpoints, where the composition is centered by construction. */
+  transform: translateX(calc(-1 * var(--landing-hero-optical-offset)));
+  grid-template-columns: var(--landing-hero-columns);
+  grid-template-areas: var(--landing-hero-areas);
+  column-gap: var(--landing-hero-column-gap);
+  row-gap: var(--landing-hero-row-gap);
+  align-items: var(--landing-hero-align);
+}
+
+.landing-headline {
+  grid-area: headline;
+  padding-block-start: var(--landing-heading-top);
+  min-width: 0;
+}
+
+.landing-heading {
+  white-space: nowrap;
+  font-size: var(--landing-display-size);
+  line-height: var(--landing-display-leading);
+  font-weight: var(--landing-display-weight);
+  letter-spacing: -0.01em;
+  font-variation-settings:
+    "wdth" 100,
+    "ROND" 0;
+  text-align: var(--landing-heading-align);
+}
+
+.landing-headline-line {
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  text-align: inherit;
+}
+
+.landing-analysis-line {
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: 0.03em;
+  color: inherit;
+  text-align: inherit;
+}
+
+.landing-art {
+  grid-area: art;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  align-items: var(--landing-art-align);
+}
+
+.landing-lockup {
+  position: relative;
+  width: var(--landing-lockup-width);
+  aspect-ratio: var(--landing-lockup-aspect);
+}
+
+.landing-symbol {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--landing-symbol-width);
+}
+
+/* The mark is the sheet's one opaque island, so the graph paper must not show
+   through the frame's open triangles or between the shader's edges. The fill
+   repeats the paper, and it fades in with the wireframe, so the sheet is all
+   there is until the mark draws itself. */
+.landing-symbol-plate {
+  position: absolute;
+  inset: 0;
+  background: var(--color-background-body);
+  opacity: 0;
+  transition: var(--landing-mark-transition);
+}
+
+.landing-symbol-plate--started {
+  opacity: 1;
+}
+
+/* The horizontal symbol mask is rotated at its wrapper while the shader is
+   counter-rotated, so the original asset clips the portrait mark without
+   rewriting its vector paths. The mask itself arrives per color mode as
+   `--landing-symbol-mask` on the element. */
+.landing-symbol-mask {
+  position: absolute;
+  width: 130.6006%;
+  aspect-ratio: 403.578 / 309.017;
+  left: -15.3003%;
+  top: 9.4561%;
+  transform: rotate(90deg);
+  mask-image: var(--landing-symbol-mask);
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+}
+
+.landing-shader {
+  position: absolute;
+  transform: rotate(-90deg);
+  opacity: 0;
+  filter: blur(var(--landing-shader-blur));
+  transition: var(--landing-shader-transition);
+}
+
+/* The canvas counter-rotates inside the rotated mask. Its box arrives as a
+   style, because `ShaderFill` sets inline sizing that a class cannot outrank. */
+
+.landing-shader--settled {
+  opacity: 1;
+  filter: blur(0);
+}
+
+/* The outline is drawn on: `pathLength` plus a dash pattern the length of the
+   path turns the stroke into a pen that stops wherever the offset says. */
+.landing-outline {
+  position: absolute;
+  width: 164.173%;
+  max-width: none;
+  aspect-ratio: 507.323 / 316.34;
+  left: -32.0865%;
+  top: 18.366%;
+  transform: rotate(90deg);
+}
+
+.landing-outline-path {
+  fill: none;
+  stroke: var(--color-text-primary);
+  stroke-width: 7.32345;
+  stroke-dasharray: 1 1;
+  stroke-dashoffset: 1;
+  transition: var(--landing-mark-transition);
+}
+
+.landing-outline-path--started {
+  stroke-dashoffset: 0;
+}
+
+.landing-wordmark {
+  position: absolute;
+  display: var(--landing-wordmark-display);
+  width: 59.0538%;
+  height: auto;
+  left: calc(var(--landing-wordmark-offset) * 100%);
+  top: 49.088%;
+}
+
+/* ── CTAs ───────────────────────────────────────────────────────────────── */
+
+.landing-ctas {
+  grid-area: var(--landing-cta-area);
+  align-self: var(--landing-cta-align);
+  justify-self: var(--landing-cta-justify);
+  /* On desktop the row is placed from the top of the art column so that its
+     bottom edge lands on the last headline line's baseline; the tablet band
+     resets the offset. */
+  position: relative;
+  top: var(--landing-cta-offset);
+  margin-inline: var(--landing-cta-margin-inline);
+  display: var(--landing-cta-display);
+  gap: var(--landing-cta-gap);
+}
+
+/* The hero action: the board's control, scaled with the composition. */
+.landing-action {
+  flex-shrink: 0;
+  font-size: var(--landing-action-size);
+  padding-inline: var(--landing-action-padding);
+  min-height: var(--landing-control-height);
+}
+
+.landing-action-icon {
+  flex-shrink: 0;
+  width: var(--landing-action-icon-size);
+  height: var(--landing-action-icon-size);
+}
+
+/* The install command reads as one field: the page's grid sits behind
+   everything, so the control needs an opaque fill instead of a window onto the
+   board. */
+.landing-command {
+  display: flex;
+  align-items: center;
+  border: var(--border-width) solid var(--color-border-emphasized);
+  border-radius: var(--radius-element);
+  min-height: var(--landing-control-height);
+  padding-inline: var(--landing-command-padding);
+  gap: var(--landing-command-gap);
+  flex-shrink: 0;
+  background: var(--color-background-body);
+}
+
+.landing-command-text {
+  font-family: var(--font-family-code);
+  font-size: var(--landing-command-size);
+  line-height: var(--landing-command-leading);
+  color: var(--color-ink-command);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.landing-prompt {
+  font-family: var(--font-family-code);
+  font-size: var(--landing-prompt-size);
+  font-weight: 500;
+  /* It carries the command's meaning with the command text, so it takes the
+     same legible ink instead of the quieter role, which falls under AA here. */
+  color: var(--color-ink-muted);
+}
+
+/* The copy glyph is an exported image, but the confirmation check is drawn
+   inline so it can take the copy glyph's ink from the theme. */
+.landing-command-icon {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+}
+
+.landing-status {
+  font-size: var(--landing-index-link-size);
+  color: var(--color-text-secondary);
+  min-height: var(--spacing-6);
+}
+
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+
+/* The footer is detached from the sheet: it opens with a rule over a labeled
+   grid, but it sits below the frame's bottom border on the pasteboard, so it
+   reads as the page's footer rather than the sheet's last row. */
+.landing-footer {
+  border-block-start: 1px solid var(--color-guide-strong);
+  margin-block-start: var(--landing-footer-gap);
+  padding-block-start: var(--landing-footer-padding);
+  padding-block-end: var(--landing-footer-bottom);
+}
+
+.landing-footer-index {
+  grid-template-columns: var(--landing-footer-columns);
+  column-gap: var(--landing-footer-column-gap);
+  row-gap: var(--landing-footer-row-gap);
+  align-items: start;
+}
+
+.landing-footer-brand {
+  display: grid;
+  row-gap: var(--landing-footer-brand-gap);
+  align-content: start;
+  min-width: 0;
+}
+
+.landing-footer-about {
+  font-size: var(--landing-index-body-size);
+  line-height: var(--landing-index-body-leading);
+  letter-spacing: 0.01em;
+  max-width: var(--landing-footer-about-width);
+}
+
+.landing-footer-group {
+  display: grid;
+  row-gap: var(--landing-card-gap);
+  align-content: start;
+  min-width: 0;
+}
+
+/* The footer's group titles are the sheet's one label treatment, one step up
+   from the links they introduce. */
+.landing-footer-heading {
+  font-size: var(--landing-index-label-size);
+  font-weight: 300;
+  line-height: var(--landing-index-label-leading);
+  letter-spacing: 0.16em;
+}
+
+.landing-footer-links {
+  display: grid;
+  row-gap: var(--landing-footer-link-gap);
+  justify-items: start;
+}
+
+/* The footer ends in a labeled pointer, so it takes the sheet's one label
+   treatment. */
+.landing-label {
+  font-family: var(--font-family-code);
+  font-size: var(--landing-index-link-size);
+  line-height: var(--landing-index-label-leading);
+  letter-spacing: 0.12em;
+}
+
+.landing-footer-link {
+  font-size: var(--landing-footer-link-size);
+}
+
+.landing-footer-legal {
+  border-block-start: 1px solid var(--color-guide-strong);
+  margin-block-start: var(--landing-footer-legal-gap);
+  padding-block-start: var(--landing-footer-legal-padding);
+  gap: var(--spacing-4);
+}
+
+.landing-footer-meta {
+  gap: var(--landing-footer-meta-gap);
+  min-width: 0;
+}
+
+/* The legal line is the same mono label one step down, so it can set its own
+   size without inheriting the footer link's. */
+.landing-legal-label {
+  font-family: var(--font-family-code);
+  font-size: var(--landing-footer-legal-size);
+  line-height: var(--landing-index-label-leading);
+  letter-spacing: var(--landing-footer-legal-tracking);
+  white-space: nowrap;
+}
+
+.landing-footer-legal-text {
+  /* The footer stands on the pasteboard, where the muted ink drops to 4.09:1 in
+     light mode; the secondary ink keeps the line legible on both grounds. */
+  color: var(--color-text-secondary);
+}
+
+.landing-footer-legal-link {
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+/* Reduced motion keeps the two beats and drops the travel between them. Every
+   layer lands on its finished state instead of transitioning into it. */
+@media (prefers-reduced-motion: reduce) {
+  .landing-header,
+  .landing-symbol-plate,
+  .landing-outline-path,
+  .landing-shader {
+    transition: none;
+  }
+}

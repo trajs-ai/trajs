@@ -5,8 +5,8 @@ Source: [TRAJS desktop board, 1920 × 1080](https://www.figma.com/design/wHC1Hy6
 `figma.tokens.json` records shared variables, both color modes and the board's
 literal canvas fills. `palette.ts` owns the reviewed light/dark colors shared by
 the Astryx theme and the shader. `trajsTheme.ts` maps these colors to semantic
-roles and component overrides. Both schemes follow the Figma board. Desktop
-geometry is the current target; responsive layout is deferred.
+roles and carries the board's two component defaults. It is the skin only: no
+page geometry, no breakpoints, no `--landing-*` properties.
 
 | Figma role                            | Astryx role                                    |
 | ------------------------------------- | ---------------------------------------------- |
@@ -18,8 +18,8 @@ geometry is the current target; responsive layout is deferred.
 | Border / strong border                | `--color-border` / `--color-border-emphasized` |
 | Google Sans Flex                      | Body and heading families                      |
 | IBM Plex Mono                         | Code family                                    |
-| IBM Plex Sans Light                   | Local wordmark family                          |
-| Page budgets, display scale, tracking | `--landing-*` local tokens                     |
+| IBM Plex Sans Light                   | `--font-wordmark` local role                   |
+| Page budgets, display scale, tracking | `src/internal/landing.css` (page composition)  |
 
 The display is 135/144 at weight 250 on the source canvas. Body copy is 20/32
 at weight 300. Navigation is 15 at weight 300. Spacing follows the four-pixel
@@ -37,9 +37,11 @@ areas sit below full brightness. The board's literal fills take precedence over
 the separate `color/canvas` variable, whose values are also retained in the
 snapshot.
 
-Theme values live in Astryx's scoped theme, including color-scheme pairs.
-`src/internal/landing-styles.ts` maps page-specific geometry to these tokens;
-it does not contain a second palette. `src/internal/brand-shader.ts` creates
+Theme values live in Astryx's scoped theme, including color-scheme pairs. The
+landing page's geometry — frame, hero, masthead, footer and the three widths
+they are drawn at — lives with the page, in `src/internal/landing.css`, as
+`--landing-*` properties on `.landing-page`; that file reads the theme's tokens
+and holds no second palette. `src/internal/brand-shader.ts` creates
 stable animated and reduced-motion shader objects for each mode. Hex pigments
 from the palette are converted to Float32 channels, matching the original
 Figma parameters. The shader program and its other parameters are unchanged.

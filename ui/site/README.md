@@ -24,8 +24,11 @@ whole of the plain-CSS path the design system's getting-started guide calls for:
 components arrive styled, in the cascade layers the stylesheets themselves
 declare, and the theme's own stylesheets arrive with the generated theme module.
 There is no Tailwind bridge and no StyleX compiler here, so `className` carries
-only what the site writes itself and `xstyle` overrides are not available: style
-a page with component props and design tokens, as `AGENTS.md` spells out.
+only what the site writes itself and `xstyle` overrides are not available. That
+is the plain-CSS path the design system documents: components and their props do
+the work, `var(--color-*|--spacing-*|--radius-*)` tokens do the styling, and the
+page's own composition lives in its own stylesheet — `src/internal/landing.css`,
+reached through `className`, which is what `AGENTS.md` spells out.
 
 `src/astryx-themes.ts` is written by the CLI, not by hand: it imports the built
 module, the production CSS and the font CSS of the local TRAJS theme, and
@@ -39,8 +42,17 @@ The landing page follows the desktop Figma board `267:90`. Its extracted
 variables, semantic mappings, local fonts and rebuild instructions live in
 [`src/themes/trajs/README.md`](src/themes/trajs/README.md). Edit `trajsTheme.ts`
 and rebuild the theme rather than editing its generated CSS or adding global
-color overrides. Both modes share `palette.ts`; each uses its own original
-Figma SVG assets and shader pigments. Responsive layout is deferred.
+color overrides. The theme is the skin — palette, typefaces, radii, the board's
+two component defaults — and a page's composition is never part of it. Both
+modes share `palette.ts`; each uses its own original Figma SVG assets and shader
+pigments.
+
+The page's composition is `src/internal/landing.css`: the sheet's frame, the
+hero, the masthead and the footer, with the values that are this page's own
+geometry held as `--landing-*` properties on `.landing-page`. It carries one
+responsive contract, one band per width — tablet from 720, the position-
+sensitive desktop board from 1440, one column below 720 — and every token in the
+bands was drawn on one of the three Figma boards.
 
 The header is fixed and initially hidden. Scrolling past 64 CSS pixels reveals
 it through blur, opacity and translation; returning to the top hides it again.

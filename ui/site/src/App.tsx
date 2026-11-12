@@ -1,3 +1,4 @@
+import "./internal/landing.css";
 import { Button } from "@astryxdesign/core/Button";
 import { ClickableCard } from "@astryxdesign/core/ClickableCard";
 import { Grid } from "@astryxdesign/core/Grid";
@@ -16,7 +17,6 @@ import { BrandMark } from "./internal/brand-mark";
 import { brandShaders, stillBrandShaders } from "./internal/brand-shader";
 import { landingAssets } from "./internal/landing-assets";
 import { LandingGuides, LandingMarks } from "./internal/landing-guides";
-import { styles } from "./internal/landing-styles";
 import { palette, type ColorMode } from "./themes/trajs/palette";
 
 const repository = "https://github.com/trajs-ai/trajs";
@@ -103,7 +103,7 @@ function CheckIcon() {
       viewBox="0 0 20 20"
       fill="none"
       aria-hidden="true"
-      style={styles.commandIcon}
+      className="landing-command-icon"
     >
       <path
         d="M4.75 10.5L8.25 14L15.25 6.5"
@@ -230,13 +230,13 @@ export function App() {
 
   return (
     <Theme theme={themes[defaultThemeSlug]} mode={mode}>
-      <VStack id="top" style={styles.page}>
-        <VStack as="main" style={styles.sheet}>
+      <VStack id="top" className="landing-page">
+        <VStack as="main" className="landing-sheet">
           <LandingGuides />
-          <Link href={notice.href} color="inherit" type="inherit" style={styles.notice}>
+          <Link href={notice.href} color="inherit" type="inherit" className="landing-notice">
             <HStack gap={1.5} vAlign="center">
               <Text type="inherit">{notice.label}</Text>
-              <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+              <img src={assets.arrowUpRight} alt="" className="landing-ink-asset" />
             </HStack>
           </Link>
           <LandingMarks />
@@ -244,40 +244,34 @@ export function App() {
             as="header"
             vAlign="center"
             gap={4}
-            style={{
-              ...styles.header,
-              opacity: chromeVisible ? 1 : 0,
-              filter: chromeVisible ? "blur(0)" : "blur(var(--landing-header-blur))",
-              pointerEvents: chromeVisible ? "auto" : "none",
-              transition: reducesMotion ? "none" : "var(--landing-header-transition)",
-            }}
+            className={chromeVisible ? "landing-header landing-header--visible" : "landing-header"}
             inert={!chromeVisible}
             aria-hidden={!chromeVisible}
           >
             <Link href={import.meta.env.BASE_URL} color="inherit" type="inherit">
-              <HStack gap={2} vAlign="center" style={styles.brand}>
-                <img src={assets.logoMark} alt="" style={styles.brandMark} />
+              <HStack gap={2} vAlign="center" className="landing-brand">
+                <img src={assets.logoMark} alt="" className="landing-brand-mark" />
                 <Text type="inherit">TRAJS</Text>
               </HStack>
             </Link>
-            <HStack vAlign="center" style={styles.headerEnd}>
-              <HStack as="nav" aria-label="Main navigation" vAlign="center" style={styles.nav}>
+            <HStack vAlign="center" className="landing-header-end">
+              <HStack as="nav" aria-label="Main navigation" vAlign="center" className="landing-nav">
                 {navigation.map(({ label, href }) => (
                   <Link
                     key={label}
                     href={href}
                     color="inherit"
                     type="inherit"
-                    style={
+                    className={
                       label === "CHANGELOG"
-                        ? { ...styles.navLink, ...styles.changelog }
-                        : styles.navLink
+                        ? "landing-nav-link landing-changelog"
+                        : "landing-nav-link"
                     }
                   >
                     <HStack gap={1.5} vAlign="center">
                       <Text type="inherit">{label}</Text>
                       {label === "GITHUB" && (
-                        <img src={assets.arrow} alt="" style={styles.inkAsset} />
+                        <img src={assets.arrow} alt="" className="landing-ink-asset" />
                       )}
                     </HStack>
                   </Link>
@@ -287,7 +281,7 @@ export function App() {
                 label={mode === "dark" ? "Use light theme" : "Use dark theme"}
                 size="sm"
                 variant="ghost"
-                style={styles.themeToggle}
+                className="landing-theme-toggle"
                 onClick={() => setMode(mode === "dark" ? "light" : "dark")}
                 icon={mode === "dark" ? <SunIcon /> : <MoonIcon />}
               />
@@ -307,14 +301,14 @@ export function App() {
                         href={href}
                         color="inherit"
                         type="inherit"
-                        style={styles.menuLink}
+                        className="landing-menu-link"
                         onClick={() => setMenuOpen(false)}
                       >
                         <HStack hAlign="between" vAlign="center" gap={3}>
-                          <Text type="inherit" style={styles.menuLabel}>
+                          <Text type="inherit" className="landing-menu-label">
                             {label}
                           </Text>
-                          <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+                          <img src={assets.arrowUpRight} alt="" className="landing-ink-asset" />
                         </HStack>
                       </Link>
                     ))}
@@ -325,85 +319,86 @@ export function App() {
                   label="Open menu"
                   variant="ghost"
                   size="sm"
-                  style={{
-                    ...styles.menuButton,
-                    background: menuOpen ? "var(--color-overlay-pressed)" : undefined,
-                  }}
+                  className={
+                    menuOpen
+                      ? "landing-menu-button landing-menu-button--open"
+                      : "landing-menu-button"
+                  }
                   icon={<MenuIcon />}
                 />
               </Popover>
             </HStack>
           </HStack>
-          <Grid columns={2} align="start" style={styles.hero}>
-            <VStack style={styles.headline}>
-              <Heading level={1} type="display-1" style={styles.heading}>
-                <Text as="span" display="block" type="inherit" style={styles.headlineLine}>
+          <Grid className="landing-hero">
+            <VStack className="landing-headline">
+              <Heading level={1} className="landing-heading">
+                <Text as="span" display="block" type="inherit" className="landing-headline-line">
                   Record.
                 </Text>
-                <Text as="span" display="block" type="inherit" style={styles.analysisLine}>
+                <Text as="span" display="block" type="inherit" className="landing-analysis-line">
                   Analysis.
                 </Text>
-                <Text as="span" display="block" type="inherit" style={styles.headlineLine}>
+                <Text as="span" display="block" type="inherit" className="landing-headline-line">
                   Exchange.
                 </Text>
               </Heading>
             </VStack>
-            <VStack style={styles.art}>
-              <VStack role="img" aria-label="TRAJS" style={styles.lockup}>
-                <VStack style={styles.symbol} aria-hidden="true">
+            <VStack className="landing-art">
+              <VStack role="img" aria-label="TRAJS" className="landing-lockup">
+                <VStack className="landing-symbol" aria-hidden="true">
                   <BrandMark
                     mask={assets.symbolFill}
                     shader={shader}
                     reducesMotion={reducesMotion}
                   />
                 </VStack>
-                <img src={assets.wordmark} alt="" style={styles.wordmark} />
+                <img src={assets.wordmark} alt="" className="landing-wordmark" />
               </VStack>
             </VStack>
-            <HStack vAlign="center" style={styles.ctas}>
+            <HStack vAlign="center" className="landing-ctas">
               <Button
                 label="Get started"
                 href={navigation[0].href}
                 variant="primary"
                 size="lg"
-                style={styles.action}
-                endContent={<img src={assets.arrowRight} alt="" style={styles.actionIcon} />}
+                className="landing-action"
+                endContent={<img src={assets.arrowRight} alt="" className="landing-action-icon" />}
               />
               <ClickableCard
                 label={`Copy install command: ${installCommand}`}
                 onClick={copyInstallCommand}
                 variant="transparent"
                 padding={0}
-                style={styles.command}
+                className="landing-command"
               >
-                <Text type="code" style={styles.prompt} aria-hidden="true">
+                <Text type="code" className="landing-prompt" aria-hidden="true">
                   $
                 </Text>
-                <Text as="p" type="code" style={styles.commandText}>
+                <Text as="p" type="code" className="landing-command-text">
                   {installCommand}
                 </Text>
                 {installCopied ? (
                   <CheckIcon />
                 ) : (
-                  <img src={assets.copy} alt="" style={styles.inkAsset} />
+                  <img src={assets.copy} alt="" className="landing-ink-asset" />
                 )}
               </ClickableCard>
             </HStack>
           </Grid>
-          <Text as="p" role="status" aria-live="polite" style={styles.status}>
+          <Text as="p" role="status" aria-live="polite" className="landing-status">
             {copyStatus}
           </Text>
         </VStack>
-        <VStack as="footer" style={styles.footer}>
-          <Grid columns={3} style={styles.footerIndex}>
-            <VStack style={styles.footerBrand}>
+        <VStack as="footer" className="landing-footer">
+          <Grid className="landing-footer-index">
+            <VStack className="landing-footer-brand">
               <Link href={import.meta.env.BASE_URL} color="inherit" type="inherit">
-                <HStack gap={2} vAlign="center" style={styles.brand}>
-                  <img src={assets.logoMark} alt="" style={styles.brandMark} />
+                <HStack gap={2} vAlign="center" className="landing-brand">
+                  <img src={assets.logoMark} alt="" className="landing-brand-mark" />
                   <Text type="inherit">TRAJS</Text>
                 </HStack>
               </Link>
-              <Text as="p" color="secondary" style={styles.footerAbout}>
+              <Text as="p" color="secondary" className="landing-footer-about">
                 Record, analyze and exchange agent trajectories.
               </Text>
             </VStack>
@@ -412,21 +407,23 @@ export function App() {
                 as="nav"
                 key={group.title}
                 aria-label={group.label}
-                style={styles.footerGroup}
+                className="landing-footer-group"
               >
-                <Heading level={2}>{group.title}</Heading>
-                <VStack style={styles.footerLinks}>
+                <Heading level={2} className="landing-footer-heading">
+                  {group.title}
+                </Heading>
+                <VStack className="landing-footer-links">
                   {group.links.map(({ label, href }) => (
                     <Link
                       key={label}
                       href={href}
                       color="inherit"
                       type="inherit"
-                      style={styles.footerLink}
+                      className="landing-label landing-footer-link"
                     >
                       <HStack gap={1.5} vAlign="center">
                         <Text type="inherit">{label}</Text>
-                        <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+                        <img src={assets.arrowUpRight} alt="" className="landing-ink-asset" />
                       </HStack>
                     </Link>
                   ))}
@@ -434,23 +431,28 @@ export function App() {
               </VStack>
             ))}
           </Grid>
-          <HStack vAlign="center" hAlign="between" wrap="wrap" style={styles.footerLegal}>
-            <HStack vAlign="center" wrap="wrap" style={styles.footerMeta}>
-              <Text type="code" style={styles.footerLegalText}>
+          <HStack vAlign="center" hAlign="between" wrap="wrap" className="landing-footer-legal">
+            <HStack vAlign="center" wrap="wrap" className="landing-footer-meta">
+              <Text type="code" className="landing-legal-label landing-footer-legal-text">
                 © {new Date().getFullYear()} TRAJS
               </Text>
-              <Link href={license} color="inherit" type="inherit" style={styles.footerLegalLink}>
+              <Link
+                href={license}
+                color="inherit"
+                type="inherit"
+                className="landing-footer-legal-link"
+              >
                 <HStack gap={1.5} vAlign="center">
-                  <Text type="inherit" style={styles.footerLegalLabel}>
+                  <Text type="inherit" className="landing-legal-label">
                     MIT LICENSE
                   </Text>
-                  <img src={assets.arrowUpRight} alt="" style={styles.inkAsset} />
+                  <img src={assets.arrowUpRight} alt="" className="landing-ink-asset" />
                 </HStack>
               </Link>
             </HStack>
-            <Link href="#top" color="inherit" type="inherit" style={styles.footerLegalLink}>
+            <Link href="#top" color="inherit" type="inherit" className="landing-footer-legal-link">
               <HStack gap={1.5} vAlign="center">
-                <Text type="inherit" style={styles.footerLegalLabel}>
+                <Text type="inherit" className="landing-legal-label">
                   BACK TO TOP
                 </Text>
                 <ArrowUpIcon />
