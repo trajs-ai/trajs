@@ -2,6 +2,16 @@
 
 Project-specific guidance for AI coding agents.
 
+## Dev server
+
+Every task that touches this site runs a dev server and hands the user its URL.
+It is served through the shared launcher; [../AGENTS.md](../AGENTS.md) has the
+contract, the TLD rule and the restart rule.
+
+```sh
+../scripts/dev-server.sh start .
+```
+
 <!-- ASTRYX:START -->
 Astryx v0.7.11 · 174 components
 CLI: run every command as `pnpm exec astryx <cmd>` (shown below as `astryx ...`).

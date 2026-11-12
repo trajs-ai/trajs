@@ -53,6 +53,7 @@ catalog:
   vite-plus: ^1.4.0
   wrangler: ^4.155.0
   "@figma/expressive-components": 0.2.0
+  portless: ^0.17.0
 overrides:
   vite@*: "catalog:"
 peerDependencyRules:

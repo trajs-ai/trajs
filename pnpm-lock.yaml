@@ -221,6 +221,9 @@ catalogs:
     pkg-pr-new:
       specifier: ^0.0.92
       version: 0.0.92
+    portless:
+      specifier: ^0.17.0
+      version: 0.17.0
     typescript:
       specifier: ^7.0.2
       version: 7.0.2
@@ -259,6 +262,9 @@ importers:
       pkg-pr-new:
         specifier: 'catalog:'
         version: 0.0.92
+      portless:
+        specifier: 'catalog:'
+        version: 0.17.0
       vite-plus:
         specifier: 'catalog:'
         version: 1.4.0(@types/node@26.6.6)(@vitest/ui@5.0.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(typescript@7.0.2)(yaml@2.9.1)
@@ -2973,6 +2979,12 @@ packages:
     resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
     engines: {node: '>=14.19.0'}
 
+  portless@0.17.0:
+    resolution: {integrity: sha512-UJdy5sGmNSwi8ETvVniUTqULJht16qvBR9rvsFqsVekEyabMH2xJ5mwIEYBmSSHVCUmQvAmaYAhBcCs8PA7IBA==}
+    engines: {node: '>=24'}
+    os: [darwin, linux, win32]
+    hasBin: true
+
   postcss-selector-parser@7.1.6:
     resolution: {integrity: sha512-7qASPzhKF2l2KLboRZux8CCTRMdGiV08vWmyKzPz22qZ7ZjQBOeY7rNzNoCLSUiftJ7HUq0GERHmxw/t0dCdMw==}
     engines: {node: '>=4'}
@@ -5217,6 +5229,8 @@ snapshots:
   pkg-pr-new@0.0.92: {}
 
   pngjs@7.0.0: {}
+
+  portless@0.17.0: {}
 
   postcss-selector-parser@7.1.6:
     dependencies:
