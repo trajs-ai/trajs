@@ -1,5 +1,12 @@
 # @trajs/olap
 
+## 0.0.0-alpha.5
+
+### Patch Changes
+
+- Updated dependencies [[`7540e23`](https://github.com/trajs-ai/trajs/commit/7540e231bce8a0d62d4f76177934908d99a168d7), [`bc79241`](https://github.com/trajs-ai/trajs/commit/bc792411e42c6c3c04a0f7915479431627abcd1a), [`f058c49`](https://github.com/trajs-ai/trajs/commit/f058c494d4cc4085e3bc5a37814b4cc1d8125b1f), [`a566ead`](https://github.com/trajs-ai/trajs/commit/a566ead936a0f90e2f0aa4ab2e3975ab1d344191), [`a3ac6ec`](https://github.com/trajs-ai/trajs/commit/a3ac6ece1fba3c34f0b90a0e605f98ec883c8ebd), [`1bee2be`](https://github.com/trajs-ai/trajs/commit/1bee2be470e3d5601a9420a14f9b59c80424ad99)]:
+  - @trajs/core@0.0.0-alpha.5
+
 ## 0.0.0-alpha.4
 
 ### Patch Changes
