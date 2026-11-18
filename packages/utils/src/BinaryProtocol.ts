@@ -2,24 +2,26 @@
  * The binary layout of one message, stated as its fields in wire order.
  *
  * {@link layout} derives a {@link Layout} from the fields of a message.
- * {@link u8}, {@link u16} and {@link u32} state an unsigned integer field, and
- * {@link bytes} states a run of bytes whose length is fixed or counted by an
- * earlier field.
- * Every other schema is a field written and read by `SchemaBinary`.
+ * {@link u8}, {@link u16}, {@link u32} and {@link u64} state an unsigned
+ * integer field, and {@link bytes} states a run of bytes whose length is fixed
+ * or counted by an earlier field.
+ * Every field states one value as the `Uint8Array` its bytes span.
+ * {@link decodeTo} states the value those bytes hold, and any other schema given
+ * to {@link layout} is a field `SchemaBinary` writes as one frame.
  *
  * @stability experimental
  */
 
-import { Data, Schema } from "effect";
+import { Data, Schema, type Pipeable } from "effect";
 
-import { unsigned } from "#/internal/binary-protocol.ts";
+import { codecOf, fieldOf, unsigned, unsignedBig } from "#/internal/binary-protocol.ts";
 
 /**
  * How one field takes its bytes.
  *
  * **Details**
  *
- * - `integer` takes 1, 2, or 4 bytes, big-endian.
+ * - `integer` takes 1, 2, 4, or 8 bytes, big-endian.
  * - `bytes` takes `length` bytes when it is a number, and the bytes a named
  *   field counts when it is a string.
  *
@@ -28,7 +30,7 @@ import { unsigned } from "#/internal/binary-protocol.ts";
  * @category models
  */
 export type Wire = Data.TaggedEnum<{
-  integer: { readonly width: 1 | 2 | 4 };
+  integer: { readonly width: 1 | 2 | 4 | 8 };
   bytes: { readonly length: number | string };
 }>;
 
@@ -39,15 +41,16 @@ const Wire = Data.taggedEnum<Wire>();
  *
  * **Details**
  *
- * `schema` checks the value the field reads and writes, and states only its
- * decoded side: `wire` states the bytes.
+ * `wire` states the bytes the field spans and `schema` the value they hold.
+ * The schema decodes the bytes of that span and encodes the value back to
+ * bytes.
  *
- * @see {@link bytes} for a field whose length an earlier field counts.
+ * @see {@link decodeTo} for stating a value the bytes do not name.
  * @stability experimental
  * @category models
  */
-export interface Field<A> {
-  readonly schema: Schema.Codec<A, unknown>;
+export interface Field<A> extends Pipeable.Pipeable {
+  readonly schema: Schema.Codec<A, Uint8Array>;
   readonly wire: Wire;
 }
 
@@ -73,7 +76,7 @@ export type Fields<A extends Record<string, unknown>> = {
  * **Details**
  *
  * Decoding reads one field after another, and fails where the bytes end inside
- * one.
+ * one or hold more than the fields state.
  * Encoding writes the fields in the same order, with no count or terminator
  * between them.
  *
@@ -95,23 +98,30 @@ export type Layout<A extends Record<string, unknown>> = Schema.Codec<
  *
  * **Details**
  *
- * A `length` that names a field reads that field's value, which is why the
- * named field comes earlier in `fields`.
+ * A field is a {@link Field}, such as {@link u8}, or any other
+ * {@link Schema.Codec}, which takes one `SchemaBinary` frame.
+ * {@link decodeTo} states the value of a {@link Field} that its bytes do not
+ * name.
+ * A `length` that names a field counts the number that field's bytes state,
+ * which is why the named field comes earlier in `fields`.
+ * A length is a number, so an eight-byte field counts no run.
  *
  * **Gotchas**
  *
  * Deriving fails when a `length` names no field, names a later field, or names
- * a field that is not an integer one.
- * Encoding fails when a named length does not count the bytes of its run.
+ * a field that is not an integer one of at most four bytes.
+ * Encoding fails when a run holds another number of bytes than its wire states,
+ * or a value is of another range than its field.
  *
  * @stability experimental
  * @category constructors
  */
-export const layout = <A extends Record<string, unknown>>(fields: Fields<A>): Layout<A> => {
-  throw new Error(
-    `A layout states ${Object.keys(fields).length} fields, and its wire codec is not written yet.`,
-  );
-};
+export const layout = <A extends Record<string, unknown>>(fields: Fields<A>): Layout<A> =>
+  codecOf(fields);
+
+/** A field of `width` unsigned bytes, big-endian. */
+const integer = (width: 1 | 2 | 4): Field<number> =>
+  fieldOf(unsigned(width), Wire.integer({ width }));
 
 /**
  * A field of one unsigned byte.
@@ -120,10 +130,7 @@ export const layout = <A extends Record<string, unknown>>(fields: Fields<A>): La
  * @stability experimental
  * @category models
  */
-export const u8: Field<number> = {
-  schema: unsigned(0xff),
-  wire: Wire.integer({ width: 1 }),
-};
+export const u8: Field<number> = integer(1);
 
 /**
  * A field of two unsigned bytes.
@@ -132,22 +139,31 @@ export const u8: Field<number> = {
  * @stability experimental
  * @category models
  */
-export const u16: Field<number> = {
-  schema: unsigned(0xffff),
-  wire: Wire.integer({ width: 2 }),
-};
+export const u16: Field<number> = integer(2);
 
 /**
  * A field of four unsigned bytes.
  *
+ * @see {@link u64} for the field of eight bytes.
  * @see {@link bytes} for a run of bytes counted by this field.
  * @stability experimental
  * @category models
  */
-export const u32: Field<number> = {
-  schema: unsigned(0xffff_ffff),
-  wire: Wire.integer({ width: 4 }),
-};
+export const u32: Field<number> = integer(4);
+
+/**
+ * A field of eight unsigned bytes.
+ *
+ * **Details**
+ *
+ * The value is a `bigint`, since a number holds an integer exactly only up to
+ * 2^53 - 1.
+ *
+ * @see {@link u32} for the field of four bytes.
+ * @stability experimental
+ * @category models
+ */
+export const u64: Field<bigint> = fieldOf(unsignedBig(), Wire.integer({ width: 8 }));
 
 /**
  * A field of `length` bytes, counted by a field it names when a string.
@@ -159,14 +175,60 @@ export const u32: Field<number> = {
  * **Details**
  *
  * A number states how many bytes the field always takes.
- * A string names an earlier field of `fields`, whose value counts the bytes in
- * the run.
+ * A string names an earlier integer field, whose number counts the bytes of the
+ * run.
+ * The value is a view of the bytes of the message, not a copy.
  *
  * @see {@link u32} for the field a length is usually counted with.
  * @stability experimental
  * @category constructors
  */
-export const bytes = (length: number | string): Field<Uint8Array> => ({
-  schema: Schema.Uint8Array,
-  wire: Wire.bytes({ length }),
-});
+export const bytes = (length: number | string): Field<Uint8Array> =>
+  fieldOf(Schema.Uint8Array, Wire.bytes({ length }));
+
+/**
+ * States the value of a field's bytes as a schema states it.
+ *
+ * **When to use**
+ *
+ * Use to give a field a value that its bytes do not name, such as a code of a
+ * closed set, a text, or a branding.
+ *
+ * **Details**
+ *
+ * The schema is composed onto the codec of the field, which states the bytes.
+ * The value is decoded from those bytes and encoded back to them, so the bytes
+ * the field spans do not change.
+ * A schema given to {@link layout} instead takes one `SchemaBinary` frame,
+ * which states its own length.
+ *
+ * **Gotchas**
+ *
+ * A schema whose encoded side is no value of the field fails where the message
+ * is read or written.
+ *
+ * **Example** (A code byte of a closed set)
+ *
+ * ```ts
+ * import { Schema } from "effect"
+ * import * as BinaryProtocol from "@trajs/utils/BinaryProtocol"
+ *
+ * const Code = Schema.Literals([0, 1])
+ *
+ * const Message = BinaryProtocol.layout({
+ *   code: BinaryProtocol.u8.pipe(BinaryProtocol.decodeTo(Code))
+ * })
+ *
+ * const read = Schema.decodeSync(Message)(new Uint8Array([1]))
+ * read.code // => 1
+ * ```
+ *
+ * @see {@link Field} for the wire the value takes its bytes from.
+ * @see {@link bytes} for a field whose value is a run of bytes.
+ * @stability experimental
+ * @category combining
+ */
+export const decodeTo =
+  <A, B>(schema: Schema.Codec<A, B>) =>
+  <C>(field: Field<C>): Field<A> =>
+    fieldOf(field.schema.pipe(Schema.decodeTo(schema)), field.wire);
