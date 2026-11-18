@@ -113,6 +113,21 @@ export type Layout<A extends Record<string, unknown>> = Schema.Codec<
  * Encoding fails when a run holds another number of bytes than its wire states,
  * or a value is of another range than its field.
  *
+ * **Example** (A message written and read by one declaration)
+ *
+ * ```ts
+ * import { Schema } from "effect"
+ * import * as BinaryProtocol from "@trajs/utils/BinaryProtocol"
+ *
+ * const Stamp = BinaryProtocol.layout({
+ *   kind: BinaryProtocol.u8,
+ *   at: BinaryProtocol.u32
+ * })
+ *
+ * Array.from(Schema.encodeSync(Stamp)({ kind: 7, at: 1 })) // => [7, 0, 0, 0, 1]
+ * Schema.decodeSync(Stamp)(new Uint8Array([7, 0, 0, 0, 1])) // => { kind: 7, at: 1 }
+ * ```
+ *
  * @stability experimental
  * @category constructors
  */
@@ -178,6 +193,27 @@ export const u64: Field<bigint> = fieldOf(unsignedBig(), Wire.integer({ width: 8
  * A string names an earlier integer field, whose number counts the bytes of the
  * run.
  * The value is a view of the bytes of the message, not a copy.
+ *
+ * **Example** (A fixed run and a run of counted bytes)
+ *
+ * ```ts
+ * import { Schema } from "effect"
+ * import * as BinaryProtocol from "@trajs/utils/BinaryProtocol"
+ *
+ * const Frame = BinaryProtocol.layout({
+ *   magic: BinaryProtocol.bytes(2),
+ *   length: BinaryProtocol.u8,
+ *   body: BinaryProtocol.bytes("length")
+ * })
+ *
+ * const value = {
+ *   magic: new Uint8Array([0x54, 0x52]),
+ *   length: 2,
+ *   body: new Uint8Array([1, 2])
+ * }
+ *
+ * Array.from(Schema.encodeSync(Frame)(value)) // => [84, 82, 2, 1, 2]
+ * ```
  *
  * @see {@link u32} for the field a length is usually counted with.
  * @stability experimental
