@@ -47,6 +47,10 @@ release. Add a tool name to select part of the graph. For example, run
 
 - DO NOT USE `timeout`.
 
+## Version Control
+
+- DO NOT read git history unless the user explicitly asks. Work from the files as they are now.
+
 ## Testing
 
 - Run the tests the change touches, named by file, directory, or test name. A bare `vp test` runs the whole workspace suite, so it is forbidden.
