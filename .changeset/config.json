@@ -9,12 +9,12 @@
   "ignore": ["@trajs/cli", "@trajs/extension-*"],
   "fixed": [
     [
-      "@trajs/backend-s3",
       "@trajs/core",
       "@trajs/olap",
       "@trajs/platform-browser",
       "@trajs/platform-bun",
       "@trajs/platform-node",
+      "@trajs/storage-s3",
       "@trajs/utils"
     ]
   ]

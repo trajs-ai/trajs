@@ -1,5 +1,5 @@
 {
-  "name": "@trajs/backend-s3",
+  "name": "@trajs/storage-s3",
   "version": "0.0.0-alpha.4",
   "description": "The bytes a program keeps between readings in a bucket of S3.",
   "homepage": "https://github.com/trajs-ai/trajs",

@@ -147,7 +147,8 @@ export interface ByteStore {
    * What is written is cut into chunks as it arrives, and a chunk is kept once it has arrived
    * whole.
    * A store that cuts a sequence keeps it as it is produced rather than once it has ended.
-   * Nothing is held open between chunks, so the sink needs no scope of its own.
+   * The sink needs no scope of its own, so what it holds between chunks is its own to drop where
+   * the write ends before the sequence does.
    *
    * What the id held is dropped before the first byte is written.
    * A write that ends before the sequence does leaves the id holding nothing.
