@@ -32,7 +32,7 @@ name: Release
 #      which is how the first cut of this file published nothing at all.
 
 # Publishes the core libraries under `packages/` to npm. The release set comes
-# from `.changeset/config.json`: `fixed` names the six core packages, which share
+# from `.changeset/config.json`: `fixed` names the core packages, which share
 # one version, and `ignore` keeps the CLI, the extensions and the UI packages out
 # until they are ready to be published.
 #

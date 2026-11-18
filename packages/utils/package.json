@@ -41,7 +41,6 @@
     "prepublishOnly": "vp run build"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "catalog:",
     "effect": "catalog:"
   },
   "devDependencies": {

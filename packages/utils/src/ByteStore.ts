@@ -1,20 +1,19 @@
 /**
  * A store of byte sequences a program keeps between readings.
  *
- * What holds them is the key/value store of `effect/persistence`, a directory of files, or a
- * bucket, so where the bytes live is the store layer's to say.
+ * What holds them is the key/value store of `effect/persistence` or a directory of files, so
+ * where the bytes live is the store layer's to say.
  * A store over a key/value store keeps a sequence as the chunks it is cut into rather than as one
  * value.
  * A read reaches only the part it asks for, so a sequence is read without holding it whole.
  *
  * This package states a store in memory ({@link layerMemory}), one in a directory of the file
- * system ({@link layerFileSystem}), one in a bucket ({@link layerS3}), and one over a key/value
- * store a program holds ({@link layerKVStore}).
+ * system ({@link layerFileSystem}), and one over a key/value store a program holds
+ * ({@link layerKVStore}).
  *
  * @stability stable
  */
 
-import type { GetObjectOutput, S3Client } from "@aws-sdk/client-s3";
 import {
   ByteSize,
   Context,
@@ -23,7 +22,6 @@ import {
   FileSystem,
   Formatter,
   Layer,
-  Option,
   Path,
   Predicate,
   Sink,
@@ -234,12 +232,12 @@ export class ByteStoreError extends Data.TaggedError("ByteStoreError")<{
 }
 
 export const layerKVStore = (
-  options?: Options,
+  _options?: Options,
 ): Layer.Layer<ByteStore, never, KeyValueStore.KeyValueStore> =>
   Layer.effect(
     ByteStore,
     Effect.gen(function* () {
-      const kvstore = yield* KeyValueStore.KeyValueStore;
+      yield* KeyValueStore.KeyValueStore;
 
       throw new Error("not implemented");
     }),
@@ -358,226 +356,6 @@ export const layerFileSystem = (
         remove: (id) =>
           fs.remove(file(id), { force: true }).pipe(Effect.mapError(ByteStoreError.from(id))),
         has: (id) => fs.exists(file(id)).pipe(Effect.mapError(ByteStoreError.from(id))),
-      });
-    }),
-  );
-
-/**
- * The bucket the store {@link layerS3} provides keeps its sequences in.
- *
- * **When to use**
- *
- * Use where a program builds the store, to name the bucket its bytes are kept in.
- *
- * **Details**
- *
- * `bucket` names the bucket, which the layer neither creates nor removes.
- * One id is one object of the bucket, named after the id.
- *
- * @see {@link ByteStore} for what the store serves.
- * @stability stable
- * @category models
- */
-export interface S3Options {
-  readonly bucket: string;
-}
-
-// The name an SDK error reports, where it reports one.
-const nameOf = (cause: unknown): string | undefined => {
-  if (!Predicate.isObject(cause) || !Predicate.hasProperty(cause, "name")) return undefined;
-
-  return Predicate.isString(cause.name) ? cause.name : undefined;
-};
-
-// A bucket names a key it holds nothing under as missing, which is not a failure of the store.
-const absent = (cause: unknown): boolean => {
-  const name = nameOf(cause);
-
-  return name === "NoSuchKey" || name === "NotFound";
-};
-
-// A range that begins at or past the end of an object holds no bytes, which is not a failure.
-const unserved = (cause: unknown): boolean => nameOf(cause) === "InvalidRange";
-
-// The bytes of the body a response holds.
-const bodyOf = (id: string, held: GetObjectOutput): Effect.Effect<Uint8Array, ByteStoreError> => {
-  const failed = ByteStoreError.from(id);
-
-  // SAFETY: the SDK adds `transformToByteArray` to the body of every streaming response, which
-  // the type of the body states without.
-  const body = held.Body as
-    | { readonly transformToByteArray: () => Promise<Uint8Array> }
-    | undefined;
-
-  return body === undefined
-    ? Effect.fail(failed("The response holds no body to read"))
-    : Effect.tryPromise({ try: () => body.transformToByteArray(), catch: failed });
-};
-
-// The bytes of the parts as one buffer.
-const joined = (parts: ReadonlyArray<Uint8Array>): Uint8Array => {
-  const whole = new Uint8Array(parts.reduce((total, part) => total + part.length, 0));
-  let at = 0;
-
-  for (const part of parts) {
-    whole.set(part, at);
-    at += part.length;
-  }
-
-  return whole;
-};
-
-/**
- * A store that keeps a sequence in a bucket, one object per id.
- *
- * **When to use**
- *
- * Use to keep the bytes of a trajectory in a bucket, so what a reader reads is not held by the
- * machine that wrote it.
- *
- * **Details**
- *
- * `client` is the {@link S3Client} every request is sent through, and `options` names the bucket
- * ({@link S3Options}), which the layer neither creates nor removes.
- *
- * One id is one object, named after the id, and a read fetches the part it asks for with a range
- * request rather than the whole sequence.
- * A write drops what the id held, and puts the object once the sequence has ended.
- *
- * **Gotchas**
- *
- * A write holds the sequence in memory until it ends, since one object is put from one buffer.
- * A write that ends before the sequence does leaves the id holding nothing.
- *
- * @see {@link ByteStore} for what the store serves.
- * @see {@link layerFileSystem} for the same sequences kept in a directory.
- * @see {@link layerKVStore} for a sequence kept as the chunks it is cut into.
- * @stability stable
- * @category layers
- */
-export const layerS3 = (client: S3Client, options: S3Options): Layer.Layer<ByteStore> =>
-  Layer.effect(
-    ByteStore,
-    Effect.gen(function* () {
-      const sdk = yield* Effect.promise(() => import("@aws-sdk/client-s3"));
-
-      const { bucket } = options;
-      const failed = ByteStoreError.from;
-
-      // Whether the bucket holds an object under `id`.
-      const holds = (id: string): Effect.Effect<boolean, ByteStoreError> =>
-        Effect.tryPromise({
-          try: () => client.send(new sdk.HeadObjectCommand({ Bucket: bucket, Key: id })),
-          catch: (cause) => cause,
-        }).pipe(
-          Effect.as(true),
-          // A key the bucket holds nothing under is an id that holds nothing, not a failure.
-          Effect.catch((cause) =>
-            absent(cause) ? Effect.succeed(false) : Effect.fail(failed(id)(cause)),
-          ),
-        );
-
-      // How many bytes the object `id` is kept as holds.
-      const lengthOf = (id: string): Effect.Effect<bigint, ByteStoreError> =>
-        Effect.tryPromise({
-          try: () => client.send(new sdk.HeadObjectCommand({ Bucket: bucket, Key: id })),
-          catch: failed(id),
-        }).pipe(
-          Effect.flatMap((info) =>
-            info.ContentLength === undefined
-              ? Effect.fail(failed(id)("The object states no length"))
-              : Effect.succeed(BigInt(info.ContentLength)),
-          ),
-        );
-
-      // Keeps `bytes` as the object `id`, in place of what the bucket held under it.
-      const put = (id: string, bytes: Uint8Array): Effect.Effect<void, ByteStoreError> =>
-        Effect.tryPromise({
-          try: () =>
-            client.send(new sdk.PutObjectCommand({ Bucket: bucket, Key: id, Body: bytes })),
-          catch: failed(id),
-        }).pipe(Effect.asVoid);
-
-      // Drops the object `id`, which holds nothing once the bucket has dropped it.
-      const drop = (id: string): Effect.Effect<void, ByteStoreError> =>
-        Effect.tryPromise({
-          try: () => client.send(new sdk.DeleteObjectCommand({ Bucket: bucket, Key: id })),
-          catch: failed(id),
-        }).pipe(Effect.asVoid);
-
-      // The object `id` is kept as, served as a sequence read at random.
-      const sequence = (id: string): Byte<ByteStoreError> =>
-        make({
-          length: lengthOf(id),
-          read: (buffer, options) =>
-            Effect.gen(function* () {
-              const offset = options?.offset ?? 0n;
-              const size = Math.min(options?.size ?? buffer.length, buffer.length);
-
-              // A read that asks for nothing serves nothing, which is where the sequence ended.
-              if (size <= 0) return 0;
-
-              const held = yield* Effect.tryPromise({
-                try: () =>
-                  client.send(
-                    new sdk.GetObjectCommand({
-                      Bucket: bucket,
-                      Key: id,
-                      Range: `bytes=${offset}-${offset + BigInt(size) - 1n}`,
-                    }),
-                  ),
-                catch: (cause) => cause,
-              }).pipe(
-                Effect.map(Option.some),
-                // A range the object ends before is no bytes, which is where the sequence ends.
-                Effect.catch((cause) =>
-                  unserved(cause) ? Effect.succeed(Option.none()) : Effect.fail(failed(id)(cause)),
-                ),
-              );
-
-              if (Option.isNone(held)) return 0;
-
-              const taken = yield* bodyOf(id, held.value);
-
-              buffer.set(taken);
-
-              return taken.length;
-            }),
-        });
-
-      return ByteStore.of({
-        read: (id) =>
-          holds(id).pipe(
-            Effect.flatMap((exists) =>
-              exists
-                ? Effect.succeed(sequence(id))
-                : Effect.fail(ByteStoreError.from(id)("No sequence is kept under the id")),
-            ),
-          ),
-        write: (id, options) =>
-          Effect.gen(function* () {
-            const exists = yield* holds(id);
-
-            if (exists && options?.overwrite === false) {
-              return yield* Effect.fail(
-                ByteStoreError.from(id)("A sequence is already kept under the id"),
-              );
-            }
-
-            // What the id held is dropped before the first byte is kept, so a write that ends
-            // before the sequence does leaves the id holding nothing.
-            yield* drop(id);
-
-            const parts: Uint8Array[] = [];
-
-            return Sink.forEach((input: Uint8Array) =>
-              Effect.sync(() => {
-                parts.push(input);
-              }),
-            ).pipe(Sink.mapEffectEnd((end) => put(id, joined(parts)).pipe(Effect.map(() => end))));
-          }).pipe(Sink.unwrap),
-        remove: (id) => drop(id),
-        has: (id) => holds(id),
       });
     }),
   );

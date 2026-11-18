@@ -1,0 +1,55 @@
+{
+  "name": "@trajs/backend-s3",
+  "version": "0.0.0-alpha.4",
+  "description": "The bytes a program keeps between readings in a bucket of S3.",
+  "homepage": "https://github.com/trajs-ai/trajs",
+  "license": "MIT",
+  "author": "Bowei Wang <wozluohd@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trajs-ai/trajs.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json",
+    "./*": "./src/*.ts",
+    "./internal/*": null,
+    "./*/index": null
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.mjs",
+      "./package.json": "./package.json",
+      "./*": "./dist/*.mjs",
+      "./internal/*": null,
+      "./*/index": null
+    },
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "check": "vp check",
+    "prepublishOnly": "vp run build"
+  },
+  "dependencies": {
+    "@effect-aws/client-s3": "catalog:",
+    "@trajs/utils": "workspace:*",
+    "effect": "catalog:"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-s3": "catalog:",
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

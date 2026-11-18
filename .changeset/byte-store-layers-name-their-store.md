@@ -4,7 +4,7 @@
 
 `ByteStore.layerMemory` replaces `ByteStore.layer`, so the store a program keeps
 in memory is named after where it keeps the bytes, as `ByteStore.layerFileSystem`
-and `ByteStore.layerS3` are.
+is.
 
 `ByteStore.layerFileSystem` replaces `ByteStore.layerFsTemp` and takes a directory.
 A directory stated alone is `dir`, so `ByteStore.layerFileSystem("bytes")` and
