@@ -1,4 +1,4 @@
-import { Byte, Checksum, Compression, StreamHash } from "@trajs/utils";
+import { Bytes, Checksum, Compression, StreamHash } from "@trajs/utils";
 import * as BinaryProtocol from "@trajs/utils/BinaryProtocol";
 import type { CompressionError } from "@trajs/utils/Compression";
 import { Effect, Option, Schema, Stream } from "effect";
@@ -177,8 +177,8 @@ export const encodeChunk = (
     const checksum = yield* Checksum.Checksum;
     const compression = yield* Compression.Compression;
 
-    const meta = Byte.concat(frames.map((frame) => frame.meta));
-    const bodies = Byte.concat(frames.map((frame) => frame.body));
+    const meta = Bytes.concat(frames.map((frame) => frame.meta));
+    const bodies = Bytes.concat(frames.map((frame) => frame.body));
 
     const packed = yield* compression.compressBytes({ algorithm })(bodies);
 
@@ -200,11 +200,11 @@ export const encodeChunk = (
 
     // `metaCrc` covers the header past its two checksums, and the meta region.
     const afterChecksums = headerBytes.subarray(ChecksumBytes);
-    const metaCrc = crc(Byte.concat([afterChecksums, meta]));
+    const metaCrc = crc(Bytes.concat([afterChecksums, meta]));
 
     const bodyCrc = crc(body);
 
-    const unchained = Byte.concat([
+    const unchained = Bytes.concat([
       Schema.encodeSync(ChunkHeader)({ ...header, metaCrc, bodyCrc }),
       meta,
       body,
@@ -212,7 +212,7 @@ export const encodeChunk = (
 
     const chain = yield* extendChain(hash, prev, unchained);
 
-    return Byte.concat([unchained, chain]);
+    return Bytes.concat([unchained, chain]);
   });
 
 /** Membership is decided on the raw size of frames, before they are compressed. */

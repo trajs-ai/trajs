@@ -5,7 +5,7 @@
  * {@link Compression} writes and reads the frame of a trajectory's parts.
  * {@link StreamHash} reads the digest a trajectory is named by.
  * {@link Checksum} checks a block of those parts.
- * {@link Byte} is the bytes of a trajectory, read at random.
+ * {@link Bytes} is the bytes of a trajectory, read at random.
  * {@link ByteStore} keeps bytes between readings.
  * {@link Package} states the fields a `package.json` holds about its package.
  * {@link VersionedSchema} reads historical payloads and writes the current
@@ -13,7 +13,7 @@
  * {@link BinaryProtocol} reads and writes the bytes of one message of a binary
  * protocol, and is not stable yet.
  *
- * A module is also a subpath import, such as `@trajs/utils/Byte`.
+ * A module is also a subpath import, such as `@trajs/utils/Bytes`.
  * A platform package states the codec a frame is carried with, such as `@trajs/platform-node`.
  * The layers stated here work over any platform.
  * The bytes kept between readings are kept over the key/value store of `effect/persistence`
@@ -25,7 +25,7 @@
 
 export * as BinaryProtocol from "#/BinaryProtocol.ts";
 
-export * as Byte from "#/Byte.ts";
+export * as Bytes from "#/Bytes.ts";
 
 export * as ByteStore from "#/ByteStore.ts";
 

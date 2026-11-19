@@ -8,7 +8,7 @@
  */
 
 import { S3Service } from "@effect-aws/client-s3";
-import { type Byte, make } from "@trajs/utils/Byte";
+import { type Bytes, make } from "@trajs/utils/Bytes";
 import * as ByteStore from "@trajs/utils/ByteStore";
 import { Effect, Layer, Option, Sink } from "effect";
 
@@ -90,7 +90,7 @@ export const layer = (options: Options): Layer.Layer<ByteStore.ByteStore, never,
           .pipe(Effect.mapError(failed(id)), Effect.asVoid);
 
       // The object `id` is kept as, served as a sequence read at random.
-      const sequence = (id: string, length: bigint): Byte<ByteStore.ByteStoreError> =>
+      const sequence = (id: string, length: bigint): Bytes<ByteStore.ByteStoreError> =>
         make({
           length: Effect.succeed(length),
           read: (buffer, options) =>

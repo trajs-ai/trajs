@@ -18,19 +18,19 @@ import type { PlatformError } from "effect/PlatformError";
  *
  * **When to use**
  *
- * Use to state where {@link Byte.read} and {@link Byte.readAlloc} begin and how much they take.
+ * Use to state where {@link Bytes.read} and {@link Bytes.readAlloc} begin and how much they take.
  *
  * **Details**
  *
  * - `offset` is where the read begins, in bytes, and defaults to `0n`.
  * - `size` is how many bytes are asked for, and defaults to what the read can take.
  *
- * The default `size` is the buffer length given to {@link Byte.read}.
- * For {@link Byte.readAlloc} it is the rest of the sequence.
+ * The default `size` is the buffer length given to {@link Bytes.read}.
+ * For {@link Bytes.readAlloc} it is the rest of the sequence.
  * A read yields fewer bytes where the sequence ends before them.
  * An offset at or past that end yields none.
  *
- * @see {@link Byte} for the sequence these are read from.
+ * @see {@link Bytes} for the sequence these are read from.
  * @stability stable
  * @category models
  */
@@ -63,7 +63,7 @@ export interface ReadOptions {
  *
  * ```ts
  * import { Effect } from "effect"
- * import { make } from "@trajs/utils/Byte"
+ * import { make } from "@trajs/utils/Bytes"
  *
  * const held = new TextEncoder().encode("trajs")
  *
@@ -89,7 +89,7 @@ export interface ReadOptions {
  * @stability stable
  * @category models
  */
-export interface Byte<out E = never, out R = never> {
+export interface Bytes<out E = never, out R = never> {
   /**
    * How many bytes the sequence holds.
    *
@@ -175,8 +175,8 @@ export const concat = (chunks: Iterable<Uint8Array>): Uint8Array => {
  * **Details**
  *
  * Only `length` and `read` are asked for.
- * {@link Byte.readAlloc} allocates what it reads into.
- * {@link Byte.stream} reads the sequence from its head one chunk at a time.
+ * {@link Bytes.readAlloc} allocates what it reads into.
+ * {@link Bytes.stream} reads the sequence from its head one chunk at a time.
  *
  * A read that takes nothing ends that stream, since the sequence ended there.
  * The bytes a sequence holds are what its reads serve from `0n` on.
@@ -205,14 +205,14 @@ export const concat = (chunks: Iterable<Uint8Array>): Uint8Array => {
  * Array.from(all) // => [1, 2, 3]
  * ```
  *
- * @see {@link Byte} for the sequence this builds.
+ * @see {@link Bytes} for the sequence this builds.
  * @stability stable
  * @category constructors
  */
 export const make = <E = never, R = never>(bytes: {
   readonly length: Effect.Effect<bigint, E, R>;
   readonly read: (buffer: Uint8Array, options?: ReadOptions) => Effect.Effect<number, E, R>;
-}): Byte<E, R> => {
+}): Bytes<E, R> => {
   const readAlloc = (options?: ReadOptions): Effect.Effect<Uint8Array, E, R> => {
     const offset = options?.offset ?? 0n;
     const size = options?.size;
@@ -252,11 +252,11 @@ export const make = <E = never, R = never>(bytes: {
 };
 
 /**
- * Creates a {@link Byte} of the bytes a buffer holds, read at random.
+ * Creates {@link Bytes} over the bytes a buffer holds, read at random.
  *
  * **When to use**
  *
- * Use to serve bytes already in memory where a {@link Byte} is asked for.
+ * Use to serve bytes already in memory where {@link Bytes} is asked for.
  *
  * **Details**
  *
@@ -269,7 +269,7 @@ export const make = <E = never, R = never>(bytes: {
  * @stability stable
  * @category constructors
  */
-export const makeFromBuffer = (buffer: Uint8Array<ArrayBufferLike>): Byte<never> =>
+export const makeFromBuffer = (buffer: Uint8Array<ArrayBufferLike>): Bytes<never> =>
   make({
     length: Effect.succeed(BigInt(buffer.length)),
     read: (held, options) => {
@@ -284,12 +284,12 @@ export const makeFromBuffer = (buffer: Uint8Array<ArrayBufferLike>): Byte<never>
   });
 
 /**
- * Creates a {@link Byte} of the bytes an open file holds, read at random.
+ * Creates {@link Bytes} over the bytes an open file holds, read at random.
  *
  * **When to use**
  *
  * Use to read part of a file without holding it whole, such as its head or its tail.
- * Use as well to serve the bytes of a file where a {@link Byte} is asked for.
+ * Use as well to serve the bytes of a file where {@link Bytes} is asked for.
  *
  * **Details**
  *
@@ -303,7 +303,7 @@ export const makeFromBuffer = (buffer: Uint8Array<ArrayBufferLike>): Byte<never>
  * @stability stable
  * @category constructors
  */
-export const makeFromFile = (file: FileSystem.File): Byte<PlatformError> =>
+export const makeFromFile = (file: FileSystem.File): Bytes<PlatformError> =>
   make({
     length: file.stat.pipe(Effect.map((info) => ByteSize.toBigInt(info.size))),
     read: (buffer, options) =>

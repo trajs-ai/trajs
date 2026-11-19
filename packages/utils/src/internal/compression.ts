@@ -2,7 +2,7 @@
 
 import { Effect, Stream } from "effect";
 
-import { concat } from "#/Byte.ts";
+import { concat } from "#/Bytes.ts";
 import {
   Algorithm,
   type Codec,

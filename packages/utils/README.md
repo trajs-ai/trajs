@@ -3,13 +3,13 @@
 The generic services a trajectory is carried and kept through, stated once so a
 platform package can say what each is over.
 
-- `Byte` — a byte sequence read at random, and the sequence built from the reads
+- `Bytes` — a byte sequence read at random, and the sequence built from the reads
   a source serves.
 - `ByteStore` — the bytes a program keeps between readings, held in chunks in the
   key/value store of `effect/persistence` (`ByteStore.layerKVStore`), in memory
   (`ByteStore.layerMemory`), in a directory of the file system
   (`ByteStore.layerFileSystem`), a temporary one that goes with the scope where
-  none is stated, read back as a `Byte` and written a chunk at a time.
+  none is stated, read back as `Bytes` and written a chunk at a time.
 - `Compression` — what carries a trajectory's parts in a frame: zstd, gzip,
   deflate, or the bytes as they are, stated at the call that writes or reads one
   (`Compression.Options`) and recorded with each chunk of a stored trajectory.

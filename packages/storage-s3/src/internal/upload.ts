@@ -4,7 +4,7 @@
 
 import type { CompletedPart } from "@aws-sdk/client-s3";
 import { S3Service } from "@effect-aws/client-s3";
-import { Byte } from "@trajs/utils";
+import { Bytes } from "@trajs/utils";
 import * as ByteStore from "@trajs/utils/ByteStore";
 import { Effect, Exit, Option, Sink } from "effect";
 import { Scope } from "effect/Scope";
@@ -114,7 +114,7 @@ export const sinks: Effect.Effect<Sinks, never, S3Service> = Effect.map(S3Servic
         upload: Upload,
         chunks: ReadonlyArray<Uint8Array>,
       ): Effect.Effect<Upload, ByteStore.ByteStoreError> =>
-        chunks.length === 0 ? Effect.succeed(upload) : send(upload, Byte.concat(chunks));
+        chunks.length === 0 ? Effect.succeed(upload) : send(upload, Bytes.concat(chunks));
 
       const push = (
         held: Held,
@@ -138,7 +138,7 @@ export const sinks: Effect.Effect<Sinks, never, S3Service> = Effect.map(S3Servic
           // A sequence that never filled a part is kept as the one object it fits.
           if (Option.isNone(held.upload)) {
             return yield* s3
-              .putObject({ Bucket: bucket, Key: id, Body: Byte.concat(held.pending) })
+              .putObject({ Bucket: bucket, Key: id, Body: Bytes.concat(held.pending) })
               .pipe(Effect.mapError(failed), Effect.asVoid);
           }
 

@@ -30,7 +30,7 @@ import { KeyValueStore } from "effect/persistence";
 import type { PlatformError } from "effect/PlatformError";
 import type { Scope } from "effect/Scope";
 
-import { type Byte, make, makeFromFile } from "#/Byte.ts";
+import { type Bytes, make, makeFromFile } from "#/Bytes.ts";
 
 /**
  * How the bytes written to a store are cut into chunks.
@@ -67,7 +67,7 @@ export interface Options {
  *
  * **Details**
  *
- * It is 64 KiB, the size {@link Byte.stream} reads a sequence in by default.
+ * It is 64 KiB, the size {@link Bytes.stream} reads a sequence in by default.
  * A store keeping a sequence in chunks of it serves the chunks a reader asks for, without cutting
  * them again.
  *
@@ -78,7 +78,7 @@ export interface Options {
 export const defaultChunkSize = 64 * 1024;
 
 /**
- * A store of byte sequences, read back as a {@link Byte}.
+ * A store of byte sequences, read back as {@link Bytes}.
  *
  * **When to use**
  *
@@ -88,7 +88,7 @@ export const defaultChunkSize = 64 * 1024;
  *
  * **Details**
  *
- * - `read` serves the bytes kept under an id as a {@link Byte}, and an id that holds nothing fails
+ * - `read` serves the bytes kept under an id as {@link Bytes}, and an id that holds nothing fails
  *   as a {@link ByteStoreError}.
  * - `write` gives the sink a sequence is written through, so its bytes are cut and kept as they are
  *   produced.
@@ -128,7 +128,7 @@ export const defaultChunkSize = 64 * 1024;
  */
 export interface ByteStore {
   /**
-   * Serves the bytes kept under `id` as a {@link Byte}.
+   * Serves the bytes kept under `id` as {@link Bytes}.
    *
    * What a read reaches is read out of the store and joined, and none of the rest of the sequence
    * is read.
@@ -139,7 +139,7 @@ export interface ByteStore {
    * What the view serves that the store no longer holds fails the read rather than serving fewer
    * bytes.
    */
-  readonly read: (id: string) => Effect.Effect<Byte<ByteStoreError>, ByteStoreError>;
+  readonly read: (id: string) => Effect.Effect<Bytes<ByteStoreError>, ByteStoreError>;
 
   /**
    * The sink a sequence is written into `id` through.
@@ -258,7 +258,7 @@ export const layerMemory = (options?: Options): Layer.Layer<ByteStore> =>
  * **Details**
  *
  * One id is one file, named after the id, so a sequence is read at random through
- * {@link Byte.read}.
+ * {@link Bytes.read}.
  * `dir` names the directory, which the layer creates.
  * Where `dir` is omitted, the directory is a temporary one, made with
  * `FileSystem.makeTempDirectoryScoped`, that the scope removes when the layer ends.
@@ -297,7 +297,7 @@ export const layerFileSystem = (
       const file = (id: string): string =>
         path.join(directory, encodeURIComponent(id).replaceAll(".", "%2E"));
 
-      const bytes = (id: string): Byte<ByteStoreError> =>
+      const bytes = (id: string): Bytes<ByteStoreError> =>
         make({
           length: fs.stat(file(id)).pipe(
             Effect.map((info) => ByteSize.toBigInt(info.size)),

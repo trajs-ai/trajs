@@ -3,7 +3,7 @@
 import { Effect } from "effect";
 import type { SchemaIssue } from "effect";
 
-import { concat } from "#/Byte.ts";
+import { concat } from "#/Bytes.ts";
 import {
   fieldSpan,
   missingFrame,
