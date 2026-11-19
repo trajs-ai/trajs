@@ -11,7 +11,7 @@
 import { Option, Predicate } from "effect";
 
 import type { Counted } from "#/internal/count.ts";
-import type { CountedPart, ResponsePart } from "#/internal/part.ts";
+import type { CountedPart, ResponseContentPart, ResponsePart } from "#/internal/part.ts";
 import {
   FileTokens,
   PromptTokens,
@@ -47,7 +47,7 @@ export const promptCount = (counted: Counted): PromptTokens =>
  *
  * The call the result answers is not counted here: `toolCallTokens` is handed in as
  * what the call and the result are worth together, which is what a reader of the
- * result alone cannot know — see {@link responseDatum}.
+ * result alone cannot know — see {@link responseCount}.
  */
 export const toolResultCount = (counted: Counted, toolCallTokens: number): ToolResultTokens =>
   ToolResultTokens.make({
@@ -67,42 +67,47 @@ const pairedTokens = (
   return call === undefined ? undefined : call + counted.tokens;
 };
 
+/** The schema of the count a response part of one kind is produced as. */
+const ownTokens = {
+  text: TextTokens,
+  reasoning: ReasoningTokens,
+  "tool-call": ToolCallTokens,
+  file: FileTokens,
+};
+
+/** A kind of response part whose count is its own numbers. */
+type OwnKind = keyof typeof ownTokens;
+
+/** Whether a kind of response part is one whose count is its own numbers. */
+const isOwnKind = (type: ResponseContentPart["type"]): type is OwnKind => type in ownTokens;
+
 /**
  * The count of a response part, as the schema of the kind of part it is, or
  * nothing when no count is taken from it.
  *
  * A response part is one message part, so the kind of count it is produced as is
- * the `type` of that part. Two kinds give back nothing: a kind that carries no
+ * the `type` of that part, and every such kind but a tool result states the
+ * part's own numbers. Two kinds give back nothing: a kind that carries no
  * content — the source of a response, its metadata, its finish, the approval of a
  * call — because nothing a tokenizer answers for is in it; and a tool result,
  * whose count states what the call it answers is worth beside it, because that is
  * read from the trajectory the result belongs to rather than from the result alone.
  */
-export const responseDatum = (
+const responseCount = (
   part: ResponsePart,
   counted: Counted,
   calls: ReadonlyMap<string, number>,
 ): Option.Option<TokenCount> => {
   const own = { tokens: counted.tokens, mediaTokens: counted.mediaTokens };
+  const { type } = part.response;
 
-  switch (part.response.type) {
-    case "text":
-      return Option.some(TextTokens.make(own));
-    case "reasoning":
-      return Option.some(ReasoningTokens.make(own));
-    case "tool-call":
-      return Option.some(ToolCallTokens.make(own));
-    case "file":
-      return Option.some(FileTokens.make(own));
-    case "tool-result": {
-      const pair = pairedTokens(part.response.id, counted, calls);
+  if (type === "tool-result") {
+    const pair = pairedTokens(part.response.id, counted, calls);
 
-      return pair === undefined ? Option.none() : Option.some(toolResultCount(counted, pair));
-    }
-
-    default:
-      return Option.none();
+    return pair === undefined ? Option.none() : Option.some(toolResultCount(counted, pair));
   }
+
+  return isOwnKind(type) ? Option.some(ownTokens[type].make(own)) : Option.none();
 };
 
 /**
@@ -113,11 +118,11 @@ export const responseDatum = (
  * state what the call it answers is worth — see `Metrics` for the producer that
  * carries them, and {@link noCalls} for a count taken of one part alone.
  */
-export const countOf = (
+export const countDatum = (
   part: CountedPart,
   counted: Counted,
   calls: ReadonlyMap<string, number>,
 ): Option.Option<TokenCount> =>
   Predicate.isTagged("Prompt")(part)
     ? Option.some(promptCount(counted))
-    : responseDatum(part, counted, calls);
+    : responseCount(part, counted, calls);

@@ -10,9 +10,7 @@ import { Tool } from "effect/ai";
 import * as Toolkit from "#/Toolkit.ts";
 import type { Document, ToolDefinition } from "#/unstable/atif/Document.ts";
 
-/**
- * The tools a document names, keyed by the name each is called by.
- */
+/** The tools a document names, keyed by the name each is called by. */
 export type Tools = Record<string, Tool.Any>;
 
 /**
@@ -21,7 +19,7 @@ export type Tools = Record<string, Tool.Any>;
  * The arguments are the JSON schema the document states. What the definition states of
  * the tool besides the tool itself is read past.
  */
-const toolOf = (definition: ToolDefinition): Tool.Any =>
+const dynamicTool = (definition: ToolDefinition): Tool.Any =>
   Tool.dynamic(definition.function.name, {
     description: definition.function.description ?? undefined,
     parameters: definition.function.parameters,
@@ -33,5 +31,5 @@ const toolOf = (definition: ToolDefinition): Tool.Any =>
  * A document that states no tool definitions, or none among them, states a toolkit that
  * names no tool.
  */
-export const toolkitOf = (document: Document): Toolkit.Toolkit<Tools> =>
-  Toolkit.make(...(document.agent.tool_definitions ?? []).map(toolOf));
+export const documentToolkit = (document: Document): Toolkit.Toolkit<Tools> =>
+  Toolkit.make(...(document.agent.tool_definitions ?? []).map(dynamicTool));

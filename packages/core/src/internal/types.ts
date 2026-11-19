@@ -1,9 +1,8 @@
 /**
- * Index an array of records by one of their keys — each key holding the record
- * that states it — and read a value that is not an array as it is given.
+ * The records an array holds, keyed by the field each one states as `Key`.
  *
- * The array is matched first because it states no key of the records it holds:
- * the records are what have to be read by one of theirs.
+ * A value that is not an array is read as it is. The array is matched first
+ * because it states no key of the records it holds.
  */
 export type IndexByKey<T, Key extends PropertyKey> =
   T extends ReadonlyArray<infer Item>

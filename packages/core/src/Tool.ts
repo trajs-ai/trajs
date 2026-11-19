@@ -10,7 +10,7 @@
 import { JsonSchema, pipe, Schema, SchemaRepresentation } from "effect";
 import { Tool } from "effect/ai";
 
-import { documentOf } from "#/internal/schema.ts";
+import { jsonDocument } from "#/internal/schema.ts";
 
 /**
  * Re-exports Effect's tool APIs without modification.
@@ -76,8 +76,8 @@ export const encode = (tool: Tool.Any): ToolSchema => ({
   name: tool.name,
   description: tool.description,
   parameters: parametersOf(tool),
-  success: documentOf(tool.successSchema),
-  failure: documentOf(tool.failureSchema),
+  success: jsonDocument(tool.successSchema),
+  failure: jsonDocument(tool.failureSchema),
 });
 
 const parametersOf = (tool: Tool.Any): Schema.Json =>
@@ -85,6 +85,6 @@ const parametersOf = (tool: Tool.Any): Schema.Json =>
     ? pipe(
         JsonSchema.fromSchemaDraft2020_12(tool.jsonSchema),
         SchemaRepresentation.fromJsonSchemaDocument,
-        documentOf,
+        jsonDocument,
       )
-    : documentOf(tool.parametersSchema);
+    : jsonDocument(tool.parametersSchema);

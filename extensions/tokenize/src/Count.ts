@@ -41,8 +41,8 @@ import { Effect } from "effect";
 import type { Option } from "effect";
 import type { AiError, Tokenizer } from "effect/ai";
 
-import { countedOf } from "#/internal/count.ts";
-import { noCalls, promptCount, responseDatum } from "#/internal/datum.ts";
+import { countPart } from "#/internal/count.ts";
+import { countDatum, noCalls, promptCount } from "#/internal/datum.ts";
 import type { ImageSize } from "#/internal/image.ts";
 import {
   type AnthropicNumbers,
@@ -52,7 +52,7 @@ import {
   type OpenAiNumbers,
   type OpenAiPatchNumbers,
   anthropicRule,
-  mediaRuleOf,
+  mediaRule,
   mediaTokens,
   openAiPatchRule,
   openAiRule,
@@ -166,7 +166,7 @@ export const promptPart = (
   part: PromptPart,
   options?: CountOptions,
 ): Effect.Effect<PromptTokens, AiError.AiError, Tokenizer.Tokenizer> =>
-  countedOf(part, mediaRuleOf(options?.media)).pipe(Effect.map(promptCount));
+  countPart(part, mediaRule(options?.media)).pipe(Effect.map(promptCount));
 
 /**
  * Counts what one part a model returned is worth.
@@ -230,6 +230,6 @@ export const responsePart = (
   part: ResponsePart,
   options?: CountOptions,
 ): Effect.Effect<Option.Option<TokenCount>, AiError.AiError, Tokenizer.Tokenizer> =>
-  countedOf(part, mediaRuleOf(options?.media)).pipe(
-    Effect.map((counted) => responseDatum(part, counted, noCalls)),
+  countPart(part, mediaRule(options?.media)).pipe(
+    Effect.map((counted) => countDatum(part, counted, noCalls)),
   );

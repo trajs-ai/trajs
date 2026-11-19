@@ -42,14 +42,14 @@ import { Effect, Schema } from "effect";
 import { SqlError } from "effect/sql/SqlError";
 
 import { Client } from "#/Clickhouse.ts";
-import { ddl as statement, name as table, rowsOf, writeRows } from "#/internal/parts.ts";
+import { createTableStatement, partRows, tableName, writeRows } from "#/internal/parts.ts";
 
 /**
  * The name of the table the rows are written into.
  *
  * @category constants
  */
-export const name = table;
+export const name = tableName;
 
 /**
  * The statement that creates {@link name}, as ClickHouse is asked for it.
@@ -75,7 +75,7 @@ export const name = table;
  * @see {@link create} for running it.
  * @category constants
  */
-export const ddl = statement;
+export const ddl = createTableStatement;
 
 /**
  * A part as JSON states it: the `part` column's payload.
@@ -199,7 +199,7 @@ export const create = (): Effect.Effect<void, SqlError, Client> =>
  * @see {@link ingest} for writing the rows this stream makes.
  * @category constructors
  */
-export const rows = rowsOf;
+export const rows = partRows;
 
 /**
  * Writes `rows` into {@link name} in batches, saying how many were sent.

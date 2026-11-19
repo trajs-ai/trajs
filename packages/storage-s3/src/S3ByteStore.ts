@@ -12,8 +12,8 @@ import { type Byte, make } from "@trajs/utils/Byte";
 import * as ByteStore from "@trajs/utils/ByteStore";
 import { Effect, Layer, Option, Sink } from "effect";
 
-import { bytesAt, lengthOf } from "#/internal/s3.ts";
-import { writeSink } from "#/internal/upload.ts";
+import { answers } from "#/internal/answers.ts";
+import { sinks } from "#/internal/upload.ts";
 
 /**
  * The bucket the store {@link layer} provides keeps its sequences in.
@@ -71,13 +71,15 @@ export const layer = (options: Options): Layer.Layer<ByteStore.ByteStore, never,
     ByteStore.ByteStore,
     Effect.gen(function* () {
       const s3 = yield* S3Service;
+      const { bytesAt, lengthOf } = yield* answers;
+      const { writeSink } = yield* sinks;
 
       const { bucket } = options;
       const failed = ByteStore.ByteStoreError.from;
 
       // What the bucket keeps under `id`, as the number of bytes it holds.
       const held = (id: string): Effect.Effect<Option.Option<bigint>, ByteStore.ByteStoreError> =>
-        lengthOf(bucket, id).pipe(Effect.provideService(S3Service, s3));
+        lengthOf(bucket, id);
 
       const has = (id: string): Effect.Effect<boolean, ByteStore.ByteStoreError> =>
         held(id).pipe(Effect.map(Option.isSome));
@@ -99,9 +101,7 @@ export const layer = (options: Options): Layer.Layer<ByteStore.ByteStore, never,
               // A read that asks for nothing serves nothing, which is where the sequence ended.
               if (size <= 0) return 0;
 
-              const taken = yield* bytesAt(bucket, id, offset, size).pipe(
-                Effect.provideService(S3Service, s3),
-              );
+              const taken = yield* bytesAt(bucket, id, offset, size);
 
               return Option.match(taken, {
                 onNone: () => 0,
@@ -139,8 +139,8 @@ export const layer = (options: Options): Layer.Layer<ByteStore.ByteStore, never,
             // What the sink keeps between the chunks is dropped with the scope of the write.
             return yield* writeSink(bucket, id);
           }).pipe(
-            // The sink sends its parts through the service the layer was built with.
-            Effect.provideService(S3Service, s3),
+            // The sink is built in the scope of the write, which an upload it never completed
+            // is dropped with.
             Sink.unwrap,
           ),
         remove: (id) => drop(id),

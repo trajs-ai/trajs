@@ -6,6 +6,7 @@ import type * as MetricKit from "#/MetricKit.ts";
 import * as Trajectory from "#/Trajectory.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
 
+/** The parts of `stream` beside the metric parts its producers report of them. */
 export const produceParts =
   <Config extends Config.AnyConfig, Metrics extends Record<string, Metric.Any>>(
     config: Config,
@@ -24,7 +25,10 @@ export const produceParts =
           trajectory,
           copy.pipe(
             Metric.produce(metrickit),
-            // SAFETY: every metric of the kit given is one the config given states.
+            // SAFETY: a result the producers report is a metric of the kit they were
+            // given with, and the caller gives a kit whose metrics the config's kit
+            // holds. No type of either kit relates them, so the part cannot be read
+            // as one of the config's metrics otherwise.
             Stream.map((metric) =>
               parts.metric(metric as Metric.MetricParts<Config.MetricsOf<Config>>),
             ),

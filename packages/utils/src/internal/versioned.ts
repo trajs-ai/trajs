@@ -1,7 +1,10 @@
+/** The unions a version history is assembled from, and the tagged member of each one. */
+
 import { Schema, SchemaGetter } from "effect";
 
 import type { Any, AnyVersioned, VersionedSchema } from "#/VersionedSchema.ts";
 
+/** The union of `readers`, keeping the current schema as `self`. */
 export function assemble<
   Self extends Schema.Struct<Schema.Struct.Fields>,
   Members extends ReadonlyArray<Schema.Top>,
@@ -10,6 +13,10 @@ export function assemble(self: Schema.Top, readers: ReadonlyArray<Schema.Top>): 
   return Object.assign(Schema.Union(readers), { self });
 }
 
+/**
+ * The member of a tagged union for `entry`: its current fields carrying `tag`,
+ * and a reading that adds the tag to a payload of an older version.
+ */
 export const tagSchema = (tag: string, entry: Any): Any => {
   const self = entry.self.mapFields((fields) => ({ ...fields, _tag: Schema.Literal(tag) }));
 

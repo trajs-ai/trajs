@@ -11,6 +11,10 @@ import type { TrajectoryError } from "#/TrajectoryError.ts";
 const isFailure = (value: unknown): value is Failure<Any> =>
   Predicate.isTagged("Failure")(value) && Predicate.hasProperty(value, "failure");
 
+/**
+ * Runs every producer of `producers` over one reading of `produced`, under the
+ * tag of the metric each reports.
+ */
 export const runProducers = <
   Metrics extends Record<string, Any>,
   Config extends Config.AnyConfig,
@@ -20,22 +24,25 @@ export const runProducers = <
   producers: Producers<Metrics>,
   produced: Trajectory.TrajectoryStream<Config, E, R>,
 ): Stream.Stream<MetricParts<Metrics>, E | TrajectoryError, R> => {
-  const byTag: Readonly<Record<string, Producer<Any>>> = producers;
-  const tags = Object.keys(byTag);
+  const tags = Object.keys(producers);
 
   if (tags.length === 0) {
     return Stream.empty;
   }
 
-  // SAFETY: each result uses the tag of its metric.
-  // That tag is the metric part the kit holds.
-  // The kit has one part per metric.
+  // The record is read by a tag computed at runtime, so each producer is taken as
+  // the producer of any metric.
+  const producersByTag: Readonly<Record<string, Producer<Any>>> = producers;
+
+  // SAFETY: each result is tagged with the producer that reported it, and `Producers`
+  // holds one producer per metric, so the merged stream holds one part per metric.
+  // The tag is a runtime string, so no type correlates it with the metric it names.
   return produced.pipe(
     Stream.broadcastN({ n: tags.length, capacity: "unbounded" }),
     Effect.map((streams) =>
       Stream.mergeAll(
         tags.map((tag, index) =>
-          byTag[tag](streams[index]).pipe(
+          producersByTag[tag](streams[index]).pipe(
             Stream.map((reported) => ({ _tag: tag, data: reported })),
             Stream.catchIf(isFailure, (failure) => Stream.make({ _tag: tag, data: failure })),
           ),

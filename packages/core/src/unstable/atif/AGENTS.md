@@ -53,6 +53,21 @@ subset (ATIF's cross-file features omitted). No information is lost, but the
 concrete ATIF form may differ. `session_id` is the field the reading goes past
 while it is unread, so the contract holds of it only once `Next` is done.
 
+## Layout
+
+- `Document.ts`, `Extra.ts` and `Event.ts` state the format, what a document carries
+  beside its conversation, and the event convention.
+- `internal/content.ts` reads a content: the text it says, and the bytes of its media.
+- `internal/fields.ts` derives the extra data a document states of a run, a step and
+  the media of a part.
+- `internal/parts.ts` builds the parts of a step: the prompt part it opens a turn
+  with, and the response parts it answers with, its results included.
+- `internal/turns.ts` assembles a document's steps into turns.
+- `internal/produce.ts` produces those turns, and the session they belong to, into a
+  `ProduceSession`.
+- `internal/toolkit.ts` builds the toolkit a document states its agent was given.
+- `Encode.ts` reads a document as a trajectory, `Step.ts` reads a trajectory as steps.
+
 ## Status
 
 - Done: `PromptPart.timestamp` in core (with the `parts` builders and the produce

@@ -3,12 +3,14 @@ import type { Tool } from "effect/ai";
 
 import * as Response from "#/Response.ts";
 
-interface Open {
+/** A text or reasoning chunk that a response has opened and not yet ended. */
+interface Chunk {
   text: string;
   metadata: Response.ProviderMetadata;
 }
 
-type OpenBySession = Map<string, Map<string, Open>>;
+/** The open chunks of one session, by the id of the part that opened them. */
+type Chunks = Map<string, Map<string, Chunk>>;
 
 /**
  * The text and reasoning chunks a response has opened, by session and by chunk id.
@@ -17,21 +19,23 @@ type OpenBySession = Map<string, Map<string, Open>>;
  * by the part that ends it, which is the part the chunk is written as.
  */
 export interface State {
-  readonly text: OpenBySession;
-  readonly reasoning: OpenBySession;
+  readonly text: Chunks;
+  readonly reasoning: Chunks;
 }
 
+/** The state before a response has opened a chunk. */
 export const initial = (): State => ({ text: new Map(), reasoning: new Map() });
 
-const openOf = (open: OpenBySession, id: string): Map<string, Open> => {
-  let parts = open.get(id);
+/** The chunks `session` opened, opened where it has none yet. */
+const openChunks = (chunks: Chunks, session: string): Map<string, Chunk> => {
+  let open = chunks.get(session);
 
-  if (parts === undefined) {
-    parts = new Map();
-    open.set(id, parts);
+  if (open === undefined) {
+    open = new Map();
+    chunks.set(session, open);
   }
 
-  return parts;
+  return open;
 };
 
 const mergeMetadata = (
@@ -52,6 +56,60 @@ const mergeMetadata = (
   return merged;
 };
 
+/** The parts that open, extend, or end a text or reasoning chunk. */
+type ChunkPart =
+  | Response.TextStartPart
+  | Response.TextDeltaPart
+  | Response.TextEndPart
+  | Response.ReasoningStartPart
+  | Response.ReasoningDeltaPart
+  | Response.ReasoningEndPart;
+
+/** What a closed chunk is written as. */
+type ChunkKind = "text" | "reasoning";
+
+/**
+ * Folds one part of a chunk into the chunk it belongs to.
+ *
+ * Returns the part the chunk is written as once it ends, and none before.
+ */
+const foldChunk = <Tools extends Record<string, Tool.Any>>(
+  chunks: Chunks,
+  kind: ChunkKind,
+  session: string,
+  part: ChunkPart,
+): Option.Option<Response.PartView<Tools>> => {
+  const open = openChunks(chunks, session);
+
+  if (part.type === "text-start" || part.type === "reasoning-start") {
+    open.set(part.id, { text: "", metadata: part.metadata });
+
+    return Option.none();
+  }
+
+  const chunk = open.get(part.id);
+
+  if (chunk === undefined) {
+    return Option.none();
+  }
+
+  if (part.type === "text-delta" || part.type === "reasoning-delta") {
+    chunk.text += part.delta;
+    chunk.metadata = mergeMetadata(chunk.metadata, part.metadata);
+
+    return Option.none();
+  }
+
+  open.delete(part.id);
+
+  return Option.some(
+    Response.makePart(kind, {
+      text: chunk.text,
+      metadata: mergeMetadata(chunk.metadata, part.metadata),
+    }),
+  );
+};
+
 /**
  * Folds one part into the finished part it belongs to.
  *
@@ -59,81 +117,26 @@ const mergeMetadata = (
  */
 export const foldResponse = <Tools extends Record<string, Tool.Any>>(
   state: State,
-  id: string,
+  session: string,
   part: Response.AllPartsView<Tools>,
 ): readonly [State, Option.Option<Response.PartView<Tools>>] => {
   switch (part.type) {
     case "text-start":
-      openOf(state.text, id).set(part.id, { text: "", metadata: part.metadata });
-
-      return [state, Option.none()];
-    case "text-delta": {
-      const text = openOf(state.text, id).get(part.id);
-
-      if (text !== undefined) {
-        text.text += part.delta;
-        text.metadata = mergeMetadata(text.metadata, part.metadata);
-      }
-
-      return [state, Option.none()];
-    }
-
-    case "text-end": {
-      const open = openOf(state.text, id);
-      const text = open.get(part.id);
-
-      if (text === undefined) {
-        return [state, Option.none()];
-      }
-
-      open.delete(part.id);
-
-      const completed = Response.makePart("text", {
-        text: text.text,
-        metadata: mergeMetadata(text.metadata, part.metadata),
-      });
-
-      return [state, Option.some(completed)];
-    }
+    case "text-delta":
+    case "text-end":
+      return [state, foldChunk(state.text, "text", session, part)];
 
     case "reasoning-start":
-      openOf(state.reasoning, id).set(part.id, { text: "", metadata: part.metadata });
-
-      return [state, Option.none()];
-    case "reasoning-delta": {
-      const text = openOf(state.reasoning, id).get(part.id);
-
-      if (text !== undefined) {
-        text.text += part.delta;
-        text.metadata = mergeMetadata(text.metadata, part.metadata);
-      }
-
-      return [state, Option.none()];
-    }
-
-    case "reasoning-end": {
-      const open = openOf(state.reasoning, id);
-      const text = open.get(part.id);
-
-      if (text === undefined) {
-        return [state, Option.none()];
-      }
-
-      open.delete(part.id);
-
-      const completed = Response.makePart("reasoning", {
-        text: text.text,
-        metadata: mergeMetadata(text.metadata, part.metadata),
-      });
-
-      return [state, Option.some(completed)];
-    }
+    case "reasoning-delta":
+    case "reasoning-end":
+      return [state, foldChunk(state.reasoning, "reasoning", session, part)];
 
     case "tool-params-start":
     case "tool-params-delta":
     case "tool-params-end":
     case "error":
       return [state, Option.none()];
+
     default:
       return [state, Option.some(part)];
   }

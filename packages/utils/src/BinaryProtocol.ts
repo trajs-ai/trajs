@@ -12,9 +12,11 @@
  * @stability experimental
  */
 
-import { Data, Schema, type Pipeable } from "effect";
+import { Data, Pipeable, Schema } from "effect";
 
-import { codecOf, fieldOf, unsigned, unsignedBig } from "#/internal/binary-protocol.ts";
+import { readFrameLength } from "#/internal/binary-protocol/frame.ts";
+import { layoutCodec } from "#/internal/binary-protocol/layout.ts";
+import { unsignedBigInt, unsignedNumber } from "#/internal/binary-protocol/wire-integer.ts";
 
 /**
  * How one field takes its bytes.
@@ -132,11 +134,42 @@ export type Layout<A extends Record<string, unknown>> = Schema.Codec<
  * @category constructors
  */
 export const layout = <A extends Record<string, unknown>>(fields: Fields<A>): Layout<A> =>
-  codecOf(fields);
+  layoutCodec(fields);
+
+/**
+ * How many bytes the frame at `offset` spans, or nothing where those bytes hold
+ * no whole frame.
+ *
+ * **When to use**
+ *
+ * Use to walk a region holding one `SchemaBinary` frame per value without
+ * decoding them, such as the bytes of a chunk.
+ *
+ * **Details**
+ *
+ * A frame states its own length first, so where it ends is read from the bytes
+ * rather than from the value they hold.
+ * The length is base-128, so it takes at most ten bytes.
+ * A frame whose bytes end past `bytes` spans nothing, since it was not written
+ * whole.
+ *
+ * @see {@link layout} for the field of a value that takes one frame.
+ * @stability experimental
+ * @category utils
+ */
+export const frameLength = (bytes: Uint8Array, offset: number): number | undefined =>
+  readFrameLength(bytes, offset);
+
+/** A field of `schema` over the bytes of `wire`. */
+const makeField = <A>(schema: Schema.Codec<A, Uint8Array>, wire: Wire): Field<A> => ({
+  ...Pipeable.Prototype,
+  schema,
+  wire,
+});
 
 /** A field of `width` unsigned bytes, big-endian. */
 const integer = (width: 1 | 2 | 4): Field<number> =>
-  fieldOf(unsigned(width), Wire.integer({ width }));
+  makeField(unsignedNumber(width), Wire.integer({ width }));
 
 /**
  * A field of one unsigned byte.
@@ -178,7 +211,7 @@ export const u32: Field<number> = integer(4);
  * @stability experimental
  * @category models
  */
-export const u64: Field<bigint> = fieldOf(unsignedBig(), Wire.integer({ width: 8 }));
+export const u64: Field<bigint> = makeField(unsignedBigInt(), Wire.integer({ width: 8 }));
 
 /**
  * A field of `length` bytes, counted by a field it names when a string.
@@ -220,7 +253,7 @@ export const u64: Field<bigint> = fieldOf(unsignedBig(), Wire.integer({ width: 8
  * @category constructors
  */
 export const bytes = (length: number | string): Field<Uint8Array> =>
-  fieldOf(Schema.Uint8Array, Wire.bytes({ length }));
+  makeField(Schema.Uint8Array, Wire.bytes({ length }));
 
 /**
  * States the value of a field's bytes as a schema states it.
@@ -267,4 +300,4 @@ export const bytes = (length: number | string): Field<Uint8Array> =>
 export const decodeTo =
   <A, B>(schema: Schema.Codec<A, B>) =>
   <C>(field: Field<C>): Field<A> =>
-    fieldOf(field.schema.pipe(Schema.decodeTo(schema)), field.wire);
+    makeField(field.schema.pipe(Schema.decodeTo(schema)), field.wire);

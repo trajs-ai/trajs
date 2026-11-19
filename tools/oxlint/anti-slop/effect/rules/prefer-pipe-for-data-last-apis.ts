@@ -1,6 +1,4 @@
-import { defineRule } from "@oxlint/plugins";
-
-import type { ESTree } from "@oxlint/plugins";
+import { defineRule, type ESTree } from "vite-plus/lint/plugins";
 
 /**
  * Effect's data-last APIs on the computation data types: each takes a program as

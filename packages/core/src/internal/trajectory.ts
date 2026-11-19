@@ -1,10 +1,17 @@
-import { v7 as uuidv7 } from "uuid";
+import { v7 } from "uuid";
 
 import type * as Config from "#/Config.ts";
 import type { Trajectory, TrajectoryStream } from "#/Trajectory.ts";
 
-export const uuid = (): string => uuidv7();
+/** A new uuid v7, which names a trajectory or a part of one. */
+export const uuid = (): string => v7();
 
+/**
+ * Names `stream` with `id` and reads it with `config`.
+ *
+ * A stream is an opaque object that carries methods of its own, so the fields are
+ * set on it rather than on a copy.
+ */
 export const attach =
   <Id extends string, Config extends Config.AnyConfig>(id: Id, config: Config) =>
   <E, R>(stream: TrajectoryStream<Config, E, R>): Trajectory<Id, Config, E, R> =>

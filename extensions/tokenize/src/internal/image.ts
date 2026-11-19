@@ -152,7 +152,7 @@ const decodeBase64 = (text: string): Uint8Array | undefined => {
 };
 
 /** The bytes a text payload carries: a `data:` URL's payload, or base64 itself. */
-const bytesOfText = (text: string): Uint8Array | undefined => {
+const readTextBytes = (text: string): Uint8Array | undefined => {
   if (!text.startsWith("data:")) return decodeBase64(text);
 
   const separator = text.indexOf(",");
@@ -165,8 +165,8 @@ const bytesOfText = (text: string): Uint8Array | undefined => {
 };
 
 /** The bytes a payload carries, or nothing when it points somewhere else. */
-const bytesOf = (data: string | Uint8Array | URL): Uint8Array | undefined => {
-  if (Predicate.isString(data)) return bytesOfText(data);
+const readBytes = (data: string | Uint8Array | URL): Uint8Array | undefined => {
+  if (Predicate.isString(data)) return readTextBytes(data);
 
   if (data instanceof URL) return undefined;
 
@@ -180,7 +180,7 @@ const bytesOf = (data: string | Uint8Array | URL): Uint8Array | undefined => {
  * the size is read from each one's header, so a payload is never decoded.
  */
 export const imageSize = (data: string | Uint8Array | URL): ImageSize | undefined => {
-  const bytes = bytesOf(data);
+  const bytes = readBytes(data);
 
   if (bytes === undefined) return undefined;
 

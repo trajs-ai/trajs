@@ -1,6 +1,7 @@
 /**
- * What the codecs of this module read of a prompt: the text and the images of its
- * parts, and the text a provider is handed a tool result as.
+ * What a prompt's parts say, and what a codec hands a provider for them: the text and
+ * the images of the parts, the media type an image is stated as, and the text a tool
+ * result is handed as.
  */
 
 import { Predicate } from "effect";

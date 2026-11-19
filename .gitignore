@@ -39,3 +39,4 @@ examples/tutorials/*/fixtures/
 
 # references/ holds local sibling checkouts, shared into Delta workspaces by .agents/linked
 references/
+.vitest/

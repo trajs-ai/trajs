@@ -18,7 +18,7 @@
 
 import { Context, Data, Effect, Schema, Stream } from "effect";
 
-import { compressionOf } from "#/internal/compression.ts";
+import { makeCompression } from "#/internal/compression.ts";
 
 /**
  * A failure to write or read a frame.
@@ -311,4 +311,4 @@ export interface Codec {
  * @stability stable
  * @category constructors
  */
-export const make = (codec: Codec): Compression => compressionOf(codec);
+export const make = (codec: Codec): Compression => makeCompression(codec);

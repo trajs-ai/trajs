@@ -12,7 +12,7 @@ import { PackageMetadata } from "@trajs/utils/Package";
 import { Data, Schema } from "effect";
 
 import type * as EventKit from "#/EventKit.ts";
-import { documentOf, requireBinaryLayout } from "#/internal/schema.ts";
+import { jsonDocument, requireBinaryLayout } from "#/internal/schema.ts";
 
 /**
  * Optional display information for an {@link Event}.
@@ -166,7 +166,7 @@ export type EventSchema = Schema.Schema.Type<typeof EventSchema>;
 export const encode = (event: Any): EventSchema => ({
   metadata: event.metadata,
   packageMetadata: event.packageMetadata,
-  schema: documentOf(event.schema),
+  schema: jsonDocument(event.schema),
 });
 
 /**

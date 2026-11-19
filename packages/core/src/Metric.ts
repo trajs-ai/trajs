@@ -14,7 +14,7 @@ import type { NonEmptyArray } from "effect/Array";
 
 import type * as Config from "#/Config.ts";
 import { runProducers } from "#/internal/metric.ts";
-import { documentOf, requireBinaryLayout } from "#/internal/schema.ts";
+import { jsonDocument, requireBinaryLayout } from "#/internal/schema.ts";
 import type * as MetricKit from "#/MetricKit.ts";
 import type * as Trajectory from "#/Trajectory.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
@@ -190,8 +190,8 @@ export type MetricSchema = Schema.Schema.Type<typeof MetricSchema>;
 export const encode = (metric: Any): MetricSchema => ({
   metadata: metric.metadata,
   packageMetadata: metric.packageMetadata,
-  output: documentOf(metric.output),
-  failure: documentOf(metric.failure),
+  output: jsonDocument(metric.output),
+  failure: jsonDocument(metric.failure),
 });
 
 /**

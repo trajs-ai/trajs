@@ -179,8 +179,8 @@ export const layerFileSystem = ({
         <C extends Config.AnyConfig>(config: C) =>
         <Id extends string>(id: Id) =>
           Effect.gen(function* () {
-            const compression = yield* Compression.Compression;
-            const buffer = yield* file.bufferOf(config, compression)(yield* bytesOf(id));
+            const makeBuffer = yield* file.makeBuffer(config);
+            const buffer = yield* makeBuffer(yield* bytesOf(id));
 
             return { ...config, id, ...buffer };
           });

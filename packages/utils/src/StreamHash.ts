@@ -18,7 +18,7 @@
 
 import { Context, Schema, Sink } from "effect";
 
-import { digestOf, startOf } from "#/internal/stream-hash.ts";
+import { digestSink, runningDigest } from "#/internal/stream-hash.ts";
 
 /**
  * The digest algorithm of a trajectory's parts.
@@ -258,6 +258,6 @@ export interface Codec {
  * @category constructors
  */
 export const make = (codec: Codec): StreamHash => ({
-  digest: (options?: Options) => digestOf(codec, options),
-  start: (options?: Options) => startOf(codec, options),
+  digest: (options?: Options) => digestSink(codec, options),
+  start: (options?: Options) => runningDigest(codec, options),
 });

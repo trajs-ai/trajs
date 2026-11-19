@@ -10,6 +10,7 @@
 import { Match, Option, Stream } from "effect";
 import type { Prompt, Tool } from "effect/ai";
 
+import { textOf } from "#/codec/internal/prompt.ts";
 import * as Config from "#/Config.ts";
 import type * as Response from "#/Response.ts";
 import type * as Session from "#/Session.ts";
@@ -62,27 +63,14 @@ const sources: Record<Prompt.Message["role"], StepSource> = {
   tool: "user",
 };
 
-/**
- * The text of the parts given.
- *
- * TODO: a tool result carries no text, so a tool message says nothing.
- */
-const textOf = (parts: ReadonlyArray<Prompt.Part>): string => {
-  let text = "";
-
-  for (const part of parts) {
-    if (part.type === "text") text += part.text;
-  }
-
-  return text;
+/** The dialogue of a message a model was given. */
+const messageOf = (message: Prompt.Message): string => {
+  // TODO: a tool result carries no text, so a tool message says nothing.
+  return message.role === "system" ? message.content : textOf(message.content);
 };
 
-/** The dialogue of a message a model was given. */
-const messageOf = (message: Prompt.Message): string =>
-  message.role === "system" ? message.content : textOf(message.content);
-
 /** The steps one step of a session is read as. */
-const stepsOf = <Config extends Config.AnyConfig>(
+const stepViews = <Config extends Config.AnyConfig>(
   step: View.Step<Config>,
 ): ReadonlyArray<Step<Tools<Config>>> =>
   Match.value(step).pipe(
@@ -161,4 +149,4 @@ const stepsOf = <Config extends Config.AnyConfig>(
 export const steps = <Config extends Config.AnyConfig, E, R>(
   stream: Session.SessionStream<Config, E, R>,
 ): Stream.Stream<Step<Tools<Config>>, E | TrajectoryError, R> =>
-  View.steps(stream).pipe(Stream.flatMap((step) => Stream.fromIterable(stepsOf(step))));
+  View.steps(stream).pipe(Stream.flatMap((step) => Stream.fromIterable(stepViews(step))));

@@ -128,6 +128,43 @@ export interface Byte<out E = never, out R = never> {
 const Chunk = 64 * 1024;
 
 /**
+ * The chunks given, joined into one buffer in the order they arrive.
+ *
+ * **When to use**
+ *
+ * Use where a region arrived in chunks and one buffer is asked for, such as a
+ * frame read back into the bytes it was written as.
+ *
+ * **Details**
+ *
+ * The buffer is allocated to the total length of the chunks, and each chunk is
+ * copied into it, so the result is backed by a buffer of its own.
+ *
+ * @stability stable
+ * @category utils
+ */
+export const concat = (chunks: Iterable<Uint8Array>): Uint8Array => {
+  const held = Array.from(chunks);
+
+  let length = 0;
+
+  for (const chunk of held) {
+    length += chunk.length;
+  }
+
+  const bytes = new Uint8Array(length);
+
+  let at = 0;
+
+  for (const chunk of held) {
+    bytes.set(chunk, at);
+    at += chunk.length;
+  }
+
+  return bytes;
+};
+
+/**
  * Builds a byte sequence from what its reads take.
  *
  * **When to use**

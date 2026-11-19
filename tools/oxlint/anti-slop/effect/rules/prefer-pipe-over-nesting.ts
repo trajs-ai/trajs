@@ -1,6 +1,4 @@
-import { defineRule } from "@oxlint/plugins";
-
-import type { ESTree } from "@oxlint/plugins";
+import { defineRule, type ESTree } from "vite-plus/lint/plugins";
 
 /** Calls in one straight line before the nesting is reported as hard to read. */
 const MINIMUM_CHAIN_LENGTH = 3;

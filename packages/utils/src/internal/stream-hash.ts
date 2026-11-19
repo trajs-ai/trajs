@@ -1,7 +1,4 @@
-/**
- * The digest a hash reads, as `StreamHash.make` derives it from the codec of a
- * platform.
- */
+/** The digest of one stream, and the running digest of one call, cut to the bytes it states. */
 
 import { Sink } from "effect";
 import { Hex } from "effect/encoding";
@@ -15,7 +12,7 @@ import {
 } from "#/StreamHash.ts";
 
 /** The digest bytes of each algorithm. */
-const bytesOf = (algorithm: Algorithm): number => {
+const digestBytes = (algorithm: Algorithm): number => {
   switch (algorithm) {
     case Algorithm.enums.Blake2b512:
       return 64;
@@ -33,12 +30,14 @@ interface Reading {
 }
 
 /**
- * A `length` outside the bytes of the algorithm raises a `RangeError` here, since
- * no digest of that length exists and the sink states no error.
+ * The algorithm one call reads its digest with, and the digest bytes it reads.
+ *
+ * A `length` outside the bytes of the algorithm raises a `RangeError` here: the
+ * sink states no error, so a call that cannot be read fails where it is made.
  */
-const reading = (options?: Options): Reading => {
+const resolveReading = (options?: Options): Reading => {
   const algorithm = options?.algorithm ?? defaultAlgorithm;
-  const bytes = bytesOf(algorithm);
+  const bytes = digestBytes(algorithm);
   const length = options?.length ?? bytes;
 
   if (!Number.isInteger(length) || length < 1 || length > bytes) {
@@ -57,11 +56,11 @@ const cut = (hashing: Hashing, bytes: number): Hashing => ({
 });
 
 /** The sink of one stream, fed to one running digest of the codec. */
-export const digestOf = (
+export const digestSink = (
   codec: Codec,
   options?: Options,
 ): Sink.Sink<string, Uint8Array, never, never> => {
-  const { algorithm, bytes } = reading(options);
+  const { algorithm, bytes } = resolveReading(options);
 
   return Sink.reduce(
     () => cut(codec.start(algorithm), bytes),
@@ -74,8 +73,8 @@ export const digestOf = (
 };
 
 /** The running digest of one call, cut to the bytes it reads. */
-export const startOf = (codec: Codec, options?: Options): Hashing => {
-  const { algorithm, bytes } = reading(options);
+export const runningDigest = (codec: Codec, options?: Options): Hashing => {
+  const { algorithm, bytes } = resolveReading(options);
 
   return cut(codec.start(algorithm), bytes);
 };

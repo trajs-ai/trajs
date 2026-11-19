@@ -30,29 +30,23 @@ release. Add a tool name to select part of the graph. For example, run
 
 <!--VITE PLUS END-->
 
-## Code Style
-
-- Prefer `.pipe()` over function composition.
-
-## Stream Algorithms
-
-- Write an algorithm over a stream with Stream combinators, not by collecting it (`Stream.runCollect`, `Stream.runFold`, a replaying queue) unless the user agrees.
-- An inefficient implementation, and leaving one unreported, is a serious error.
-
 ## Package Layout
 
 - Keep a public module's private logic in the package's `src/internal/` (lowercase files, imported as `#/internal/*.ts`, never re-exported), and block `"./internal/*"` from the public surface.
 
-## Command Execution
+## Effect Code Style
+
+- Refer to `effect` official code style as standard.
+- Prefer `.pipe()` over function composition.
+- Write an algorithm over a stream with Stream combinators, not by collecting it. An inefficient implementation, and leaving one unreported, is a serious error.
+
+## Rules
 
 - DO NOT USE `timeout`.
-
-## Version Control
-
 - DO NOT read git history unless the user explicitly asks. Work from the files as they are now.
 
 ## Testing
 
-- Run the tests the change touches, named by file, directory, or test name. A bare `vp test` runs the whole workspace suite, so it is forbidden.
-- Do not change the test suite unless the user explicitly asks for it.
-- Temporary unit tests written while implementing are allowed, but delete every one of them once the task is done.
+- Run the tests the change touches, named by file, directory, or test name. A bare `vp test` is forbidden.
+- Do not change the test suite unless explicitly asks for.
+- Temporary unit tests written while implementing must be cleaned up once the task is done.

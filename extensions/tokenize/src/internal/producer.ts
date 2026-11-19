@@ -21,9 +21,10 @@ import { Effect, Option, Predicate } from "effect";
 import { Tokenizer } from "effect/ai";
 import type { AiError } from "effect/ai";
 
-import { carriesAnyOf, countedOf } from "#/internal/count.ts";
-import { countOf, noCalls } from "#/internal/datum.ts";
-import { mediaRuleOf } from "#/internal/media.ts";
+import { carriesAnyTag } from "#/internal/contribution.ts";
+import { countPart } from "#/internal/count.ts";
+import { countDatum, noCalls } from "#/internal/datum.ts";
+import { mediaRule } from "#/internal/media.ts";
 import type { CountedPart } from "#/internal/part.ts";
 import type { ProducerOptions } from "#/Metrics.ts";
 import type { TokenCount } from "#/Tokens.ts";
@@ -45,11 +46,7 @@ export interface Measured {
   readonly total: number;
 }
 
-/**
- * What one session has been counted for so far.
- *
- * @see {@link Sessions} for the state a step carries.
- */
+/** What one session has been counted for so far, as `Sessions` holds it. */
 export interface SessionCount {
   /** Tokens the parts of the session counted so far are worth, the part just counted among them. */
   total: number;
@@ -61,7 +58,7 @@ export interface SessionCount {
 export type Sessions = Map<string, SessionCount>;
 
 /** The state a step starts from: no session counted yet. */
-export const sessions = (): Sessions => new Map();
+export const emptySessions = (): Sessions => new Map();
 
 /**
  * The running count of one session, made when the first of its parts is counted.
@@ -71,7 +68,7 @@ export const sessions = (): Sessions => new Map();
  * it is first counted. A part of a session no earlier part declared is therefore
  * counted all the same, from the beginning of that session's count.
  */
-const sessionOf = (state: Sessions, id: string): SessionCount => {
+const ensureSession = (state: Sessions, id: string): SessionCount => {
   const existing = state.get(id);
 
   if (existing !== undefined) return existing;
@@ -109,6 +106,12 @@ export type Step = (
 ) => Effect.Effect<readonly [Sessions, ReadonlyArray<Measured>], UncountedFailure>;
 
 /**
+ * The step's answer for a part no count is taken from: the state as it was, and
+ * nothing measured.
+ */
+const unchanged = (state: Sessions): readonly [Sessions, ReadonlyArray<Measured>] => [state, []];
+
+/**
  * A part a tokenizer failed on: which part it is, and why it was left uncounted.
  *
  * The part is named here rather than by the caller of a step, because a step is
@@ -130,41 +133,40 @@ export interface UncountedFailure {
  * so that which tokenizer a trajectory is counted under is chosen where the step
  * is built and travels with it rather than with the kit that runs it.
  */
-export const stepOf = Effect.fn("stepOf")(function* (
+export const makeStep = Effect.fn("makeStep")(function* (
   options?: ProducerOptions,
 ): Effect.fn.Return<Step, never, Tokenizer.Tokenizer> {
   const tokenizer = yield* Tokenizer.Tokenizer;
-
-  const countOfPart = (part: CountedPart) =>
-    countedOf(part, mediaRuleOf(options?.media)).pipe(
-      Effect.provideService(Tokenizer.Tokenizer, tokenizer),
-      // What the part is, rather than what it is worth, is what a failure names:
-      // the uuid of the part is read where the part is known to be one a count is
-      // taken from.
-      Effect.mapError((reason): UncountedFailure => ({ attach: part.uuid, reason })),
-    );
+  // The option resolves to one rule for the whole step rather than per part.
+  const media = mediaRule(options?.media);
 
   return (state, part) =>
     Effect.gen(function* () {
-      if (!isCounted(part)) return [state, []] as const;
+      if (!isCounted(part)) return unchanged(state);
 
       const tags = options?.tags;
 
-      if (tags !== undefined && !carriesAnyOf(part, tags)) return [state, []] as const;
+      if (tags !== undefined && !carriesAnyTag(part, tags)) return unchanged(state);
 
-      const counted = yield* countOfPart(part);
+      const counted = yield* countPart(part, media).pipe(
+        Effect.provideService(Tokenizer.Tokenizer, tokenizer),
+        // What the part is, rather than what it is worth, is what a failure names:
+        // the uuid of the part is read where the part is known to be one a count is
+        // taken from.
+        Effect.mapError((reason): UncountedFailure => ({ attach: part.uuid, reason })),
+      );
 
       // A part that states no session of its own belongs to the main session.
       const sessionId = part.sessionId ?? Trajectory.mainSessionId;
       const known = state.get(sessionId);
-      const count = countOf(part, counted, known === undefined ? noCalls : known.calls);
+      const count = countDatum(part, counted, known === undefined ? noCalls : known.calls);
 
       // A part no count is taken from leaves the state as it was, so that a
       // session is not made for a part which carries nothing a tokenizer answers
       // for.
-      if (Option.isNone(count)) return [state, []] as const;
+      if (Option.isNone(count)) return unchanged(state);
 
-      const session = sessionOf(state, sessionId);
+      const session = ensureSession(state, sessionId);
 
       // What the call of a result is worth is known from the call itself, which
       // the result answers by identifier, so every call a part carries is kept

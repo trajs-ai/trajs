@@ -41,7 +41,7 @@ export const mediaRuleIds = ["openai", "anthropic"] as const;
 /**
  * Name of a family a payload that is not text is priced with.
  *
- * @see {@link mediaRuleOf} for the rule a name stands for.
+ * @see {@link mediaRule} for the rule a name stands for.
  */
 export type MediaRuleId = (typeof mediaRuleIds)[number];
 
@@ -51,44 +51,8 @@ const IMAGE_TOKENS = 85;
 /** Tokens any other payload is estimated at when the caller supplies no rule. */
 const FILE_TOKENS = 100;
 
-/** Tokens an OpenAI vision model charges for any image, `gpt-4o` and `gpt-4.1`. */
-const OPENAI_BASE = 85;
-
-/** Tokens it charges for each tile the image is covered with. */
-const OPENAI_TILE_TOKENS = 170;
-
-/** The side of one of those tiles. */
-const OPENAI_TILE_EDGE = 512;
-
-/** The square an image is fitted into before its tiles are counted. */
-const OPENAI_MAX_EDGE = 2048;
-
-/** The longest short side that survives that fit. */
-const OPENAI_SHORT_EDGE = 768;
-
-/** Pixels of one of the square patches an OpenAI vision model counts in. */
-const OPENAI_PATCH_EDGE = 32;
-
-/** Tokens one of those patches is worth, the models that count in patches. */
-const OPENAI_PATCH_MULTIPLIER = 1.2;
-
-/** The longest edge an image keeps before its patches are counted. */
-const OPENAI_PATCH_MAX_EDGE = 2048;
-
-/** Most patches an image is covered with before it is scaled down. */
-const OPENAI_PATCH_BUDGET = 2500;
-
-/** The square an image is fitted into when it is read at `"low"` detail. */
-const OPENAI_PATCH_LOW_EDGE = 512;
-
-/** Pixels of one of the square patches a Claude model counts an image in. */
-const ANTHROPIC_PATCH_EDGE = 28;
-
-/** The longest edge a Claude image keeps, on the standard resolution tier. */
-const ANTHROPIC_MAX_EDGE = 1568;
-
-/** Most visual tokens one Claude image costs, on the standard resolution tier. */
-const ANTHROPIC_MAX_TOKENS = 1568;
+/** Whether a payload is an image, which is the only thing the families price. */
+const isImage = (part: MediaPart): boolean => part.mediaType.startsWith("image/");
 
 /**
  * Estimates a payload that is not text at `ai-tokenizer`'s numbers: 85 tokens for
@@ -101,8 +65,17 @@ const ANTHROPIC_MAX_TOKENS = 1568;
 export const mediaTokens = (part: MediaPart): number =>
   isImage(part) ? IMAGE_TOKENS : FILE_TOKENS;
 
-/** Whether a payload is an image, which is the only thing the families price. */
-const isImage = (part: MediaPart): boolean => part.mediaType.startsWith("image/");
+/**
+ * Makes a rule out of a price per image size: a payload that is an image with
+ * known pixels is priced by `price`, and every other one — anything that is not
+ * an image, or an image whose pixels are not in it — by {@link mediaTokens}.
+ *
+ * Every published rule falls back the same way, so the fallback is stated once.
+ */
+const pricedBy =
+  (price: (size: ImageSize) => number): MediaRule =>
+  (part, size) =>
+    size === undefined || !isImage(part) ? mediaTokens(part) : price(size);
 
 /** Scales a size down so neither side exceeds `max`, keeping its aspect ratio. */
 const fitInside = (size: ImageSize, max: number): ImageSize => {
@@ -130,92 +103,20 @@ const fitShortSide = (size: ImageSize, max: number): ImageSize => {
 const patchCount = (size: ImageSize, edge: number): number =>
   Math.ceil(size.width / edge) * Math.ceil(size.height / edge);
 
-/**
- * Rounds a half pixel to the even neighbor, which is how Anthropic's own
- * implementation resolves one.
- *
- * `Math.round` rounds a half up instead, and so computes a different size for the
- * images whose short edge lands exactly between two pixels.
- */
-const roundTiesToEven = (value: number): number => {
-  const floor = Math.floor(value);
+/** Tokens an OpenAI vision model charges for any image, `gpt-4o` and `gpt-4.1`. */
+const OPENAI_BASE = 85;
 
-  if (value - floor !== 0.5) return Math.round(value);
+/** Tokens it charges for each tile the image is covered with. */
+const OPENAI_TILE_TOKENS = 170;
 
-  return floor % 2 === 0 ? floor : floor + 1;
-};
+/** The side of one of those tiles. */
+const OPENAI_TILE_EDGE = 512;
 
-/**
- * The size a Claude model resizes an image to before its patches are counted: the
- * largest aspect-preserving size whose edges are whole patches inside `maxEdge`
- * and whose patches are within `maxTokens`.
- *
- * The token limit and not the edge limit is what decides the size of nearly every
- * image, so the size is not `fitInside`'s: this is Anthropic's own reference
- * implementation, which searches for the longest edge that fits, published at
- * https://platform.claude.com/docs/en/build-with-claude/vision-coordinates#resize-your-image-before-uploading
- */
-const claudeSize = (size: ImageSize, maxEdge: number, maxTokens: number): ImageSize => {
-  const patched = (side: number): number =>
-    Math.ceil(side / ANTHROPIC_PATCH_EDGE) * ANTHROPIC_PATCH_EDGE;
+/** The square an image is fitted into before its tiles are counted. */
+const OPENAI_MAX_EDGE = 2048;
 
-  const fits = (width: number, height: number): boolean =>
-    patched(width) <= maxEdge &&
-    patched(height) <= maxEdge &&
-    patchCount({ width, height }, ANTHROPIC_PATCH_EDGE) <= maxTokens;
-
-  if (fits(size.width, size.height)) return size;
-
-  // An image taller than it is wide is the same problem with its sides swapped.
-  if (size.height > size.width) {
-    const turned = claudeSize({ width: size.height, height: size.width }, maxEdge, maxTokens);
-
-    return { width: turned.height, height: turned.width };
-  }
-
-  const aspect = size.width / size.height;
-  const shortEdge = (longEdge: number): number => Math.max(roundTiesToEven(longEdge / aspect), 1);
-
-  let inside = 1;
-  let outside = size.width;
-
-  while (inside + 1 < outside) {
-    const middle = Math.floor((inside + outside) / 2);
-
-    if (fits(middle, shortEdge(middle))) inside = middle;
-    else outside = middle;
-  }
-
-  return { width: inside, height: shortEdge(inside) };
-};
-
-/**
- * The size an image is scaled down to so that its patches are within `budget`,
- * after the edge it was fitted into left it covered by more.
- *
- * The scale is pulled back to a whole number of patches, so that the size it is
- * floored to cannot land one patch over the budget. This is step B of the rule
- * OpenAI publishes, at
- * https://platform.openai.com/docs/guides/images-vision#patch-based-image-tokenization
- */
-const fitPatchBudget = (size: ImageSize, budget: number): ImageSize => {
-  const shrink = Math.sqrt(
-    (OPENAI_PATCH_EDGE * OPENAI_PATCH_EDGE * budget) / (size.width * size.height),
-  );
-
-  const whole = (side: number): number => {
-    const patches = (side * shrink) / OPENAI_PATCH_EDGE;
-
-    return Math.floor(patches) / patches;
-  };
-
-  const adjusted = shrink * Math.min(whole(size.width), whole(size.height));
-
-  return {
-    width: Math.floor(size.width * adjusted),
-    height: Math.floor(size.height * adjusted),
-  };
-};
+/** The longest short side that survives that fit. */
+const OPENAI_SHORT_EDGE = 768;
 
 /** The numbers an OpenAI vision model charges for an image. */
 export interface OpenAiNumbers {
@@ -263,16 +164,55 @@ export const openAiRule = (numbers: OpenAiNumbers = {}): MediaRule => {
   const tile = numbers.tile ?? OPENAI_TILE_TOKENS;
   const detail = numbers.detail ?? "high";
 
-  return (part, size) => {
-    if (size === undefined || !isImage(part)) return mediaTokens(part);
-
+  return pricedBy((size) => {
     if (detail === "low") return base;
 
     const fitted = fitShortSide(fitInside(size, OPENAI_MAX_EDGE), OPENAI_SHORT_EDGE);
-    const across = Math.ceil(fitted.width / OPENAI_TILE_EDGE);
-    const down = Math.ceil(fitted.height / OPENAI_TILE_EDGE);
 
-    return base + tile * across * down;
+    return base + tile * patchCount(fitted, OPENAI_TILE_EDGE);
+  });
+};
+
+/** Pixels of one of the square patches an OpenAI vision model counts in. */
+const OPENAI_PATCH_EDGE = 32;
+
+/** Tokens one of those patches is worth, the models that count in patches. */
+const OPENAI_PATCH_MULTIPLIER = 1.2;
+
+/** The longest edge an image keeps before its patches are counted. */
+const OPENAI_PATCH_MAX_EDGE = 2048;
+
+/** Most patches an image is covered with before it is scaled down. */
+const OPENAI_PATCH_BUDGET = 2500;
+
+/** The square an image is fitted into when it is read at `"low"` detail. */
+const OPENAI_PATCH_LOW_EDGE = 512;
+
+/**
+ * The size an image is scaled down to so that its patches are within `budget`,
+ * after the edge it was fitted into left it covered by more.
+ *
+ * The scale is pulled back to a whole number of patches, so that the size it is
+ * floored to cannot land one patch over the budget. This is step B of the rule
+ * OpenAI publishes, at
+ * https://platform.openai.com/docs/guides/images-vision#patch-based-image-tokenization
+ */
+const fitPatchBudget = (size: ImageSize, budget: number): ImageSize => {
+  const shrink = Math.sqrt(
+    (OPENAI_PATCH_EDGE * OPENAI_PATCH_EDGE * budget) / (size.width * size.height),
+  );
+
+  const whole = (side: number): number => {
+    const patches = (side * shrink) / OPENAI_PATCH_EDGE;
+
+    return Math.floor(patches) / patches;
+  };
+
+  const adjusted = shrink * Math.min(whole(size.width), whole(size.height));
+
+  return {
+    width: Math.floor(size.width * adjusted),
+    height: Math.floor(size.height * adjusted),
   };
 };
 
@@ -338,9 +278,7 @@ export const openAiPatchRule = (numbers: OpenAiPatchNumbers = {}): MediaRule => 
   const lowEdge = numbers.lowEdge ?? OPENAI_PATCH_LOW_EDGE;
   const detail = numbers.detail ?? "high";
 
-  return (part, size) => {
-    if (size === undefined || !isImage(part)) return mediaTokens(part);
-
+  return pricedBy((size) => {
     if (detail === "low") {
       return Math.ceil(patchCount(fitInside(size, lowEdge), OPENAI_PATCH_EDGE) * multiplier);
     }
@@ -350,7 +288,75 @@ export const openAiPatchRule = (numbers: OpenAiPatchNumbers = {}): MediaRule => 
     const resized = covered <= budget ? fitted : fitPatchBudget(fitted, budget);
 
     return Math.ceil(patchCount(resized, OPENAI_PATCH_EDGE) * multiplier);
-  };
+  });
+};
+
+/** Pixels of one of the square patches a Claude model counts an image in. */
+const ANTHROPIC_PATCH_EDGE = 28;
+
+/** The longest edge a Claude image keeps, on the standard resolution tier. */
+const ANTHROPIC_MAX_EDGE = 1568;
+
+/** Most visual tokens one Claude image costs, on the standard resolution tier. */
+const ANTHROPIC_MAX_TOKENS = 1568;
+
+/**
+ * Rounds a half pixel to the even neighbor, which is how Anthropic's own
+ * implementation resolves one.
+ *
+ * `Math.round` rounds a half up instead, and so computes a different size for the
+ * images whose short edge lands exactly between two pixels.
+ */
+const roundTiesToEven = (value: number): number => {
+  const floor = Math.floor(value);
+
+  if (value - floor !== 0.5) return Math.round(value);
+
+  return floor % 2 === 0 ? floor : floor + 1;
+};
+
+/**
+ * The size a Claude model resizes an image to before its patches are counted: the
+ * largest aspect-preserving size whose edges are whole patches inside `maxEdge`
+ * and whose patches are within `maxTokens`.
+ *
+ * The token limit and not the edge limit is what decides the size of nearly every
+ * image, so the size is not `fitInside`'s: this is Anthropic's own reference
+ * implementation, which searches for the longest edge that fits, published at
+ * https://platform.claude.com/docs/en/build-with-claude/vision-coordinates#resize-your-image-before-uploading
+ */
+const anthropicSize = (size: ImageSize, maxEdge: number, maxTokens: number): ImageSize => {
+  const patched = (side: number): number =>
+    Math.ceil(side / ANTHROPIC_PATCH_EDGE) * ANTHROPIC_PATCH_EDGE;
+
+  const fits = (width: number, height: number): boolean =>
+    patched(width) <= maxEdge &&
+    patched(height) <= maxEdge &&
+    patchCount({ width, height }, ANTHROPIC_PATCH_EDGE) <= maxTokens;
+
+  if (fits(size.width, size.height)) return size;
+
+  // An image taller than it is wide is the same problem with its sides swapped.
+  if (size.height > size.width) {
+    const turned = anthropicSize({ width: size.height, height: size.width }, maxEdge, maxTokens);
+
+    return { width: turned.height, height: turned.width };
+  }
+
+  const aspect = size.width / size.height;
+  const shortEdge = (longEdge: number): number => Math.max(roundTiesToEven(longEdge / aspect), 1);
+
+  let inside = 1;
+  let outside = size.width;
+
+  while (inside + 1 < outside) {
+    const middle = Math.floor((inside + outside) / 2);
+
+    if (fits(middle, shortEdge(middle))) inside = middle;
+    else outside = middle;
+  }
+
+  return { width: inside, height: shortEdge(inside) };
 };
 
 /** The numbers a Claude model charges for an image. */
@@ -404,18 +410,16 @@ export const anthropicRule = (numbers: AnthropicNumbers = {}): MediaRule => {
   const maxEdge = numbers.maxEdge ?? ANTHROPIC_MAX_EDGE;
   const maxTokens = numbers.maxTokens ?? ANTHROPIC_MAX_TOKENS;
 
-  return (part, size) => {
-    if (size === undefined || !isImage(part)) return mediaTokens(part);
-
-    return patchCount(claudeSize(size, maxEdge, maxTokens), ANTHROPIC_PATCH_EDGE);
-  };
+  return pricedBy((size) =>
+    patchCount(anthropicSize(size, maxEdge, maxTokens), ANTHROPIC_PATCH_EDGE),
+  );
 };
 
 /**
  * The rule an option names: a family's own, one of the caller's, or the
  * placeholder when nothing was named.
  */
-export const mediaRuleOf = (option?: MediaRuleId | MediaRule): MediaRule => {
+export const mediaRule = (option?: MediaRuleId | MediaRule): MediaRule => {
   if (option === undefined) return mediaTokens;
 
   if (Predicate.isString(option)) {

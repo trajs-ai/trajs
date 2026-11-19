@@ -20,7 +20,7 @@
 
 import { Context, Layer, Schema } from "effect";
 
-import { ofFrom } from "#/internal/checksum.ts";
+import { resolveChecksum } from "#/internal/checksum.ts";
 
 /**
  * The checksum algorithm of a trajectory's blocks.
@@ -192,7 +192,7 @@ export interface Codec {
  * @category constructors
  */
 export const make = (codec?: Codec): Checksum => ({
-  of: (options) => ofFrom(codec, options),
+  of: (options) => resolveChecksum(codec, options),
 });
 
 /**

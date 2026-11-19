@@ -12,7 +12,7 @@ import { PackageMetadata } from "@trajs/utils/Package";
 import { Data, Schema } from "effect";
 
 import type * as ExtraKit from "#/ExtraKit.ts";
-import { documentOf, requireBinaryLayout } from "#/internal/schema.ts";
+import { jsonDocument, requireBinaryLayout } from "#/internal/schema.ts";
 
 /**
  * The trajectory part kinds supporting extras.
@@ -224,7 +224,7 @@ const declaredFor = (item: Any, part: Part): Schema.Top | undefined =>
 const documentFor = (item: Any, part: Part): Schema.Json | undefined => {
   const schema = declaredFor(item, part);
 
-  return schema === undefined ? undefined : documentOf(schema);
+  return schema === undefined ? undefined : jsonDocument(schema);
 };
 
 type Datum<X extends Any, P extends Part> = [Declared<X, P>] extends [never]

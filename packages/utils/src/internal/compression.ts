@@ -1,10 +1,8 @@
-/**
- * The frames a compression carries, as `Compression.make` derives them from the
- * codec of a platform.
- */
+/** The frames a compression carries, from the options of one call and the codec of a platform. */
 
 import { Effect, Stream } from "effect";
 
+import { concat } from "#/Byte.ts";
 import {
   Algorithm,
   type Codec,
@@ -14,26 +12,8 @@ import {
   defaultAlgorithm,
 } from "#/Compression.ts";
 
-const joined = (chunks: ReadonlyArray<Uint8Array>): Uint8Array => {
-  let length = 0;
-
-  for (const chunk of chunks) {
-    length += chunk.length;
-  }
-
-  const bytes = new Uint8Array(length);
-  let at = 0;
-
-  for (const chunk of chunks) {
-    bytes.set(chunk, at);
-    at += chunk.length;
-  }
-
-  return bytes;
-};
-
-/** `None` states no codec, so the chunks are passed through here. */
-const direction =
+/** Carries the chunks of a stream through the codec of the stated algorithm. */
+const carryStream =
   (codecs: Codec["compress"]): Compression["compress"] =>
   (options) =>
   <E, R>(
@@ -41,27 +21,31 @@ const direction =
   ): Stream.Stream<Uint8Array, E | CompressionError, R> => {
     const algorithm = options?.algorithm ?? defaultAlgorithm;
 
+    // `None` states no codec, so the chunks are passed through untouched.
     return algorithm === Algorithm.enums.None ? bytes : codecs(algorithm)(bytes);
   };
 
 /**
- * The stream holds the one buffer that was given, so the codec writes or reads
- * exactly one frame.
+ * Carries the one buffer that is given through the frame of one call.
+ *
+ * The stream holds that buffer alone, so the codec writes or reads exactly one
+ * frame.
  */
-const held =
+const carryBytes =
   (frame: Compression["compress"]) =>
   (options?: Options) =>
   (bytes: Uint8Array): Effect.Effect<Uint8Array, CompressionError> =>
-    Stream.make(bytes).pipe(frame(options), Stream.runCollect, Effect.map(joined));
+    Stream.make(bytes).pipe(frame(options), Stream.runCollect, Effect.map(concat));
 
-export const compressionOf = (codec: Codec): Compression => {
-  const compress = direction(codec.compress);
-  const decompress = direction(codec.decompress);
+/** The compression a platform's codecs provide. */
+export const makeCompression = (codec: Codec): Compression => {
+  const compress = carryStream(codec.compress);
+  const decompress = carryStream(codec.decompress);
 
   return {
     compress,
-    compressBytes: held(compress),
+    compressBytes: carryBytes(compress),
     decompress,
-    decompressBytes: held(decompress),
+    decompressBytes: carryBytes(decompress),
   };
 };

@@ -20,8 +20,8 @@ import { FromJson } from "#/unstable/atif/Document.ts";
 import type { Document } from "#/unstable/atif/Document.ts";
 import * as AtifEvent from "#/unstable/atif/Event.ts";
 import { extrakit } from "#/unstable/atif/Extra.ts";
-import { produce } from "#/unstable/atif/internal/reading.ts";
-import { toolkitOf } from "#/unstable/atif/internal/toolkit.ts";
+import { produceDocument } from "#/unstable/atif/internal/produce.ts";
+import { documentToolkit } from "#/unstable/atif/internal/toolkit.ts";
 
 /**
  * The config a document is read with: the kits this module declares.
@@ -96,7 +96,7 @@ export const encode = (
   AtifConfig,
   TrajectoryError | PlatformError.PlatformError,
   FileSystem.FileSystem | Path.Path
-> => kits(document)((main) => produce(main, document, options?.cwd));
+> => kits(document)((main) => produceDocument(main, document, options?.cwd));
 
 /**
  * Reads and decodes an ATIF JSON file before constructing its trajectory.
@@ -146,7 +146,7 @@ export const fromFile = (
 const kits = (document: Document) =>
   Produce.produce(
     Config.config({
-      toolkit: toolkitOf(document),
+      toolkit: documentToolkit(document),
       // The events this module declares, so the trajectory names the kit its events are
       // read with. No step is read as an event yet.
       eventkit: AtifEvent.eventkit,

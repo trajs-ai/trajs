@@ -1,8 +1,4 @@
-/**
- * What the metric view reads of a cached trajectory: the results attached to each part.
- */
-
-import { Effect, Option, Predicate, Result, Stream } from "effect";
+import { Effect, Predicate, Result, Stream } from "effect";
 
 import type * as Cache from "#/Cache.ts";
 import type * as Config from "#/Config.ts";
@@ -10,81 +6,74 @@ import * as Trajectory from "#/Trajectory.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
 import type * as MetricView from "#/view/MetricView.ts";
 
-type Part<Config extends Config.AnyConfig> = Trajectory.Part<Config>;
+/** What one reading of a cached trajectory fails with. */
+type ReadError = TrajectoryError | Cache.CacheError;
 
 /** The cached parts of a trajectory, read by index or as a stream. */
 type Parts<Config extends Config.AnyConfig> = Trajectory.TrajectoryBuffer<
   Config,
-  TrajectoryError | Cache.CacheError,
+  ReadError,
   Config.DecodingServices<Config>
 >;
 
 /** A reading of a cached trajectory, which fails wherever the cache does. */
 type Reading<Config extends Config.AnyConfig, A> = Effect.Effect<
   A,
-  TrajectoryError | Cache.CacheError,
+  ReadError,
   Config.DecodingServices<Config>
 >;
 
+/** A metric view stream of a cached trajectory. */
 type MetricStream<Config extends Config.AnyConfig> = MetricView.MetricTrajectoryStream<
   Config,
-  TrajectoryError | Cache.CacheError,
+  ReadError,
   Config.DecodingServices<Config>
 >;
 
-/** Metric part indices by the uuid of every part they attach to, in trajectory order. */
-type Attachment = Map<string, Array<number>>;
+/** The metric parts attached to each part, by the uuid of the part they name. */
+type Attachment<Config extends Config.AnyConfig> = ReadonlyMap<
+  string,
+  ReadonlyArray<Trajectory.MetricPartOf<Config>>
+>;
 
 const isMetric = <Config extends Config.AnyConfig>(
-  part: Part<Config>,
+  part: Trajectory.Part<Config>,
 ): part is Trajectory.MetricPartOf<Config> => Predicate.isTagged("Metric")(part);
 
-const attachPart = <Config extends Config.AnyConfig>(
-  attached: Attachment,
-  part: Part<Config>,
-  index: number,
-): void => {
-  if (!isMetric<Config>(part)) return;
-
-  // A result that names one target twice attaches once.
-  for (const target of new Set(part.metric.data.attach ?? [])) {
-    const indices = attached.get(target);
-
-    if (indices === undefined) {
-      attached.set(target, [index]);
-    } else {
-      indices.push(index);
-    }
-  }
-};
-
-const record = <Config extends Config.AnyConfig>(
+/**
+ * The metric parts `cached` holds, by the uuid of the part each attaches to.
+ *
+ * A result that names one target twice attaches once.
+ */
+const attachments = <Config extends Config.AnyConfig>(
   cached: Parts<Config>,
-): Reading<Config, Attachment> =>
+): Reading<Config, Attachment<Config>> =>
   Effect.gen(function* () {
-    // One index per reading, so reading the view again starts from no entries.
-    const attached: Attachment = new Map();
+    // One reading per call, so reading the view again starts from no entries.
+    const attached = new Map<string, Array<Trajectory.MetricPartOf<Config>>>();
 
     yield* Trajectory.asStream(cached).pipe(
-      Stream.zipWithIndex,
-      Stream.runForEach(([part, index]) => Effect.sync(() => attachPart(attached, part, index))),
+      Stream.filter(isMetric),
+      Stream.runForEach((result) =>
+        Effect.sync(() => {
+          for (const target of new Set(result.metric.data.attach ?? [])) {
+            const held = attached.get(target);
+
+            if (held === undefined) {
+              attached.set(target, [result]);
+            } else {
+              held.push(result);
+            }
+          }
+        }),
+      ),
     );
 
     return attached;
   });
 
-const metricAt = <Config extends Config.AnyConfig>(
-  cached: Parts<Config>,
-  index: number,
-): Reading<Config, Trajectory.MetricPartOf<Config>> =>
-  cached.at(index).pipe(
-    Effect.map(Option.filter(isMetric<Config>)),
-    // An index is recorded from reading this cache, which held a metric part there.
-    Effect.map(Option.getOrThrow),
-  );
-
 /** Groups the results of one part by metric tag, each list in trajectory order. */
-const byTag = <Config extends Config.AnyConfig>(
+const groupByTag = <Config extends Config.AnyConfig>(
   results: ReadonlyArray<Trajectory.MetricPartOf<Config>>,
 ): MetricView.AttachedMetrics<Config> => {
   const grouped = new Map<string, Array<Trajectory.MetricPartOf<Config>>>();
@@ -107,39 +96,27 @@ const byTag = <Config extends Config.AnyConfig>(
   return Object.fromEntries<unknown>(grouped) as MetricView.AttachedMetrics<Config>;
 };
 
-const metricsOf = <Config extends Config.AnyConfig>(
-  cached: Parts<Config>,
-  attached: Attachment,
-  uuid: string,
-): Reading<Config, MetricView.AttachedMetrics<Config>> =>
-  Effect.forEach(attached.get(uuid) ?? [], (index) => metricAt(cached, index)).pipe(
-    Effect.map(byTag),
-  );
-
-/** Keeps a result that names no target, and hands every other part its results. */
+/**
+ * The part with the results attached to it.
+ *
+ * A result that names a target is dropped, since that target carries it, and a
+ * result that names none is a part of its own.
+ */
 const emit = <Config extends Config.AnyConfig>(
-  cached: Parts<Config>,
-  attached: Attachment,
-  part: Part<Config>,
-): Reading<Config, Result.Result<MetricView.MetricTrajectoryPart<Config>, void>> => {
-  // A result that names a target is emitted with that target rather than last.
-  if (isMetric<Config>(part)) {
-    return Effect.succeed(
-      part.metric.data.attach === undefined ? Result.succeed(part) : Result.failVoid,
-    );
+  attached: Attachment<Config>,
+  part: Trajectory.Part<Config>,
+): Result.Result<MetricView.MetricTrajectoryPart<Config>, void> => {
+  if (isMetric(part)) {
+    return part.metric.data.attach === undefined ? Result.succeed(part) : Result.failVoid;
   }
 
-  return Effect.map(metricsOf(cached, attached, part.uuid), (metrics) =>
-    Result.succeed({ ...part, metrics }),
-  );
+  return Result.succeed({ ...part, metrics: groupByTag(attached.get(part.uuid) ?? []) });
 };
 
 /** Reads the parts of a cached trajectory with the results attached to each of them. */
 export const metricStream = <Config extends Config.AnyConfig>(
   cached: Parts<Config>,
 ): Reading<Config, MetricStream<Config>> =>
-  Effect.map(record(cached), (attached) =>
-    Trajectory.asStream(cached).pipe(
-      Stream.filterMapEffect((part) => emit(cached, attached, part)),
-    ),
+  Effect.map(attachments(cached), (attached) =>
+    Trajectory.asStream(cached).pipe(Stream.filterMap((part) => emit(attached, part))),
   );

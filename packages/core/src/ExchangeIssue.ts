@@ -9,7 +9,7 @@
  */
 
 import type { CompressionError } from "@trajs/utils/Compression";
-import type { Algorithm as HashAlgorithm } from "@trajs/utils/StreamHash";
+import type { Algorithm } from "@trajs/utils/StreamHash";
 import { Data, Formatter } from "effect";
 import type { Schema } from "effect";
 
@@ -82,7 +82,7 @@ export class TruncatedFrame extends Data.TaggedClass("TruncatedFrame")<{
  * @category errors
  */
 export class DigestMismatch extends Data.TaggedClass("DigestMismatch")<{
-  readonly algorithm: HashAlgorithm;
+  readonly algorithm: Algorithm;
   readonly expected: string;
   readonly actual: string;
 }> {

@@ -51,9 +51,9 @@ import { Metric, MetricKit, VersionedSchema } from "@trajs/core";
 import { Effect, Schema, Stream } from "effect";
 import { AiError, Tokenizer } from "effect/ai";
 
-import type { PartTag } from "#/internal/count.ts";
+import type { PartTag } from "#/internal/contribution.ts";
 import { type MediaRuleId } from "#/internal/media.ts";
-import { type Measured, sessions, stepOf } from "#/internal/producer.ts";
+import { emptySessions, type Measured, makeStep } from "#/internal/producer.ts";
 import { TokenCount } from "#/Tokens.ts";
 
 import pkg from "../package.json" with { type: "json" };
@@ -331,7 +331,7 @@ export const makeProducer = (
   options?: ProducerOptions,
 ): Effect.Effect<Metric.Producer<typeof tokenEstimate>, never, Tokenizer.Tokenizer> =>
   Effect.gen(function* () {
-    const step = yield* stepOf(options);
+    const step = yield* makeStep(options);
 
     // What a producer is: a reading of a trajectory for the output the metric
     // states. The step the run was provided with a tokenizer for is read here and
@@ -342,7 +342,7 @@ export const makeProducer = (
     // one into the other.
     const producer: Metric.Producer<typeof tokenEstimate> = (trajectory) =>
       trajectory.pipe(
-        Stream.mapAccumEffect(sessions, (state, part) =>
+        Stream.mapAccumEffect(emptySessions, (state, part) =>
           step(state, part).pipe(
             Effect.mapError((failure) => uncounted(failure.attach, failure.reason)),
             Effect.map(([next, measured]) => [next, measured.map(outputOf)] as const),
