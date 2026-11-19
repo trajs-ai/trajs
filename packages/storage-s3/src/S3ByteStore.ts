@@ -7,14 +7,13 @@
  * @stability stable
  */
 
-import type { GetObjectCommandOutput, HeadObjectCommandOutput } from "@aws-sdk/client-s3";
 import { S3Service } from "@effect-aws/client-s3";
 import { type Byte, make } from "@trajs/utils/Byte";
 import * as ByteStore from "@trajs/utils/ByteStore";
-import { Effect, Exit, Layer, Option, Sink } from "effect";
+import { Effect, Layer, Option, Sink } from "effect";
 
-import { readBody, unserved } from "#/internal/s3.ts";
-import { makeUpload } from "#/internal/upload.ts";
+import { bytesAt, lengthOf } from "#/internal/s3.ts";
+import { writeSink } from "#/internal/upload.ts";
 
 /**
  * The bucket the store {@link layer} provides keeps its sequences in.
@@ -57,9 +56,10 @@ export interface Options {
  *
  * **Gotchas**
  *
- * A write that ends before the sequence does leaves the id holding nothing, and the parts of an
- * upload it opened are dropped. Parts left by a process that dies mid-write stay in the bucket
- * until a lifecycle rule expires them.
+ * A write that fails or is interrupted drops the parts of the upload it opened,
+ * which leaves the id holding nothing.
+ * Parts left by a process that dies mid-write stay in the bucket until a lifecycle rule expires
+ * them.
  *
  * @see {@link ByteStore.layerFileSystem} for the same sequences kept in a directory.
  * @see {@link ByteStore.layerKVStore} for a sequence kept as the chunks it is cut into.
@@ -75,22 +75,13 @@ export const layer = (options: Options): Layer.Layer<ByteStore.ByteStore, never,
       const { bucket } = options;
       const failed = ByteStore.ByteStoreError.from;
 
-      // What the bucket holds under `id`, if it holds anything there.
-      const head = (
-        id: string,
-      ): Effect.Effect<Option.Option<HeadObjectCommandOutput>, ByteStore.ByteStoreError> =>
-        s3.headObject({ Bucket: bucket, Key: id }).pipe(
-          Effect.map(Option.some),
-          // A key the bucket holds nothing under is an id that holds nothing, not a failure.
-          Effect.catchTag("NotFound", () => Effect.succeed(Option.none<HeadObjectCommandOutput>())),
-          Effect.mapError(failed(id)),
-        );
+      // What the bucket keeps under `id`, as the number of bytes it holds.
+      const held = (id: string): Effect.Effect<Option.Option<bigint>, ByteStore.ByteStoreError> =>
+        lengthOf(bucket, id).pipe(Effect.provideService(S3Service, s3));
 
-      // Whether the bucket holds an object under `id`.
       const has = (id: string): Effect.Effect<boolean, ByteStore.ByteStoreError> =>
-        head(id).pipe(Effect.map(Option.isSome));
+        held(id).pipe(Effect.map(Option.isSome));
 
-      // Drops the object `id`.
       const drop = (id: string): Effect.Effect<void, ByteStore.ByteStoreError> =>
         s3
           .deleteObject({ Bucket: bucket, Key: id })
@@ -108,46 +99,30 @@ export const layer = (options: Options): Layer.Layer<ByteStore.ByteStore, never,
               // A read that asks for nothing serves nothing, which is where the sequence ended.
               if (size <= 0) return 0;
 
-              const held = yield* s3
-                .getObject({
-                  Bucket: bucket,
-                  Key: id,
-                  Range: `bytes=${offset}-${offset + BigInt(size) - 1n}`,
-                })
-                .pipe(
-                  Effect.map((response) => Option.some(response)),
-                  Effect.catchTag("SdkError", (cause) =>
-                    unserved(cause)
-                      ? Effect.succeed(Option.none<GetObjectCommandOutput>())
-                      : Effect.fail(cause),
-                  ),
-                  Effect.mapError(failed(id)),
-                );
+              const taken = yield* bytesAt(bucket, id, offset, size).pipe(
+                Effect.provideService(S3Service, s3),
+              );
 
-              if (Option.isNone(held)) return 0;
+              return Option.match(taken, {
+                onNone: () => 0,
+                onSome: (served) => {
+                  buffer.set(served);
 
-              const taken = yield* readBody(id, held.value);
-
-              buffer.set(taken);
-
-              return taken.length;
+                  return served.length;
+                },
+              });
             }),
         });
 
       return ByteStore.ByteStore.of({
         read: (id) =>
-          head(id).pipe(
-            Effect.flatMap((held) => {
-              if (Option.isNone(held)) {
-                return Effect.fail(failed(id)("No sequence is kept under the id"));
-              }
-
-              const { ContentLength } = held.value;
-
-              return ContentLength === undefined
-                ? Effect.fail(failed(id)("The object states no length"))
-                : Effect.succeed(sequence(id, BigInt(ContentLength)));
-            }),
+          held(id).pipe(
+            Effect.flatMap(
+              Option.match({
+                onNone: () => Effect.fail(failed(id)("No sequence is kept under the id")),
+                onSome: (length) => Effect.succeed(sequence(id, length)),
+              }),
+            ),
           ),
         write: (id, options) =>
           Effect.gen(function* () {
@@ -161,14 +136,13 @@ export const layer = (options: Options): Layer.Layer<ByteStore.ByteStore, never,
             // before the sequence does leaves the id holding nothing.
             yield* drop(id);
 
-            const upload = makeUpload(s3, bucket, id);
-
-            return Sink.forEach((input: Uint8Array) => upload.push(input)).pipe(
-              Sink.mapEffectEnd((end) => upload.finish().pipe(Effect.map(() => end))),
-              // The parts of an upload are dropped where the write ends before keeping the object.
-              Sink.onExit((exit) => (Exit.isSuccess(exit) ? Effect.void : upload.abandon())),
-            );
-          }).pipe(Sink.unwrap),
+            // What the sink keeps between the chunks is dropped with the scope of the write.
+            return yield* writeSink(bucket, id);
+          }).pipe(
+            // The sink sends its parts through the service the layer was built with.
+            Effect.provideService(S3Service, s3),
+            Sink.unwrap,
+          ),
         remove: (id) => drop(id),
         has,
       });
