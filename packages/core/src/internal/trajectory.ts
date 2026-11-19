@@ -1,21 +1,25 @@
 import { v7 } from "uuid";
 
 import type * as Config from "#/Config.ts";
-import type { Trajectory, TrajectoryStream } from "#/Trajectory.ts";
 
 /** A new uuid v7, which names a trajectory or a part of one. */
 export const uuid = (): string => v7();
 
+/** A trajectory value, which carries the id it is named by and the config it is read with. */
+type Named<Id extends string, Config extends Config.AnyConfig, Value extends object> = Value &
+  Readonly<{ id: Id }> &
+  Readonly<Config>;
+
 /**
- * Names `stream` with `id` and reads it with `config`.
+ * Names `value` with `id` and reads it with `config`.
  *
- * A stream is an opaque object that carries methods of its own, so the fields are
- * set on it rather than on a copy.
+ * A stream and a buffer are opaque objects that carry methods of their own, so the
+ * fields are set on the value rather than on a copy.
  */
 export const attach =
   <Id extends string, Config extends Config.AnyConfig>(id: Id, config: Config) =>
-  <E, R>(stream: TrajectoryStream<Config, E, R>): Trajectory<Id, Config, E, R> =>
-    Object.assign(stream, config, { id });
+  <Value extends object>(value: Value): Named<Id, Config, Value> =>
+    Object.assign(value, config, { id });
 
 export const configOf = <Config extends Config.AnyConfig>(trajectory: Readonly<Config>): Config =>
   // SAFETY: these fields are the config. The trajectory carries that config.

@@ -2,12 +2,12 @@
  * Trajectories held as files.
  *
  * {@link Exchange} reads one by id, and {@link layerFileSystem} provides it
- * from the file system.
+ * from the file system. {@link fromBytes} reads one from a sequence of bytes.
  *
  * @stability stable
  */
 
-import { Compression } from "@trajs/utils";
+import { Bytes, Compression } from "@trajs/utils";
 import { Context, Effect, FileSystem, Layer, Match, Option, Path, Scope } from "effect";
 import type { PlatformError } from "effect/PlatformError";
 import type { JsonObject } from "effect/Schema";
@@ -15,6 +15,7 @@ import type { JsonObject } from "effect/Schema";
 import * as Config from "#/Config.ts";
 import * as ExchangeIssue from "#/ExchangeIssue.ts";
 import * as file from "#/internal/exchange/file.ts";
+import { attach } from "#/internal/trajectory.ts";
 import * as Trajectory from "#/Trajectory.ts";
 import { TrajectoryError } from "#/TrajectoryError.ts";
 
@@ -131,7 +132,7 @@ export const layerFileSystem = ({
       // The bytes of one trajectory, opened from its file.
       const bytesOf = (
         id: string,
-      ): Effect.Effect<file.Bytes, TrajectoryError | ExchangeIssue.NotFound> =>
+      ): Effect.Effect<Bytes.Bytes<PlatformError>, TrajectoryError | ExchangeIssue.NotFound> =>
         Effect.gen(function* () {
           const path = pathOf(id);
 
@@ -146,33 +147,7 @@ export const layerFileSystem = ({
             .open(resolved)
             .pipe(Effect.provideService(Scope.Scope, scope), Effect.mapError(openFailure(id)));
 
-          const { size } = yield* opened.stat.pipe(Effect.mapError(TrajectoryError.parse));
-
-          // A read returns what it can, so the region is read until it is full.
-          const readAt = (position: bigint, length: number) =>
-            Effect.gen(function* () {
-              const region = new Uint8Array(length);
-
-              let filled = 0;
-
-              while (filled < length) {
-                const taken = yield* opened
-                  .read(region.subarray(filled), { position: position + BigInt(filled) })
-                  .pipe(Effect.mapError(TrajectoryError.parse));
-
-                if (taken === 0) {
-                  return yield* Effect.fail(
-                    TrajectoryError.parse(new Error(`'${resolved}' ends before its bytes do`)),
-                  );
-                }
-
-                filled += taken;
-              }
-
-              return region;
-            });
-
-          return { size, read: readAt };
+          return Bytes.makeFromFile(opened);
         });
 
       const read =
@@ -180,9 +155,8 @@ export const layerFileSystem = ({
         <Id extends string>(id: Id) =>
           Effect.gen(function* () {
             const makeBuffer = yield* file.makeBuffer(config);
-            const buffer = yield* makeBuffer(yield* bytesOf(id));
 
-            return { ...config, id, ...buffer };
+            return attach(id, config)(yield* makeBuffer(yield* bytesOf(id)));
           });
 
       // TODO: writing and inspecting a file.
@@ -193,3 +167,41 @@ export const layerFileSystem = ({
       };
     }),
   );
+
+/**
+ * Reads a whole trajectory from a sequence of bytes, named by an id and read with `config`.
+ *
+ * **When to use**
+ *
+ * Use to read bytes a store or a buffer already serves, where {@link layerFileSystem} has no path to open.
+ *
+ * **Details**
+ *
+ * Only the regions the footer's table states are read, so `at` reaches a part without reading the ones before it.
+ * A source that fails reads as a {@link TrajectoryError}, so the trajectory states no `E` of its own.
+ * Reading a part requires `R` beside what decoding `config`'s kits requires.
+ *
+ * **Gotchas**
+ *
+ * The id is the caller's, and the header's own id is not compared with it.
+ * The sequence serves its bytes as each part is read, so it must keep serving them after this returns.
+ *
+ * @see {@link layerFileSystem} for the same over a file system.
+ * @see {@link Exchange.read} for a trajectory a store holds under an id.
+ * @see {@link Trajectory.TrajectoryFile} for the trajectory this reads.
+ * @stability stable
+ * @category constructors
+ */
+export const fromBytes =
+  <Id extends string, C extends Config.AnyConfig>(id: Id, config: C) =>
+  <E, R>(
+    bytes: Bytes.Bytes<E, R>,
+  ): Effect.Effect<
+    Trajectory.TrajectoryFile<Id, C, TrajectoryError, Config.DecodingServices<C> | R>,
+    TrajectoryError,
+    Compression.Compression | R
+  > =>
+    file.makeBuffer(config).pipe(
+      Effect.flatMap((makeBuffer) => makeBuffer(bytes)),
+      Effect.map(attach(id, config)),
+    );

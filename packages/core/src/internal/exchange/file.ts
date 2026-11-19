@@ -1,4 +1,4 @@
-import { Compression } from "@trajs/utils";
+import { type Bytes as Sequence, Compression } from "@trajs/utils";
 import { Effect, Option, Schema } from "effect";
 
 import type * as Config from "#/Config.ts";
@@ -8,10 +8,45 @@ import * as Trajectory from "#/Trajectory.ts";
 import { TrajectoryError } from "#/TrajectoryError.ts";
 
 /** The bytes of one stored trajectory, read by region. */
-export interface Bytes {
+interface Bytes<R> {
   readonly size: bigint;
-  readonly read: (position: bigint, size: number) => Effect.Effect<Uint8Array, TrajectoryError>;
+  readonly read: (position: bigint, size: number) => Effect.Effect<Uint8Array, TrajectoryError, R>;
 }
+
+/** The bytes of one stored trajectory, read from a sequence that serves them. */
+const bytesOf = <E, R>(
+  sequence: Sequence.Bytes<E, R>,
+): Effect.Effect<Bytes<R>, TrajectoryError, R> => {
+  // A read returns what it can, so a region is read until it is full. A region the
+  // sequence ends inside fails, since the trajectory states bytes it does not hold.
+  const read = (position: bigint, size: number): Effect.Effect<Uint8Array, TrajectoryError, R> =>
+    Effect.gen(function* () {
+      const region = new Uint8Array(size);
+
+      let filled = 0;
+
+      while (filled < size) {
+        const taken = yield* sequence
+          .read(region.subarray(filled), { offset: position + BigInt(filled) })
+          .pipe(Effect.mapError(TrajectoryError.parse));
+
+        if (taken === 0) {
+          return yield* Effect.fail(
+            TrajectoryError.parse(new Error("the bytes end inside a region the trajectory states")),
+          );
+        }
+
+        filled += taken;
+      }
+
+      return region;
+    });
+
+  return sequence.length.pipe(
+    Effect.mapError(TrajectoryError.parse),
+    Effect.map((size) => ({ size, read })),
+  );
+};
 
 /** One chunk the footer's table states: where it begins, how many bytes it takes, and the parts it holds. */
 interface TableEntry {
@@ -22,7 +57,9 @@ interface TableEntry {
 }
 
 /** The chunks a file holds, read from the footer's table and placed where each begins. */
-const readTable = (bytes: Bytes): Effect.Effect<ReadonlyArray<TableEntry>, TrajectoryError> =>
+const readTable = <R>(
+  bytes: Bytes<R>,
+): Effect.Effect<ReadonlyArray<TableEntry>, TrajectoryError, R> =>
   Effect.gen(function* () {
     const tailBytes = BigInt(chunk.FooterTailBytes);
     const noFooter = TrajectoryError.parse(new Error("the bytes end in no footer"));
@@ -59,14 +96,14 @@ const readTable = (bytes: Bytes): Effect.Effect<ReadonlyArray<TableEntry>, Traje
     });
   });
 
-/** The parts of a stored trajectory, read by index. */
+/** The parts of a stored trajectory a sequence of bytes holds, read by index. */
 export const makeBuffer = <C extends Config.AnyConfig>(config: C) =>
   Effect.gen(function* () {
     const compression = yield* Compression.Compression;
     const decodeFrame = frame.decodeFrame(config);
 
     // One chunk's two regions, split into the frames that tile them.
-    const readFrames = (bytes: Bytes, entry: TableEntry) =>
+    const readFrames = <R>(bytes: Bytes<R>, entry: TableEntry) =>
       Effect.gen(function* () {
         const stored = yield* Schema.decodeUnknownEffect(chunk.Chunk)(
           yield* bytes.read(entry.at, entry.len),
@@ -92,14 +129,15 @@ export const makeBuffer = <C extends Config.AnyConfig>(config: C) =>
         return regions.map((region, frame) => ({ meta: metas[frame]!, body: region }));
       });
 
-    return (
-      bytes: Bytes,
+    return <E, R>(
+      sequence: Sequence.Bytes<E, R>,
     ): Effect.Effect<
-      Trajectory.TrajectoryBuffer<C, TrajectoryError, Config.DecodingServices<C>>,
+      Trajectory.TrajectoryBuffer<C, TrajectoryError, Config.DecodingServices<C> | R>,
       TrajectoryError,
-      Config.DecodingServices<C>
+      R
     > =>
       Effect.gen(function* () {
+        const bytes = yield* bytesOf(sequence);
         const table = yield* readTable(bytes);
 
         const at = (index: number) =>
