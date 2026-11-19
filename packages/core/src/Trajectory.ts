@@ -464,33 +464,48 @@ export const parts = <Config extends Config.AnyConfig>(config: Config): Parts<Co
   const Metric = MetricPart(config.metrickit);
 
   return {
-    prompt: (prompt, { sessionId, timestamp, startTimestamp, uuid, ...extra } = {}) =>
-      Prompt.make({
+    prompt: (prompt, options = {}) => {
+      const { sessionId, timestamp, startTimestamp, uuid, ...extra } = options;
+
+      return Prompt.make({
         messages: prompt.content,
         sessionId,
         extra,
         timestamp,
         startTimestamp,
         uuid,
-      }),
-    mainSession: ({ uuid, ...extra } = {}) =>
-      Session.make({ type: MainSession.make({ id: mainSessionId }), extra, uuid }),
+      });
+    },
+    mainSession: (options = {}) => {
+      const { uuid, ...extra } = options;
+
+      return Session.make({ type: MainSession.make({ id: mainSessionId }), extra, uuid });
+    },
     subSession: (id, { fork, uuid, ...extra }) =>
       Session.make({ type: SubSession.make({ id, fork }), extra, uuid }),
-    // SAFETY: the schema uses the same configuration as the return type.
-    response: (response, { sessionId, timestamp, startTimestamp, uuid, ...extra } = {}) =>
-      Response.make({
+    response: (response, options = {}) => {
+      const { sessionId, timestamp, startTimestamp, uuid, ...extra } = options;
+
+      // SAFETY: the schema uses the same configuration as the return type.
+      return Response.make({
         response,
         sessionId,
         extra,
         timestamp,
         startTimestamp,
         uuid,
-      }) as ResponsePart<Config["toolkit"], Config["extrakit"]>,
-    event: (event, { sessionId, timestamp, startTimestamp, uuid } = {}) =>
-      Event.make({ event, sessionId, timestamp, startTimestamp, uuid }),
-    metric: (metric, { timestamp, startTimestamp } = {}) =>
-      Metric.make({ metric, timestamp, startTimestamp }),
+      }) as ResponsePart<Config["toolkit"], Config["extrakit"]>;
+    },
+    event: (event, options = {}) => {
+      const { sessionId, timestamp, startTimestamp, uuid } = options;
+
+      return Event.make({ event, sessionId, timestamp, startTimestamp, uuid });
+    },
+    metric: (metric, options = {}) => {
+      const { timestamp, startTimestamp } = options;
+
+      return Metric.make({ metric, timestamp, startTimestamp });
+    },
   };
 };
 

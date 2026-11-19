@@ -709,10 +709,17 @@ export function produce<
         declaration: string,
       ): ProduceSession<Toolkit["tools"], Events["events"], Extras["extra"]> => ({
         id: stated ?? Trajectory.mainSessionId,
-        enqueuePrompt: (prompt, { timestamp, startTimestamp, ...extra } = {}) =>
-          enqueue(part.prompt(prompt, { sessionId: stated, timestamp, startTimestamp, ...extra })),
-        enqueueResponse: (response, { timestamp, startTimestamp, ...extra } = {}) =>
-          Effect.gen(function* () {
+        enqueuePrompt: (prompt, options = {}) => {
+          const { timestamp, startTimestamp, ...extra } = options;
+
+          return enqueue(
+            part.prompt(prompt, { sessionId: stated, timestamp, startTimestamp, ...extra }),
+          );
+        },
+        enqueueResponse: (response, options = {}) => {
+          const { timestamp, startTimestamp, ...extra } = options;
+
+          return Effect.gen(function* () {
             // A response that is still arriving is folded into the chunk it builds, so
             // the trajectory holds the part the chunk ends in.
             const [, folded] = foldResponse(folding, stated ?? Trajectory.mainSessionId, response);
@@ -731,9 +738,13 @@ export function produce<
             );
 
             return Option.some(written);
-          }),
-        enqueueEvent: (event, { timestamp, startTimestamp } = {}) =>
-          enqueue(part.event(event, { sessionId: stated, timestamp, startTimestamp })),
+          });
+        },
+        enqueueEvent: (event, options = {}) => {
+          const { timestamp, startTimestamp } = options;
+
+          return enqueue(part.event(event, { sessionId: stated, timestamp, startTimestamp }));
+        },
         forkSession: ({ id: sessionId, fork, ...extra }) =>
           Effect.gen(function* () {
             // A session is declared before the parts it produces, so a declaration of
