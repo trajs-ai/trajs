@@ -27,90 +27,6 @@ const extraField = <K extends ExtraKit.Any, P extends Extra.Part>(extrakit: K, p
   Extra.ExtraRecord(extrakit, part).pipe(Schema.withDecodingDefault(Effect.succeed({})));
 
 /**
- * Schema for the metadata of a prompt part.
- *
- * **Details**
- *
- * `uuid` is a uuid v7. Construction fills one when the caller omits it.
- * A missing `sessionId` means {@link mainSessionId}.
- * `timestamp` is the moment the part was produced.
- * A missing `startTimestamp` leaves that moment alone.
- *
- * **Gotchas**
- *
- * `timestamp` stays absent when omitted.
- * {@link ResponseMeta} requires it.
- *
- * @see {@link PromptBody} for the content beside it.
- * @stability stable
- * @category schemas
- */
-export const PromptMeta = Schema.TaggedStruct("Prompt", {
-  sessionId: Schema.optional(Schema.String),
-  uuid: Uuid,
-  timestamp: Schema.optional(TimestampString),
-  startTimestamp: Schema.optional(TimestampString),
-});
-
-/**
- * The decoded form of {@link PromptMeta}.
- *
- * @stability stable
- * @category models
- */
-export type PromptMeta = Schema.Schema.Type<typeof PromptMeta>;
-
-/**
- * The wire form of a {@link PromptMeta}.
- *
- * @stability stable
- * @category encoding
- */
-export type PromptMetaEncoded = Schema.Codec.Encoded<typeof PromptMeta>;
-
-/**
- * Schema for the content of a prompt part, read with `extrakit`.
- *
- * **Details**
- *
- * `messages` holds the content of a {@link Prompt.Prompt}.
- * `extra` decodes as `{}` when the payload omits it.
- *
- * @see {@link PromptMeta} for the metadata beside it.
- * @stability stable
- * @category schemas
- */
-export const PromptBody = <K extends ExtraKit.Any>(extrakit: K) =>
-  Schema.Struct({
-    messages: Schema.Array(Prompt.Message),
-    extra: extraField(extrakit, "prompt"),
-  });
-
-/**
- * The content of a prompt part, read with `extrakit`.
- *
- * @see {@link PromptBody} for the schema.
- * @stability stable
- * @category models
- */
-export type PromptBody<K extends ExtraKit.Any> = Schema.Schema.Type<
-  ReturnType<typeof PromptBody<K>>
->;
-
-/**
- * The wire form of a {@link PromptBody}.
- *
- * **Details**
- *
- * The alias is not generic.
- * Each extra value stays unknown under {@link ExtraKit.Any}.
- *
- * @stability stable
- * @category encoding
- */
-export type PromptBodyEncoded = Schema.Codec.Encoded<ReturnType<typeof PromptBody<ExtraKit.Any>>>;
-
-/**
  * Schema for a prompt part of `extrakit`.
  *
  * **When to use**
@@ -119,16 +35,32 @@ export type PromptBodyEncoded = Schema.Codec.Encoded<ReturnType<typeof PromptBod
  *
  * **Details**
  *
- * A prompt part holds the fields of {@link PromptMeta} and {@link PromptBody}.
+ * `messages` holds the content of a {@link Prompt.Prompt}.
+ * `extra` decodes as `{}` when the payload omits it.
+ * `uuid` is a uuid v7. Construction fills one when the caller omits it.
+ * A missing `sessionId` means {@link mainSessionId}.
+ * `timestamp` is the moment the part was produced.
+ * A missing `startTimestamp` leaves that moment alone.
+ *
+ * **Gotchas**
+ *
+ * `timestamp` stays absent when omitted.
+ * {@link ResponsePart} requires it.
  *
  * @see {@link parts} for building a prompt part from a {@link Prompt.Prompt}.
  * @see {@link PromptPartOf} for the prompt part of a config.
- * @see {@link PromptBody} for the content alone.
  * @stability stable
  * @category schemas
  */
 export const PromptPart = <K extends ExtraKit.Any>(extrakit: K) =>
-  Schema.Struct({ ...PromptMeta.fields, ...PromptBody(extrakit).fields });
+  Schema.TaggedStruct("Prompt", {
+    sessionId: Schema.optional(Schema.String),
+    uuid: Uuid,
+    timestamp: Schema.optional(TimestampString),
+    startTimestamp: Schema.optional(TimestampString),
+    messages: Schema.Array(Prompt.Message),
+    extra: extraField(extrakit, "prompt"),
+  });
 
 /**
  * A prompt part decoded with `extrakit`.
@@ -202,83 +134,6 @@ const SubSession = Schema.TaggedStruct("sub", { id: Schema.String, fork: Uuid })
 export const subSession = (id: string, { fork }: { fork: string }) => SubSession.make({ id, fork });
 
 /**
- * Schema for the metadata of a session declaration.
- *
- * **Details**
- *
- * `type` is `main` or `sub`.
- * `main` carries {@link mainSessionId}.
- * `sub` carries its own `id` and a `fork` uuid.
- * `uuid` is a uuid v7. Construction fills one when the caller omits it.
- *
- * **Gotchas**
- *
- * A session declaration has no `timestamp` and no `sessionId`.
- *
- * @see {@link SessionBody} for the extras beside it.
- * @stability stable
- * @category schemas
- */
-export const SessionMeta = Schema.TaggedStruct("Session", {
-  type: Schema.Union([MainSession, SubSession]),
-  uuid: Uuid,
-});
-
-/**
- * The decoded form of {@link SessionMeta}.
- *
- * @stability stable
- * @category models
- */
-export type SessionMeta = Schema.Schema.Type<typeof SessionMeta>;
-
-/**
- * The wire form of a {@link SessionMeta}.
- *
- * @stability stable
- * @category encoding
- */
-export type SessionMetaEncoded = Schema.Codec.Encoded<typeof SessionMeta>;
-
-/**
- * Schema for the extras of a session declaration, read with `extrakit`.
- *
- * **Details**
- *
- * `extra` decodes as `{}` when the payload omits it.
- *
- * @see {@link SessionMeta} for the metadata beside it.
- * @stability stable
- * @category schemas
- */
-export const SessionBody = <K extends ExtraKit.Any>(extrakit: K) =>
-  Schema.Struct({ extra: extraField(extrakit, "session") });
-
-/**
- * The extras of a session declaration, read with `extrakit`.
- *
- * @see {@link SessionBody} for the schema.
- * @stability stable
- * @category models
- */
-export type SessionBody<K extends ExtraKit.Any> = Schema.Schema.Type<
-  ReturnType<typeof SessionBody<K>>
->;
-
-/**
- * The wire form of a {@link SessionBody}.
- *
- * **Details**
- *
- * The alias is not generic.
- * Each extra value stays unknown under {@link ExtraKit.Any}.
- *
- * @stability stable
- * @category encoding
- */
-export type SessionBodyEncoded = Schema.Codec.Encoded<ReturnType<typeof SessionBody<ExtraKit.Any>>>;
-
-/**
  * Schema for a session declaration of `extrakit`.
  *
  * **When to use**
@@ -287,16 +142,27 @@ export type SessionBodyEncoded = Schema.Codec.Encoded<ReturnType<typeof SessionB
  *
  * **Details**
  *
- * A session declaration holds the fields of {@link SessionMeta} and {@link SessionBody}.
+ * `type` is `main` or `sub`.
+ * `main` carries {@link mainSessionId}.
+ * `sub` carries its own `id` and a `fork` uuid.
+ * `extra` decodes as `{}` when the payload omits it.
+ * `uuid` is a uuid v7. Construction fills one when the caller omits it.
+ *
+ * **Gotchas**
+ *
+ * A session declaration has no `timestamp` and no `sessionId`.
  *
  * @see {@link parts} for `mainSession` and `subSession`.
  * @see {@link SessionPartOf} for the session part of a config.
- * @see {@link SessionBody} for the extras alone.
  * @stability stable
  * @category schemas
  */
 export const SessionPart = <K extends ExtraKit.Any>(extrakit: K) =>
-  Schema.Struct({ ...SessionMeta.fields, ...SessionBody(extrakit).fields });
+  Schema.TaggedStruct("Session", {
+    type: Schema.Union([MainSession, SubSession]),
+    uuid: Uuid,
+    extra: extraField(extrakit, "session"),
+  });
 
 /**
  * A session declaration decoded with `extrakit`.
@@ -323,95 +189,6 @@ export type SessionPart<K extends ExtraKit.Any> = Schema.Schema.Type<
 export type SessionPartEncoded = Schema.Codec.Encoded<ReturnType<typeof SessionPart<ExtraKit.Any>>>;
 
 /**
- * Schema for the metadata of a response part.
- *
- * **Details**
- *
- * `timestamp` is required. Construction uses the current time when the caller omits it.
- * `uuid` is a uuid v7. Construction fills one when the caller omits it.
- * A missing `sessionId` means {@link mainSessionId}.
- * A missing `startTimestamp` leaves the moment of `timestamp` alone.
- *
- * @see {@link ResponseBody} for the response beside it.
- * @stability stable
- * @category schemas
- */
-export const ResponseMeta = Schema.TaggedStruct("Response", {
-  timestamp: TimestampString,
-  startTimestamp: Schema.optional(TimestampString),
-  sessionId: Schema.optional(Schema.String),
-  uuid: Uuid,
-});
-
-/**
- * The decoded form of {@link ResponseMeta}.
- *
- * @stability stable
- * @category models
- */
-export type ResponseMeta = Schema.Schema.Type<typeof ResponseMeta>;
-
-/**
- * The wire form of a {@link ResponseMeta}.
- *
- * @stability stable
- * @category encoding
- */
-export type ResponseMetaEncoded = Schema.Codec.Encoded<typeof ResponseMeta>;
-
-/**
- * Schema for the response a response part carries, read with `toolkit` and `extrakit`.
- *
- * **Details**
- *
- * `response` is one finished response part, a {@link Response.Part}.
- * The schema also accepts parts built for tools beyond `toolkit`.
- * `extra` decodes as `{}` when the payload omits it.
- *
- * @see {@link ResponseMeta} for the metadata beside it.
- * @stability stable
- * @category schemas
- */
-export const ResponseBody = <Toolkit extends Toolkit.Any, Extras extends ExtraKit.Any>({
-  toolkit,
-  extrakit,
-}: {
-  toolkit: Toolkit;
-  extrakit: Extras;
-}) =>
-  Schema.Struct({
-    response: Schema.Union([Response.Part(toolkit), Response.Part()]),
-    extra: extraField(extrakit, "response"),
-  });
-
-/**
- * The response a response part carries, read with `toolkit` and `extrakit`.
- *
- * @see {@link ResponseBody} for the schema.
- * @stability stable
- * @category models
- */
-export type ResponseBody<
-  Toolkit extends Toolkit.Any,
-  Extras extends ExtraKit.Any,
-> = Schema.Schema.Type<ReturnType<typeof ResponseBody<Toolkit, Extras>>>;
-
-/**
- * The wire form of a {@link ResponseBody}.
- *
- * **Details**
- *
- * The alias is not generic.
- * Each response payload stays unknown under {@link Toolkit.Any}.
- *
- * @stability stable
- * @category encoding
- */
-export type ResponseBodyEncoded = Schema.Codec.Encoded<
-  ReturnType<typeof ResponseBody<Toolkit.Any, ExtraKit.Any>>
->;
-
-/**
  * Schema for a response part of `toolkit` and `extrakit`.
  *
  * **When to use**
@@ -420,7 +197,13 @@ export type ResponseBodyEncoded = Schema.Codec.Encoded<
  *
  * **Details**
  *
- * A response part holds the fields of {@link ResponseMeta} and {@link ResponseBody}.
+ * `response` is one finished response part, a {@link Response.Part}.
+ * The schema also accepts parts built for tools beyond `toolkit`.
+ * `extra` decodes as `{}` when the payload omits it.
+ * `timestamp` is required. Construction uses the current time when the caller omits it.
+ * `uuid` is a uuid v7. Construction fills one when the caller omits it.
+ * A missing `sessionId` means {@link mainSessionId}.
+ * A missing `startTimestamp` leaves the moment of `timestamp` alone.
  *
  * **Gotchas**
  *
@@ -429,7 +212,6 @@ export type ResponseBodyEncoded = Schema.Codec.Encoded<
  *
  * @see {@link parts} for building a response part.
  * @see {@link ResponsePartOf} for the response part of a config.
- * @see {@link ResponseBody} for the response alone.
  * @stability stable
  * @category schemas
  */
@@ -440,9 +222,13 @@ export const ResponsePart = <Toolkit extends Toolkit.Any, Extras extends ExtraKi
   toolkit: Toolkit;
   extrakit: Extras;
 }) =>
-  Schema.Struct({
-    ...ResponseMeta.fields,
-    ...ResponseBody({ toolkit, extrakit }).fields,
+  Schema.TaggedStruct("Response", {
+    timestamp: TimestampString,
+    startTimestamp: Schema.optional(TimestampString),
+    sessionId: Schema.optional(Schema.String),
+    uuid: Uuid,
+    response: Schema.Union([Response.Part(toolkit), Response.Part()]),
+    extra: extraField(extrakit, "response"),
   });
 
 /**
@@ -473,83 +259,6 @@ export type ResponsePartEncoded = Schema.Codec.Encoded<
 >;
 
 /**
- * Schema for the metadata of an event part.
- *
- * **Details**
- *
- * `timestamp` is required. Construction uses the current time when the caller omits it.
- * A missing `startTimestamp` leaves that moment alone.
- * A missing `sessionId` means {@link mainSessionId}.
- * `uuid` is a uuid v7. Construction fills one when the caller omits it.
- *
- * @see {@link EventBody} for the event beside it.
- * @stability stable
- * @category schemas
- */
-export const EventMeta = Schema.TaggedStruct("Event", {
-  timestamp: TimestampString,
-  startTimestamp: Schema.optional(TimestampString),
-  sessionId: Schema.optional(Schema.String),
-  uuid: Uuid,
-});
-
-/**
- * The decoded form of {@link EventMeta}.
- *
- * @stability stable
- * @category models
- */
-export type EventMeta = Schema.Schema.Type<typeof EventMeta>;
-
-/**
- * The wire form of a {@link EventMeta}.
- *
- * @stability stable
- * @category encoding
- */
-export type EventMetaEncoded = Schema.Codec.Encoded<typeof EventMeta>;
-
-/**
- * Schema for the event an event part carries, read with `eventkit`.
- *
- * **Details**
- *
- * `event` is one event the kit declares.
- *
- * **Gotchas**
- *
- * An event part carries no extras.
- *
- * @see {@link EventMeta} for the metadata beside it.
- * @stability stable
- * @category schemas
- */
-export const EventBody = <K extends EventKit.Any>(eventkit: K) =>
-  Schema.Struct({ event: Event.EventParts(eventkit) });
-
-/**
- * The event an event part carries, read with `eventkit`.
- *
- * @see {@link EventBody} for the schema.
- * @stability stable
- * @category models
- */
-export type EventBody<K extends EventKit.Any> = Schema.Schema.Type<ReturnType<typeof EventBody<K>>>;
-
-/**
- * The wire form of a {@link EventBody}.
- *
- * **Details**
- *
- * The alias is not generic.
- * The event payload stays unknown under {@link EventKit.Any}.
- *
- * @stability stable
- * @category encoding
- */
-export type EventBodyEncoded = Schema.Codec.Encoded<ReturnType<typeof EventBody<EventKit.Any>>>;
-
-/**
  * Schema for an event part of `eventkit`.
  *
  * **When to use**
@@ -558,16 +267,29 @@ export type EventBodyEncoded = Schema.Codec.Encoded<ReturnType<typeof EventBody<
  *
  * **Details**
  *
- * An event part holds the fields of {@link EventMeta} and {@link EventBody}.
+ * `event` is one event the kit declares.
+ * `timestamp` is required. Construction uses the current time when the caller omits it.
+ * A missing `startTimestamp` leaves that moment alone.
+ * A missing `sessionId` means {@link mainSessionId}.
+ * `uuid` is a uuid v7. Construction fills one when the caller omits it.
+ *
+ * **Gotchas**
+ *
+ * An event part carries no extras.
  *
  * @see {@link parts} for building an event part.
  * @see {@link EventPartOf} for the event part of a config.
- * @see {@link EventBody} for the event alone.
  * @stability stable
  * @category schemas
  */
 export const EventPart = <K extends EventKit.Any>(eventkit: K) =>
-  Schema.Struct({ ...EventMeta.fields, ...EventBody(eventkit).fields });
+  Schema.TaggedStruct("Event", {
+    timestamp: TimestampString,
+    startTimestamp: Schema.optional(TimestampString),
+    sessionId: Schema.optional(Schema.String),
+    uuid: Uuid,
+    event: Event.EventParts(eventkit),
+  });
 
 /**
  * An event part decoded with `eventkit`.
@@ -592,81 +314,6 @@ export type EventPart<K extends EventKit.Any> = Schema.Schema.Type<ReturnType<ty
 export type EventPartEncoded = Schema.Codec.Encoded<ReturnType<typeof EventPart<EventKit.Any>>>;
 
 /**
- * Schema for the metadata of a metric part.
- *
- * **Details**
- *
- * `timestamp` and `startTimestamp` stay absent when omitted.
- *
- * **Gotchas**
- *
- * A metric part has no `uuid` and no `sessionId`.
- * The metric's tag and its attachments stay in {@link MetricBody}.
- *
- * @see {@link MetricBody} for the metric beside it.
- * @stability stable
- * @category schemas
- */
-export const MetricMeta = Schema.TaggedStruct("Metric", {
-  timestamp: Schema.optional(TimestampString),
-  startTimestamp: Schema.optional(TimestampString),
-});
-
-/**
- * The decoded form of {@link MetricMeta}.
- *
- * @stability stable
- * @category models
- */
-export type MetricMeta = Schema.Schema.Type<typeof MetricMeta>;
-
-/**
- * The wire form of a {@link MetricMeta}.
- *
- * @stability stable
- * @category encoding
- */
-export type MetricMetaEncoded = Schema.Codec.Encoded<typeof MetricMeta>;
-
-/**
- * Schema for the metric a metric part carries, read with `metrickit`.
- *
- * **Details**
- *
- * `metric` is one metric the kit declares.
- *
- * @see {@link MetricMeta} for the metadata beside it.
- * @stability stable
- * @category schemas
- */
-export const MetricBody = <K extends MetricKit.Any>(metrickit: K) =>
-  Schema.Struct({ metric: Metric.MetricParts(metrickit) });
-
-/**
- * The metric a metric part carries, read with `metrickit`.
- *
- * @see {@link MetricBody} for the schema.
- * @stability stable
- * @category models
- */
-export type MetricBody<K extends MetricKit.Any> = Schema.Schema.Type<
-  ReturnType<typeof MetricBody<K>>
->;
-
-/**
- * The wire form of a {@link MetricBody}.
- *
- * **Details**
- *
- * The alias is not generic.
- * The metric payload stays unknown under {@link MetricKit.Any}.
- *
- * @stability stable
- * @category encoding
- */
-export type MetricBodyEncoded = Schema.Codec.Encoded<ReturnType<typeof MetricBody<MetricKit.Any>>>;
-
-/**
  * Schema for a metric part of `metrickit`.
  *
  * **When to use**
@@ -675,16 +322,24 @@ export type MetricBodyEncoded = Schema.Codec.Encoded<ReturnType<typeof MetricBod
  *
  * **Details**
  *
- * A metric part holds the fields of {@link MetricMeta} and {@link MetricBody}.
+ * `metric` is one metric the kit declares, with its tag and its attachments.
+ * `timestamp` and `startTimestamp` stay absent when omitted.
+ *
+ * **Gotchas**
+ *
+ * A metric part has no `uuid` and no `sessionId`.
  *
  * @see {@link parts} for building a metric part.
  * @see {@link MetricPartOf} for the metric part of a config.
- * @see {@link MetricBody} for the metric alone.
  * @stability stable
  * @category schemas
  */
 export const MetricPart = <K extends MetricKit.Any>(metrickit: K) =>
-  Schema.Struct({ ...MetricMeta.fields, ...MetricBody(metrickit).fields });
+  Schema.TaggedStruct("Metric", {
+    timestamp: Schema.optional(TimestampString),
+    startTimestamp: Schema.optional(TimestampString),
+    metric: Metric.MetricParts(metrickit),
+  });
 
 /**
  * A metric part decoded with `metrickit`.
@@ -709,41 +364,6 @@ export type MetricPart<K extends MetricKit.Any> = Schema.Schema.Type<
  * @category encoding
  */
 export type MetricPartEncoded = Schema.Codec.Encoded<ReturnType<typeof MetricPart<MetricKit.Any>>>;
-
-/**
- * Schema for the metadata of one part, whichever kind it is.
- *
- * **When to use**
- *
- * Use when only the metadata of a stored part is needed.
- *
- * **Details**
- *
- * Each member is the meta schema of one part kind.
- * The body of that kind holds the payload beside those fields.
- * Decoding an encoded part keeps these fields and drops its body.
- *
- * @see {@link Part} for the parts that hold a body too.
- * @stability stable
- * @category schemas
- */
-export const Meta = Schema.Union([PromptMeta, SessionMeta, ResponseMeta, EventMeta, MetricMeta]);
-
-/**
- * The decoded form of {@link Meta}.
- *
- * @stability stable
- * @category models
- */
-export type Meta = Schema.Schema.Type<typeof Meta>;
-
-/**
- * The wire form of {@link Meta}.
- *
- * @stability stable
- * @category encoding
- */
-export type MetaEncoded = Schema.Codec.Encoded<typeof Meta>;
 
 /**
  * Builders for every part kind of one config.

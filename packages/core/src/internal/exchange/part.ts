@@ -21,6 +21,15 @@ import { TrajectoryError } from "#/TrajectoryError.ts";
 const extraField = <K extends ExtraKit.Any, P extends Extra.Part>(extrakit: K, part: P) =>
   Extra.ExtraRecord(extrakit, part).pipe(Schema.withDecodingDefault(Effect.succeed({})));
 
+/** The meta of a prompt part, which a scan reads alone. */
+type PromptPartMeta = Pick<
+  Trajectory.PromptPart<ExtraKit.Any>,
+  "_tag" | "uuid" | "sessionId" | "timestamp" | "startTimestamp"
+>;
+
+/** The messages and extras of a prompt part, stored apart from its meta. */
+type PromptPartBody<K extends ExtraKit.Any> = Pick<Trajectory.PromptPart<K>, "messages" | "extra">;
+
 /** A prompt part's meta as stored, which a scan reads alone. */
 export interface PromptPartMetaEncoded {
   _tag: "Prompt";
@@ -44,8 +53,9 @@ const promptMetaFields = {
   startTimestamp: Schema.optional(TimestampInt),
 };
 
-export const PromptPartMeta: Schema.Codec<Trajectory.PromptMeta, PromptPartMetaEncoded> =
-  Schema.Struct(promptMetaFields).annotate({ identifier: "PromptPartMeta" });
+export const PromptPartMeta: Schema.Codec<PromptPartMeta, PromptPartMetaEncoded> = Schema.Struct(
+  promptMetaFields,
+).annotate({ identifier: "PromptPartMeta" });
 
 const promptBodyFields = <K extends ExtraKit.Any>(extrakit: K) => ({
   messages: Prompt.Message.pipe(Schema.Array, Schema.mutable),
@@ -54,7 +64,7 @@ const promptBodyFields = <K extends ExtraKit.Any>(extrakit: K) => ({
 
 export const PromptPartBody = <K extends ExtraKit.Any>(
   extrakit: K,
-): Schema.Codec<Trajectory.PromptBody<K>, PromptPartBodyEncoded> =>
+): Schema.Codec<PromptPartBody<K>, PromptPartBodyEncoded> =>
   Schema.Struct(promptBodyFields(extrakit)).annotate({ identifier: "PromptPartBody" });
 
 /** Both halves as one struct, which `encodePart` writes as one binary value. */
@@ -64,6 +74,12 @@ export const PromptPart = <K extends ExtraKit.Any>(
   Schema.Struct({ ...promptMetaFields, ...promptBodyFields(extrakit) }).annotate({
     identifier: "PromptPart",
   });
+
+/** The meta of a session part, which a scan reads alone. */
+type SessionPartMeta = Pick<Trajectory.SessionPart<ExtraKit.Any>, "_tag" | "uuid" | "type">;
+
+/** The extras of a session part, stored apart from its meta. */
+type SessionPartBody<K extends ExtraKit.Any> = Pick<Trajectory.SessionPart<K>, "extra">;
 
 /** A session part's meta as stored, which a scan reads alone. */
 export interface SessionPartMetaEncoded {
@@ -81,8 +97,17 @@ const MainSessionEncoded = Schema.TaggedStruct("main", {});
 
 const SubSessionEncoded = Schema.TaggedStruct("sub", { id: Schema.String, fork: UuidFromByte });
 
+/**
+ * The declaration a session part states, which the stored type decodes to. It is
+ * stated here because the part schema is generic in the extras it reads.
+ */
+const SessionTypeDecoded = Schema.Union([
+  Schema.TaggedStruct("main", { id: Schema.Literal(Trajectory.mainSessionId) }),
+  Schema.TaggedStruct("sub", { id: Schema.String, fork: Schema.String }),
+]);
+
 const SessionType = Schema.Union([MainSessionEncoded, SubSessionEncoded]).pipe(
-  Schema.decodeTo(Trajectory.SessionMeta.fields.type, {
+  Schema.decodeTo(SessionTypeDecoded, {
     decode: SchemaGetter.transform((stored) =>
       Match.value(stored).pipe(
         Match.tag("main", () => ({ ...Trajectory.mainSession })),
@@ -106,8 +131,9 @@ const sessionMetaFields = {
   type: SessionType,
 };
 
-export const SessionPartMeta: Schema.Codec<Trajectory.SessionMeta, SessionPartMetaEncoded> =
-  Schema.Struct(sessionMetaFields).annotate({ identifier: "SessionPartMeta" });
+export const SessionPartMeta: Schema.Codec<SessionPartMeta, SessionPartMetaEncoded> = Schema.Struct(
+  sessionMetaFields,
+).annotate({ identifier: "SessionPartMeta" });
 
 const sessionBodyFields = <K extends ExtraKit.Any>(extrakit: K) => ({
   extra: extraField(extrakit, "session"),
@@ -115,7 +141,7 @@ const sessionBodyFields = <K extends ExtraKit.Any>(extrakit: K) => ({
 
 export const SessionPartBody = <K extends ExtraKit.Any>(
   extrakit: K,
-): Schema.Codec<Trajectory.SessionBody<K>, SessionPartBodyEncoded> =>
+): Schema.Codec<SessionPartBody<K>, SessionPartBodyEncoded> =>
   Schema.Struct(sessionBodyFields(extrakit)).annotate({ identifier: "SessionPartBody" });
 
 /** Both halves as one struct, which `encodePart` writes as one binary value. */
@@ -125,6 +151,18 @@ export const SessionPart = <K extends ExtraKit.Any>(
   Schema.Struct({ ...sessionMetaFields, ...sessionBodyFields(extrakit) }).annotate({
     identifier: "SessionPart",
   });
+
+/** The meta of a response part, which a scan reads alone. */
+type ResponsePartMeta = Pick<
+  Trajectory.ResponsePart<Toolkit.Any, ExtraKit.Any>,
+  "_tag" | "uuid" | "sessionId" | "timestamp" | "startTimestamp"
+>;
+
+/** The response and extras of a response part, stored apart from its meta. */
+type ResponsePartBody<T extends Toolkit.Any, K extends ExtraKit.Any> = Pick<
+  Trajectory.ResponsePart<T, K>,
+  "response" | "extra"
+>;
 
 /** A response part's meta as stored, which a scan reads alone. */
 export interface ResponsePartMetaEncoded {
@@ -155,7 +193,7 @@ const responseMetaFields = {
   startTimestamp: Schema.optional(TimestampInt),
 };
 
-export const ResponsePartMeta: Schema.Codec<Trajectory.ResponseMeta, ResponsePartMetaEncoded> =
+export const ResponsePartMeta: Schema.Codec<ResponsePartMeta, ResponsePartMetaEncoded> =
   Schema.Struct(responseMetaFields).annotate({ identifier: "ResponsePartMeta" });
 
 const responseBodyFields = <T extends Toolkit.Any, K extends ExtraKit.Any>(
@@ -170,7 +208,7 @@ export const ResponsePartBody = <T extends Toolkit.Any, K extends ExtraKit.Any>(
   toolkit: T,
   extrakit: K,
 ): Schema.Codec<
-  Trajectory.ResponseBody<T, K>,
+  ResponsePartBody<T, K>,
   ResponsePartBodyEncoded,
   Schema.Codec.DecodingServices<ResponseParts<T>>,
   Schema.Codec.EncodingServices<ResponseParts<T>>
@@ -192,6 +230,15 @@ export const ResponsePart = <T extends Toolkit.Any, K extends ExtraKit.Any>(
   Schema.Struct({ ...responseMetaFields, ...responseBodyFields(toolkit, extrakit) }).annotate({
     identifier: "ResponsePart",
   });
+
+/** The meta of an event part, which a scan reads alone. */
+type EventPartMeta = Pick<
+  Trajectory.EventPart<EventKit.Any>,
+  "_tag" | "uuid" | "sessionId" | "timestamp" | "startTimestamp"
+>;
+
+/** The event an event part carries, stored apart from its meta. */
+type EventPartBody<K extends EventKit.Any> = Pick<Trajectory.EventPart<K>, "event">;
 
 /** An event part's meta as stored, which a scan reads alone. */
 export interface EventPartMetaEncoded {
@@ -218,8 +265,9 @@ const eventMetaFields = {
   startTimestamp: Schema.optional(TimestampInt),
 };
 
-export const EventPartMeta: Schema.Codec<Trajectory.EventMeta, EventPartMetaEncoded> =
-  Schema.Struct(eventMetaFields).annotate({ identifier: "EventPartMeta" });
+export const EventPartMeta: Schema.Codec<EventPartMeta, EventPartMetaEncoded> = Schema.Struct(
+  eventMetaFields,
+).annotate({ identifier: "EventPartMeta" });
 
 const eventBodyFields = <K extends EventKit.Any>(eventkit: K) => ({
   event: Event.EventParts(eventkit),
@@ -228,7 +276,7 @@ const eventBodyFields = <K extends EventKit.Any>(eventkit: K) => ({
 export const EventPartBody = <K extends EventKit.Any>(
   eventkit: K,
 ): Schema.Codec<
-  Trajectory.EventBody<K>,
+  EventPartBody<K>,
   EventPartBodyEncoded,
   Schema.Codec.DecodingServices<ReturnType<typeof Event.EventParts<K>>>,
   Schema.Codec.EncodingServices<ReturnType<typeof Event.EventParts<K>>>
