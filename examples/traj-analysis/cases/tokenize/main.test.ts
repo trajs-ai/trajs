@@ -1,6 +1,6 @@
 import { NodeServices as PlatformNodeServices } from "@effect/platform-node";
 import { expect, it } from "@effect/vitest";
-import { Exchange, Storage, View } from "@trajs/core";
+import { ByteStore, Exchange, View } from "@trajs/core";
 import type { Tokens } from "@trajs/extension-tokenize";
 import { tokenEstimate } from "@trajs/extension-tokenize";
 import { NodeServices } from "@trajs/platform-node";
@@ -38,7 +38,7 @@ interface Reading {
   readonly prompt: Tokens.PromptTokens | undefined;
 }
 
-const nodeFileSystem = Layer.merge(NodeServices.layer, Storage.layerFileSystem);
+const nodeFileSystem = Layer.merge(NodeServices.layer, ByteStore.layerFileSystem());
 
 const layers = Layer.mergeAll(
   PlatformNodeServices.layer,

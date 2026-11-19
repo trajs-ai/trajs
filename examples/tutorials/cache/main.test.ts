@@ -1,7 +1,8 @@
 import { expect, it } from "@effect/vitest";
 import { Cache, Prompt, Response, Trajectory } from "@trajs/core";
 import * as Config from "@trajs/core/Config";
-import { Effect, Option, Predicate, Stream } from "effect";
+import { Effect, Layer, Option, Predicate, Stream } from "effect";
+import { KeyValueStore } from "effect/persistence";
 
 const config = Config.config();
 
@@ -94,6 +95,8 @@ it.effect("main", () =>
       } satisfies Summary),
     ),
     // The window holds the newest 2 parts in memory; the 2 before them go to the store.
-    Effect.provide(Cache.layer({ capacity: 2 })),
+    Effect.provide(
+      Cache.layerKVStore({ capacity: 2 }).pipe(Layer.provide(KeyValueStore.layerMemory)),
+    ),
   ),
 );

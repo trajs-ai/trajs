@@ -1,6 +1,6 @@
 import { NodeServices as PlatformNodeServices } from "@effect/platform-node";
 import { expect, it } from "@effect/vitest";
-import { Exchange, Storage } from "@trajs/core";
+import { ByteStore, Exchange } from "@trajs/core";
 import { Clickhouse } from "@trajs/olap";
 import { NodeServices } from "@trajs/platform-node";
 import { Effect, Layer } from "effect";
@@ -47,7 +47,7 @@ interface Summary {
   readonly analysis: Analysis;
 }
 
-const storage = Layer.merge(NodeServices.layer, Storage.layerFileSystem);
+const storage = Layer.merge(NodeServices.layer, ByteStore.layerFileSystem());
 
 const Layers = Layer.mergeAll(
   PlatformNodeServices.layer,

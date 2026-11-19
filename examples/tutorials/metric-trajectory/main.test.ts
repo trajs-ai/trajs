@@ -199,7 +199,7 @@ const main = Effect.fn(function* () {
 
 it.effect("main", () =>
   main().pipe(
-    Effect.provide(Cache.layer()),
+    Effect.provide(Cache.layerMemory),
     Effect.map((summary) =>
       expect(summary).toEqual({
         results: [

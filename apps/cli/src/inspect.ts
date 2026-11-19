@@ -9,8 +9,8 @@
 
 import * as Exchange from "@trajs/core/Exchange";
 import { NodeServices } from "@trajs/platform-node";
+import { layerFileSystem } from "@trajs/utils/ByteStore";
 import { Algorithm as CompressionAlgorithm } from "@trajs/utils/Compression";
-import { layerFileSystem } from "@trajs/utils/Storage";
 import { Algorithm as HashAlgorithm } from "@trajs/utils/StreamHash";
 import { Console, Effect, Layer, Schema } from "effect";
 import { Argument, CliError, Command, Flag } from "effect/cli";
@@ -96,5 +96,7 @@ export const inspect = Command.make(
 ).pipe(
   Command.withDescription("Print what a `.trajs` file states about itself."),
   // `Exchange.layer` requires compression and hashing, though inspection uses neither.
-  Command.provide(Layer.provide(Exchange.layer, Layer.merge(NodeServices.layer, layerFileSystem))),
+  Command.provide(
+    Layer.provide(Exchange.layer, Layer.merge(NodeServices.layer, layerFileSystem())),
+  ),
 );

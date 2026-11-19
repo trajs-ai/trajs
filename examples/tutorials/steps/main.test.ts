@@ -98,7 +98,7 @@ it.effect("main", () =>
       } satisfies Summary),
     ),
     // Session.main reads parts from Cache. This layer keeps them in memory.
-    // Cache.layerFsTemp keeps them in a temporary directory instead.
-    Effect.provide(Cache.layer()),
+    // Cache.layerFileSystem keeps them in a temporary directory instead.
+    Effect.provide(Cache.layerMemory),
   ),
 );

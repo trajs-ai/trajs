@@ -18,8 +18,8 @@ import * as Response from "@trajs/core/Response";
 import * as Toolkit from "@trajs/core/Toolkit";
 import * as Trajectory from "@trajs/core/Trajectory";
 import { NodeServices } from "@trajs/platform-node";
+import { layerFileSystem } from "@trajs/utils/ByteStore";
 import { Algorithm as CompressionAlgorithm } from "@trajs/utils/Compression";
-import { layerFileSystem } from "@trajs/utils/Storage";
 import { Effect, FileSystem, Layer, Predicate, Stream } from "effect";
 import { describe, expect, it } from "vite-plus/test";
 
@@ -68,7 +68,7 @@ const parts = [
 const trajectory = Trajectory.make(config)(Stream.fromIterable(parts));
 
 /** The file system a Node program reads and writes through, under the layer that states it. */
-const nodeFileSystem = Layer.merge(NodeServices.layer, layerFileSystem);
+const nodeFileSystem = Layer.merge(NodeServices.layer, layerFileSystem());
 
 /**
  * What a program on Node is made of: the file system and the terminal the platform

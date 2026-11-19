@@ -84,6 +84,6 @@ it.effect("main", () =>
         ],
       }),
     ),
-    Effect.provide(Cache.layer()),
+    Effect.provide(Cache.layerMemory),
   ),
 );

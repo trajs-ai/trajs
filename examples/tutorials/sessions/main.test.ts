@@ -155,7 +155,7 @@ it.effect("main", () =>
       expect(historian.firstInputTokens).toBe(2_760);
       expect(archivist.firstInputTokens).toBe(3_880);
     }),
-    // Session.main requires Cache. Cache.layerFsTemp stores the parts on disk.
-    Effect.provide(Cache.layer()),
+    // Session.main requires Cache. Cache.layerFileSystem stores the parts on disk.
+    Effect.provide(Cache.layerMemory),
   ),
 );

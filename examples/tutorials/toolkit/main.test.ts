@@ -154,6 +154,6 @@ it.effect("main", () =>
         undescribed: 1,
       } satisfies Summary),
     ),
-    Effect.provide(Cache.layer()),
+    Effect.provide(Cache.layerMemory),
   ),
 );
