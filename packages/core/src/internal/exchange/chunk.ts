@@ -290,10 +290,13 @@ export type FooterTail = Schema.Schema.Type<typeof FooterTail>;
 export const FooterTailBytes = 4 + Magic.length;
 
 /**
- * Where the footer begins, or nothing where the bytes hold no footer. A reader confirms
- * the place against the file's own length.
+ * Where the footer begins and how many bytes it takes, or nothing where the bytes hold
+ * no footer. A reader confirms the place against the file's own length.
  */
-export const footerStart = (length: bigint, tail: Uint8Array): bigint | undefined => {
+export const footerStart = (
+  length: bigint,
+  tail: Uint8Array,
+): { readonly start: bigint; readonly len: number } | undefined => {
   if (tail.length < FooterTailBytes) {
     return undefined;
   }
@@ -317,7 +320,7 @@ export const footerStart = (length: bigint, tail: Uint8Array): bigint | undefine
 
   const end = BigInt(FooterTailBytes + footerLen);
 
-  return length < end ? undefined : length - end;
+  return length < end ? undefined : { start: length - end, len: footerLen };
 };
 
 /**

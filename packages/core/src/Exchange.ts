@@ -14,7 +14,7 @@ import type { JsonObject } from "effect/Schema";
 
 import * as Config from "#/Config.ts";
 import * as ExchangeIssue from "#/ExchangeIssue.ts";
-import * as file from "#/internal/exchange/file.ts";
+import { makeBuffer } from "#/internal/exchange/read.ts";
 import { attach } from "#/internal/trajectory.ts";
 import * as Trajectory from "#/Trajectory.ts";
 import { TrajectoryError } from "#/TrajectoryError.ts";
@@ -154,9 +154,9 @@ export const layerFileSystem = ({
         <C extends Config.AnyConfig>(config: C) =>
         <Id extends string>(id: Id) =>
           Effect.gen(function* () {
-            const makeBuffer = yield* file.makeBuffer(config);
+            const buffer = yield* makeBuffer(config);
 
-            return attach(id, config)(yield* makeBuffer(yield* bytesOf(id)));
+            return attach(id, config)(yield* buffer(yield* bytesOf(id)));
           });
 
       // TODO: writing and inspecting a file.
@@ -201,7 +201,7 @@ export const fromBytes =
     TrajectoryError,
     Compression.Compression | R
   > =>
-    file.makeBuffer(config).pipe(
-      Effect.flatMap((makeBuffer) => makeBuffer(bytes)),
+    makeBuffer(config).pipe(
+      Effect.flatMap((buffer) => buffer(bytes)),
       Effect.map(attach(id, config)),
     );

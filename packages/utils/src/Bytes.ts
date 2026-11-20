@@ -27,8 +27,9 @@ import type { PlatformError } from "effect/PlatformError";
  *
  * The default `size` is the buffer length given to {@link Bytes.read}.
  * For {@link Bytes.readAlloc} it is the rest of the sequence.
- * A read yields fewer bytes where the sequence ends before them.
- * An offset at or past that end yields none.
+ * A read yields what one call on the sequence serves, so it may yield fewer bytes than asked for.
+ * An offset at or past the end of the sequence yields none.
+ * A caller that needs a region whole reads on from where a read stopped.
  *
  * @see {@link Bytes} for the sequence these are read from.
  * @stability stable
@@ -100,7 +101,7 @@ export interface Bytes<out E = never, out R = never> {
   /**
    * Reads up to `size` bytes of the sequence beginning at `offset` into the buffer given.
    *
-   * Yields how many bytes were read into it.
+   * Yields how many bytes were read into it, which is `0` at the end of the sequence.
    * The buffer is the caller's, and what it holds past those bytes is left as it was.
    * A read of `n` bytes reads into the first `n`.
    */
@@ -109,7 +110,7 @@ export interface Bytes<out E = never, out R = never> {
   /**
    * Reads up to `size` bytes of the sequence beginning at `offset` into a buffer it allocates.
    *
-   * Yields that buffer cut to what it read.
+   * Yields that buffer cut to what it read, which is empty at the end of the sequence.
    * Without a size, the read takes everything left from the offset to the end of the sequence.
    */
   readonly readAlloc: (options?: ReadOptions) => Effect.Effect<Uint8Array, E, R>;
