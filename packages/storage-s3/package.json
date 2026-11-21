@@ -1,6 +1,6 @@
 {
   "name": "@trajs/storage-s3",
-  "version": "0.0.0-alpha.4",
+  "version": "0.0.0-alpha.5",
   "description": "The bytes a program keeps between readings in a bucket of S3.",
   "homepage": "https://github.com/trajs-ai/trajs",
   "license": "MIT",
