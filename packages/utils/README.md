@@ -4,7 +4,8 @@ The generic services a trajectory is carried and kept through, stated once so a
 platform package can say what each is over.
 
 - `Bytes` — a byte sequence read at random, and the sequence built from the reads
-  a source serves.
+  a source serves. The `Uint8Array` utilities of `effect/Bytes` are re-exported
+  there.
 - `ByteStore` — the bytes a program keeps between readings, held in chunks in the
   key/value store of `effect/persistence` (`ByteStore.layerKVStore`), in memory
   (`ByteStore.layerMemory`), in a directory of the file system

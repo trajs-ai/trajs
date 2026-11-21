@@ -6,12 +6,31 @@
  * A read fails as `E` where its source does, and requires `R`.
  *
  * {@link make} builds a sequence from what its reads serve.
+ * The `Uint8Array` utilities of `effect/Bytes` are re-exported here.
  *
  * @stability stable
  */
 
-import { ByteSize, Effect, FileSystem, Stream } from "effect";
+import { ByteSize, Effect, FileSystem, Option, Stream } from "effect";
 import type { PlatformError } from "effect/PlatformError";
+
+/**
+ * Re-exports the `Uint8Array` utilities of `effect/Bytes` without modification.
+ *
+ * **When to use**
+ *
+ * Use to join the chunks a sequence was read in, or to compare or sort the buffers of a
+ * trajectory.
+ *
+ * **Details**
+ *
+ * `concat` joins chunks into one new buffer, `Equivalence` compares two buffers byte by byte,
+ * and `Order` sorts them.
+ *
+ * @stability stable
+ * @category re-exports
+ */
+export { concat, Equivalence, Order } from "effect/Bytes";
 
 /**
  * Where and how much a byte sequence is read by.
@@ -52,7 +71,8 @@ export interface ReadOptions {
  *
  * - `length` is how many bytes the sequence holds.
  * - `read` fills a buffer the caller holds and yields how many bytes it read.
- * - `readAlloc` reads into a buffer it allocates, cut to what it read.
+ * - `readAlloc` reads into a buffer it allocates, cut to what it read, or `Option.none()` at
+ *   the end of the sequence.
  * - `stream` reads the whole sequence from its head, one chunk at a time.
  *
  * A read fails as `E` where what the sequence is of fails, such as a disk.
@@ -63,7 +83,7 @@ export interface ReadOptions {
  * **Example** (A sequence of bytes read at random)
  *
  * ```ts
- * import { Effect } from "effect"
+ * import { Effect, Option } from "effect"
  * import { make } from "@trajs/utils/Bytes"
  *
  * const held = new TextEncoder().encode("trajs")
@@ -82,7 +102,7 @@ export interface ReadOptions {
  *
  * const tail = await Effect.runPromise(bytes.readAlloc({ offset: 2n }))
  *
- * new TextDecoder().decode(tail) // => "ajs"
+ * new TextDecoder().decode(Option.getOrThrow(tail)) // => "ajs"
  * ```
  *
  * @see {@link make} for building one from the reads it takes.
@@ -110,10 +130,11 @@ export interface Bytes<out E = never, out R = never> {
   /**
    * Reads up to `size` bytes of the sequence beginning at `offset` into a buffer it allocates.
    *
-   * Yields that buffer cut to what it read, which is empty at the end of the sequence.
+   * Yields that buffer cut to what it read, and `Option.none()` where the sequence holds no
+   * byte at the offset, as {@link FileSystem.File.readAlloc} yields at the end of a file.
    * Without a size, the read takes everything left from the offset to the end of the sequence.
    */
-  readonly readAlloc: (options?: ReadOptions) => Effect.Effect<Uint8Array, E, R>;
+  readonly readAlloc: (options?: ReadOptions) => Effect.Effect<Option.Option<Uint8Array>, E, R>;
 
   /**
    * The whole sequence, read from its head in chunks as the consumer pulls them.
@@ -126,44 +147,7 @@ export interface Bytes<out E = never, out R = never> {
 }
 
 /** How many bytes of a sequence are read at a time when it is read as a stream. */
-const Chunk = 64 * 1024;
-
-/**
- * The chunks given, joined into one buffer in the order they arrive.
- *
- * **When to use**
- *
- * Use where a region arrived in chunks and one buffer is asked for, such as a
- * frame read back into the bytes it was written as.
- *
- * **Details**
- *
- * The buffer is allocated to the total length of the chunks, and each chunk is
- * copied into it, so the result is backed by a buffer of its own.
- *
- * @stability stable
- * @category utils
- */
-export const concat = (chunks: Iterable<Uint8Array>): Uint8Array => {
-  const held = Array.from(chunks);
-
-  let length = 0;
-
-  for (const chunk of held) {
-    length += chunk.length;
-  }
-
-  const bytes = new Uint8Array(length);
-
-  let at = 0;
-
-  for (const chunk of held) {
-    bytes.set(chunk, at);
-    at += chunk.length;
-  }
-
-  return bytes;
-};
+const defaultChunkSize = 64 * 1024;
 
 /**
  * Builds a byte sequence from what its reads take.
@@ -185,7 +169,7 @@ export const concat = (chunks: Iterable<Uint8Array>): Uint8Array => {
  * **Example** (Building the sequence a store serves)
  *
  * ```ts
- * import { Effect } from "effect"
+ * import { Effect, Option } from "effect"
  *
  * const held = new Uint8Array([1, 2, 3])
  *
@@ -203,7 +187,7 @@ export const concat = (chunks: Iterable<Uint8Array>): Uint8Array => {
  *
  * const all = await Effect.runPromise(bytes.readAlloc())
  *
- * Array.from(all) // => [1, 2, 3]
+ * Array.from(Option.getOrThrow(all)) // => [1, 2, 3]
  * ```
  *
  * @see {@link Bytes} for the sequence this builds.
@@ -214,7 +198,7 @@ export const make = <E = never, R = never>(bytes: {
   readonly length: Effect.Effect<bigint, E, R>;
   readonly read: (buffer: Uint8Array, options?: ReadOptions) => Effect.Effect<number, E, R>;
 }): Bytes<E, R> => {
-  const readAlloc = (options?: ReadOptions): Effect.Effect<Uint8Array, E, R> => {
+  const readAlloc = (options?: ReadOptions): Effect.Effect<Option.Option<Uint8Array>, E, R> => {
     const offset = options?.offset ?? 0n;
     const size = options?.size;
 
@@ -229,9 +213,14 @@ export const make = <E = never, R = never>(bytes: {
 
     return allocated.pipe(
       Effect.flatMap((buffer) =>
-        bytes
-          .read(buffer, { offset, size: buffer.length })
-          .pipe(Effect.map((read) => (read === buffer.length ? buffer : buffer.subarray(0, read)))),
+        bytes.read(buffer, { offset, size: buffer.length }).pipe(
+          // A read that takes nothing has reached the end of the sequence, which is none.
+          Effect.map((read) =>
+            read === 0
+              ? Option.none()
+              : Option.some(read === buffer.length ? buffer : buffer.subarray(0, read)),
+          ),
+        ),
       ),
     );
   };
@@ -241,11 +230,13 @@ export const make = <E = never, R = never>(bytes: {
     readAlloc,
     stream: (options) =>
       Stream.unfold(0n, (offset) =>
-        readAlloc({ offset, size: options?.chunkSize ?? Chunk }).pipe(
+        readAlloc({ offset, size: options?.chunkSize ?? defaultChunkSize }).pipe(
           Effect.map((chunk) =>
-            // A read that takes nothing has reached the end of the sequence: the
-            // read before it ended there, and this one begins at the end it left.
-            chunk.length === 0 ? undefined : ([chunk, offset + BigInt(chunk.length)] as const),
+            Option.match(chunk, {
+              // The read before it ended there, and this one begins at the end it left.
+              onNone: () => undefined,
+              onSome: (held) => [held, offset + BigInt(held.length)] as const,
+            }),
           ),
         ),
       ),

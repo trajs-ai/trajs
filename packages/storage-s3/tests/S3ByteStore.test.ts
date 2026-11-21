@@ -13,7 +13,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { S3Service } from "@effect-aws/client-s3";
 import * as ByteStore from "@trajs/utils/ByteStore";
-import { Effect, Layer, Stream } from "effect";
+import { Effect, Layer, Option, Stream } from "effect";
 import { describe, expect, it } from "vite-plus/test";
 
 import * as S3ByteStore from "#/S3ByteStore.ts";
@@ -137,7 +137,7 @@ describe("layer", () => {
       const tail = yield* held.readAlloc({ offset: 2n });
 
       return {
-        tail: text(tail),
+        tail: text(Option.getOrThrow(tail)),
         length: yield* held.length,
         kept: text(bucket.objects.get("parts/0")!),
       };

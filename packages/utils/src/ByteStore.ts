@@ -102,7 +102,7 @@ export const defaultChunkSize = 64 * 1024;
  * **Example** (Keeping a sequence of bytes and reading part of it back)
  *
  * ```ts
- * import { Effect, Stream } from "effect"
+ * import { Effect, Option, Stream } from "effect"
  *
  * import { ByteStore } from "@trajs/utils"
  *
@@ -112,7 +112,9 @@ export const defaultChunkSize = 64 * 1024;
  *   // Four bytes to a chunk, so the sequence is kept in two of them.
  *   yield* Stream.make(new TextEncoder().encode("trajs")).pipe(Stream.run(store.write("a")))
  *
- *   return yield* (yield* store.read("a")).readAlloc({ offset: 2n })
+ *   const tail = yield* (yield* store.read("a")).readAlloc({ offset: 2n })
+ *
+ *   return Option.getOrThrow(tail)
  * })
  *
  * const bytes = await Effect.runPromise(
