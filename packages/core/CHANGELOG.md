@@ -1,5 +1,76 @@
 # @trajs/core
 
+## 0.0.0-alpha.5
+
+### Minor Changes
+
+- [`7540e23`](https://github.com/trajs-ai/trajs/commit/7540e231bce8a0d62d4f76177934908d99a168d7) Thanks [@observerw](https://github.com/observerw)! - `Cache.layerFileSystem` provides the `Cache.Cache` of `@trajs/core` over a
+  directory of the file system, with no `KeyValueStore` stated of the program. A part is kept
+  as one file named after its `<id>/<index>` key.
+  
+  The directory is stated alone or beside the `capacity` of the memory:
+  `Cache.layerFileSystem("parts")` and
+  `Cache.layerFileSystem({ dir: "parts", capacity: 1_000 })` build the same layer. A directory
+  left unstated is a temporary one, made for the scope of the layer.
+
+- [`bc79241`](https://github.com/trajs-ai/trajs/commit/bc792411e42c6c3c04a0f7915479431627abcd1a) Thanks [@observerw](https://github.com/observerw)! - An `Event`, `Metric`, or `Extra` declaration now throws a `TrajectoryError` at construction
+  when a schema it states has no layout for `SchemaBinary`, rather than failing where a part
+  is first written. `TrajectoryError.binaryLayout` wraps the new `BinaryLayoutError` reason.
+
+- [`f058c49`](https://github.com/trajs-ai/trajs/commit/f058c494d4cc4085e3bc5a37814b4cc1d8125b1f) Thanks [@observerw](https://github.com/observerw)! - `SchemaDocument` is removed. A stored schema is `Schema.Json` in every declaration that holds one.
+  The stored form of a schema is a `SchemaRepresentation.Document` in its JSON form, which
+  `Schema.Json` states without an export of its own.
+  
+  `ToolSchema`, `MetricSchema`, `ExtraSchema`, and `EventSchema` hold `Schema.Json` where they
+  held `SchemaDocument`, so the stored shape of a trajectory does not change.
+
+- [`4ec32c5`](https://github.com/trajs-ai/trajs/commit/4ec32c5931c8b27f8c2b8ff36a3fdb5cb3701a86) Thanks [@observerw](https://github.com/observerw)! - A trajectory part is one schema. `PromptPart`, `SessionPart`, `ResponsePart`,
+  `EventPart`, and `MetricPart` state every field of the part.
+  The `*Meta` and `*Body` schemas beside them are removed, with their `*Encoded`
+  aliases and the `Meta` union that gathered the meta of every kind.
+  The stored form of a part does not change.
+
+- [`a566ead`](https://github.com/trajs-ai/trajs/commit/a566ead936a0f90e2f0aa4ab2e3975ab1d344191) Thanks [@observerw](https://github.com/observerw)! - `VersionedSchema` and the schema of a `package.json` are stated in
+  `@trajs/utils`, beside the services a trajectory is carried through.
+  
+  `VersionedSchema` keeps its name, so `import { VersionedSchema } from
+  "@trajs/core"` reads the same module as `@trajs/utils/VersionedSchema`.
+  
+  The schema of a `package.json` is `Package.PackageMetadata`, where `@trajs/core`
+  exported `PackageMetadata`. A declaration still states it as its
+  `packageMetadata`, and `@trajs/core` re-exports `Package` as it re-exports the
+  other modules of `@trajs/utils`.
+
+- [`a3ac6ec`](https://github.com/trajs-ai/trajs/commit/a3ac6ece1fba3c34f0b90a0e605f98ec883c8ebd) Thanks [@observerw](https://github.com/observerw)! - `Session.main` reads a `Trajectory.TrajectoryBuffer` rather than a `Trajectory`, and
+  no longer requires `Cache.Cache` or `Config.SchemaServices`. Reading a trajectory
+  into that buffer is the caller's step, so where its parts are kept is no longer a
+  decision of the session read: `Cache.cache` answers a buffer held in memory or read
+  from a store, and a caller that already holds the parts states `length` and `at`
+  itself.
+  
+  Session streams read that buffer again on every replay, so a buffer a cache keeps
+  replays the way it did before. The buffer states its own failure and its own
+  requirements, so a buffer read through `Cache.layerKVStore` still fails with
+  `Cache.CacheError` and still decodes with `Config.DecodingServices`.
+
+- [`1bee2be`](https://github.com/trajs-ai/trajs/commit/1bee2be470e3d5601a9420a14f9b59c80424ad99) Thanks [@observerw](https://github.com/observerw)! - `StreamHash` reads one of three digests: `Algorithm.Sha256` (0), `Algorithm.Blake2b512` (1) and
+  `Algorithm.Xxh64` (2). `Algorithm.Xxh32` is removed, and `StreamHash.defaultAlgorithm` is
+  `Xxh64`, the cheapest of the three.
+  
+  A digest of XXH64 is 8 bytes, so the metadata records 16 hex characters where it recorded 8. A
+  trajectory that records XXH32 no longer verifies, because the algorithm it recorded now states
+  XXH64.
+  
+  `StreamHash.make` and `StreamHash.layer` are removed, since no codec of the package computes
+  XXH64. A platform package supplies all three: `@trajs/platform-node` and `@trajs/platform-bun`
+  read XXH64 with the binding `@node-rs/xxhash`, and `@trajs/platform-browser` reads it with the
+  WebAssembly module of `@node-rs/xxhash-wasm32-wasi` and BLAKE2b with `@noble/hashes`.
+
+### Patch Changes
+
+- Updated dependencies [[`047e37d`](https://github.com/trajs-ai/trajs/commit/047e37d162f322a9a667fe013e558ca80d49f25e), [`aceb66b`](https://github.com/trajs-ai/trajs/commit/aceb66b85a53239da3414204bc234ff86d8bf4b5), [`9ffc4ce`](https://github.com/trajs-ai/trajs/commit/9ffc4cef2e0498e75b54cbc421dc65eb6ffd3925), [`35853e6`](https://github.com/trajs-ai/trajs/commit/35853e654ce7d96682046b5c7d1eda17e9f3e53e), [`3a2f353`](https://github.com/trajs-ai/trajs/commit/3a2f353873e7133888131d5a88768ba5d131324a), [`c396840`](https://github.com/trajs-ai/trajs/commit/c396840173c01f77317b7f985a6c87fda93d5194), [`a566ead`](https://github.com/trajs-ai/trajs/commit/a566ead936a0f90e2f0aa4ab2e3975ab1d344191), [`8537a14`](https://github.com/trajs-ai/trajs/commit/8537a14ad680e1a885de070aea5be2b5e90bd2b2), [`ab96c7e`](https://github.com/trajs-ai/trajs/commit/ab96c7e8f920c66b5fa0d10d223a529bf2f51150), [`8537a14`](https://github.com/trajs-ai/trajs/commit/8537a14ad680e1a885de070aea5be2b5e90bd2b2)]:
+  - @trajs/utils@0.0.0-alpha.5
+
 ## 0.0.0-alpha.4
 
 ### Minor Changes
