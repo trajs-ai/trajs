@@ -37,8 +37,8 @@ const readAt = <E, R>(
     return held;
   });
 
-/** The chunks a file holds, and where the first of them begins. */
-const readTable = <E, R>(sequence: Bytes.Bytes<E, R>, size: bigint) =>
+/** The footer of a stored file, and where the first of its chunks begins. */
+export const readFooter = <E, R>(sequence: Bytes.Bytes<E, R>, size: bigint) =>
   Effect.gen(function* () {
     const tailBytes = BigInt(chunk.FooterTailBytes);
     const noFooter = corrupt("the bytes end in no footer");
@@ -68,7 +68,46 @@ const readTable = <E, R>(sequence: Bytes.Bytes<E, R>, size: bigint) =>
       );
     }
 
-    return { begin: place.start - total, chunks: footer.chunks };
+    return { begin: place.start - total, footer };
+  });
+
+/**
+ * The header at the head of a stored file, which states the trajectory it holds and the
+ * kits it was written with. The header states how many bytes it takes, so no footer is
+ * read here.
+ */
+export const readHeader = <E, R>(
+  sequence: Bytes.Bytes<E, R>,
+  size: bigint,
+): Effect.Effect<chunk.Header, TrajectoryError, R> =>
+  Effect.gen(function* () {
+    const noHeader = corrupt("the bytes begin in no header");
+
+    const startBytes = BigInt(chunk.HeaderStartBytes);
+    const start = yield* readAt(sequence, 0n, Number(size < startBytes ? size : startBytes));
+
+    if (!chunk.Magic.every((byte, index) => start[index] === byte)) {
+      return yield* Effect.fail(noHeader);
+    }
+
+    const head = yield* Schema.decodeUnknownEffect(chunk.HeaderHead)(
+      start.subarray(chunk.Magic.length),
+    ).pipe(Effect.mapError(TrajectoryError.parse));
+
+    // The head states the bytes the header takes, so the region is read from that alone.
+    const regionBytes = BigInt(chunk.Magic.length) + BigInt(head.len);
+
+    if (size < regionBytes) {
+      return yield* Effect.fail(noHeader);
+    }
+
+    const region = yield* readAt(sequence, 0n, Number(regionBytes));
+
+    const decoded = yield* Schema.decodeUnknownEffect(chunk.HeaderRegion)(
+      region.subarray(chunk.Magic.length),
+    ).pipe(Effect.mapError(TrajectoryError.parse));
+
+    return decoded.header;
   });
 
 /** The parts of a stored trajectory a sequence of bytes holds, read by index. */
@@ -120,14 +159,16 @@ export const makeBuffer = <C extends Config.AnyConfig>(config: C) =>
     > =>
       Effect.gen(function* () {
         const size = yield* sequence.length.pipe(Effect.mapError(TrajectoryError.parse));
-        const table = yield* readTable(sequence, size);
+        const { begin, footer } = yield* readFooter(sequence, size);
+
+        const chunks = footer.chunks;
 
         const at = (index: number) =>
           Effect.gen(function* () {
-            let position = table.begin;
+            let position = begin;
             let seen = 0;
 
-            for (const entry of table.chunks) {
+            for (const entry of chunks) {
               if (index < seen + entry.count) {
                 const frames = yield* readFrames(sequence, position, entry.len);
 
@@ -141,6 +182,6 @@ export const makeBuffer = <C extends Config.AnyConfig>(config: C) =>
             return Option.none();
           });
 
-        return { length: table.chunks.reduce((sum, entry) => sum + entry.count, 0), at };
+        return { length: chunks.reduce((sum, entry) => sum + entry.count, 0), at };
       });
   });

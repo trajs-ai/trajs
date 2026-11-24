@@ -57,17 +57,34 @@ export const makeHeader = (
   extrakit: ExtraKit.encode(config.extrakit),
 });
 
+const headerHeadFields = {
+  crc: BinaryProtocol.u32,
+  len: BinaryProtocol.u32,
+};
+
 /**
- * A file begins with its header, which is no chunk and so states no body. Its chain
- * value extends the one {@link Magic} starts, so a reader checks it with no chunk before it.
+ * A file begins with its header, which is no chunk and so states no body. The header
+ * states how many bytes it takes, since no table holds its extent, and its chain value
+ * extends the one {@link Magic} starts, so a reader checks it with no chunk before it.
  */
 export const HeaderRegion = BinaryProtocol.layout({
-  crc: BinaryProtocol.u32,
+  ...headerHeadFields,
   header: Header,
   chain: BinaryProtocol.bytes(ChainBytes),
 });
 
 export type HeaderRegion = Schema.Schema.Type<typeof HeaderRegion>;
+
+/** What a scan reads of a header before the header states how many bytes it takes. */
+export const HeaderHead = BinaryProtocol.layout(headerHeadFields);
+
+export type HeaderHead = Schema.Schema.Type<typeof HeaderHead>;
+
+/** Every field of a head is empty, so the codec states how many bytes a head takes. */
+const HeaderHeadBytes = Schema.encodeSync(HeaderHead)({ crc: 0, len: 0 }).length;
+
+/** The marker and the head of a header, which a scan reads first. */
+export const HeaderStartBytes = Magic.length + HeaderHeadBytes;
 
 const chunkHeaderFields = {
   metaCrc: BinaryProtocol.u32,
