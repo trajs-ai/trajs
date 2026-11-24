@@ -1,6 +1,14 @@
 import { expect, it } from "@effect/vitest";
-import { Extra, ExtraKit, Prompt, Response, Trajectory, VersionedSchema } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
+import {
+  Extra,
+  ExtraKit,
+  Prompt,
+  Response,
+  Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
+  VersionedSchema,
+} from "@trajs/core";
 import { Effect, Match, Schema, SchemaGetter, Stream } from "effect";
 
 /** The fields the harness wrote of a step, before `model_name` became `model`. */
@@ -46,9 +54,9 @@ const runExtra = new Extra.Extra({ packageName: "tutorial", id: "Run", session: 
 // that does not declare a field leaves that field out.
 const extrakit = ExtraKit.make(stepExtra, runExtra);
 
-const config = Config.config({ extrakit });
+const config = TrajectoryConfig.config({ extrakit });
 
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 interface Turn {
   /** The model that produced the answer. */

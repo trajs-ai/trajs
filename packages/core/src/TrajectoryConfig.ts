@@ -1,7 +1,8 @@
 /**
- * Kits for reading trajectory parts.
+ * Kits for reading trajectory parts, and the part of one config.
  *
  * {@link config} supplies defaults for omitted fields.
+ * The part types state one {@link TrajectoryPart.Part} of a config.
  * The service types describe schema requirements for storage operations.
  *
  * @stability stable
@@ -14,6 +15,7 @@ import * as EventKit from "#/EventKit.ts";
 import * as ExtraKit from "#/ExtraKit.ts";
 import * as MetricKit from "#/MetricKit.ts";
 import * as Toolkit from "#/Toolkit.ts";
+import type * as TrajectoryPart from "#/TrajectoryPart.ts";
 
 /**
  * The kits of one trajectory.
@@ -146,6 +148,56 @@ export type MetricsOf<C extends AnyConfig> = C["metrickit"]["metrics"];
  * @category utility types
  */
 export type ExtrasOf<C extends AnyConfig> = C["extrakit"]["extra"];
+
+/**
+ * The prompt part of a trajectory read with `Config`.
+ *
+ * @see {@link TrajectoryPart.PromptPart} for the part read with its extras alone.
+ * @stability stable
+ * @category models
+ */
+export type PromptPartOf<Config extends AnyConfig> = TrajectoryPart.PromptPart<Config["extrakit"]>;
+
+/**
+ * The session part of a trajectory read with `Config`.
+ *
+ * @see {@link TrajectoryPart.SessionPart} for the part read with its extras alone.
+ * @stability stable
+ * @category models
+ */
+export type SessionPartOf<Config extends AnyConfig> = TrajectoryPart.SessionPart<
+  Config["extrakit"]
+>;
+
+/**
+ * The response part of a trajectory read with `Config`.
+ *
+ * @see {@link TrajectoryPart.ResponsePart} for the part read with its kits alone.
+ * @stability stable
+ * @category models
+ */
+export type ResponsePartOf<Config extends AnyConfig> = TrajectoryPart.ResponsePart<
+  Config["toolkit"],
+  Config["extrakit"]
+>;
+
+/**
+ * The event part of a trajectory read with `Config`.
+ *
+ * @see {@link TrajectoryPart.EventPart} for the part read with its event kit alone.
+ * @stability stable
+ * @category models
+ */
+export type EventPartOf<Config extends AnyConfig> = TrajectoryPart.EventPart<Config["eventkit"]>;
+
+/**
+ * The metric part of a trajectory read with `Config`.
+ *
+ * @see {@link TrajectoryPart.MetricPart} for the part read with its metric kit alone.
+ * @stability stable
+ * @category models
+ */
+export type MetricPartOf<Config extends AnyConfig> = TrajectoryPart.MetricPart<Config["metrickit"]>;
 
 type ToolOf<C extends AnyConfig> = ToolsOf<C>[keyof ToolsOf<C>];
 

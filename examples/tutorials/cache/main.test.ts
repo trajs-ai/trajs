@@ -1,17 +1,16 @@
 import { expect, it } from "@effect/vitest";
-import { Cache, Prompt, Response, Trajectory } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
+import { Cache, Prompt, Response, Trajectory, TrajectoryConfig, TrajectoryPart } from "@trajs/core";
 import { Effect, Layer, Option, Predicate, Stream } from "effect";
 import { KeyValueStore } from "effect/persistence";
 
-const config = Config.config();
+const config = TrajectoryConfig.config();
 
 const id = "paris-then-berlin";
 
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 /** The tag of each part, in the order a reading returned them. */
-const tags = (parts: Iterable<Trajectory.Part<typeof config>>): ReadonlyArray<string> =>
+const tags = (parts: Iterable<TrajectoryPart.Part<typeof config>>): ReadonlyArray<string> =>
   Array.from(parts, (held) => held._tag);
 
 interface Summary {

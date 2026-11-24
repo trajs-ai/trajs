@@ -1,10 +1,10 @@
 import { Effect, Match, Schema } from "effect";
 import { SchemaBinary } from "effect/encoding";
 
-import type * as Config from "#/Config.ts";
 import * as part from "#/internal/exchange/part.ts";
-import * as Trajectory from "#/Trajectory.ts";
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import { TrajectoryError } from "#/TrajectoryError.ts";
+import type * as TrajectoryPart from "#/TrajectoryPart.ts";
 
 /** One part's two stored segments: the meta a scan reads alone, and the body it pairs. */
 export interface Frame {
@@ -30,7 +30,7 @@ const joined = <M extends object, B extends object>(meta: M, body: B): M & B => 
  * Reads a frame as the part its meta states. The tag picks the schema the body is
  * read with, and the halves join back to the part.
  */
-export const decodeFrame = <C extends Config.AnyConfig>(config: C) => {
+export const decodeFrame = <C extends TrajectoryConfig.AnyConfig>(config: C) => {
   const decodeMeta = decodeSegment(part.Meta);
 
   const bodies = {
@@ -43,7 +43,7 @@ export const decodeFrame = <C extends Config.AnyConfig>(config: C) => {
 
   return (
     frame: Frame,
-  ): Effect.Effect<Trajectory.Part<C>, TrajectoryError, Config.DecodingServices<C>> =>
+  ): Effect.Effect<TrajectoryPart.Part<C>, TrajectoryError, TrajectoryConfig.DecodingServices<C>> =>
     // SAFETY: every body is read with the config's own kits, so the config's
     // services cover them, and the halves join to the part its tag names.
     Effect.gen(function* () {
@@ -62,5 +62,9 @@ export const decodeFrame = <C extends Config.AnyConfig>(config: C) => {
         ),
         Match.orElse(() => stored),
       );
-    }) as Effect.Effect<Trajectory.Part<C>, TrajectoryError, Config.DecodingServices<C>>;
+    }) as Effect.Effect<
+      TrajectoryPart.Part<C>,
+      TrajectoryError,
+      TrajectoryConfig.DecodingServices<C>
+    >;
 };

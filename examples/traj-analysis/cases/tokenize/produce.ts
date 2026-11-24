@@ -1,8 +1,15 @@
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { Exchange, MetricKit, Produce, Prompt, Response, Trajectory } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
+import {
+  Exchange,
+  MetricKit,
+  Produce,
+  Prompt,
+  Response,
+  TrajectoryConfig,
+  TrajectoryPart,
+} from "@trajs/core";
 import { makeProducer, metrickit, tokenEstimate, Tokenizer } from "@trajs/extension-tokenize";
 import { Effect, FileSystem, Stream } from "effect";
 
@@ -71,9 +78,9 @@ const replayed = Prompt.fromMessages([
   }),
 ]);
 
-export const config = Config.config({ metrickit });
+export const config = TrajectoryConfig.config({ metrickit });
 
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 const parts = [
   part.prompt(askedPrompt),

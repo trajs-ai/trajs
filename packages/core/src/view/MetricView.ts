@@ -10,10 +10,11 @@
 import { Effect, Predicate, Result, Stream } from "effect";
 
 import * as Cache from "#/Cache.ts";
-import * as Config from "#/Config.ts";
 import type * as Metric from "#/Metric.ts";
 import * as Trajectory from "#/Trajectory.ts";
+import * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
+import type * as TrajectoryPart from "#/TrajectoryPart.ts";
 import { metricStream } from "#/view/internal/metric.ts";
 
 /**
@@ -35,8 +36,8 @@ import { metricStream } from "#/view/internal/metric.ts";
  */
 export const metricOutputs =
   <Ext extends Metric.Any>(metric: Ext) =>
-  <Config extends Config.AnyConfig, E, R>(
-    stream: Stream.Stream<Trajectory.Part<Config>, E, R>,
+  <Config extends TrajectoryConfig.AnyConfig, E, R>(
+    stream: Stream.Stream<TrajectoryPart.Part<Config>, E, R>,
   ): Stream.Stream<Metric.Output<Ext>, E, R> =>
     stream.pipe(
       Stream.filterMap((part) => {
@@ -56,12 +57,12 @@ export const metricOutputs =
 /**
  * The metric part of the metric `Tag` names, carrying that metric's payload.
  */
-type ResultOf<Config extends Config.AnyConfig, Tag extends keyof Config.MetricsOf<Config>> = Omit<
-  Trajectory.MetricPartOf<Config>,
-  "metric"
-> &
+type ResultOf<
+  Config extends TrajectoryConfig.AnyConfig,
+  Tag extends keyof TrajectoryConfig.MetricsOf<Config>,
+> = Omit<TrajectoryConfig.MetricPartOf<Config>, "metric"> &
   Readonly<{
-    metric: Extract<Trajectory.MetricPartOf<Config>["metric"], { readonly _tag: Tag }>;
+    metric: Extract<TrajectoryConfig.MetricPartOf<Config>["metric"], { readonly _tag: Tag }>;
   }>;
 
 /**
@@ -76,8 +77,8 @@ type ResultOf<Config extends Config.AnyConfig, Tag extends keyof Config.MetricsO
  * @stability stable
  * @category models
  */
-export type AttachedMetrics<Config extends Config.AnyConfig> = Readonly<{
-  [Tag in keyof Config.MetricsOf<Config>]?: ReadonlyArray<ResultOf<Config, Tag>>;
+export type AttachedMetrics<Config extends TrajectoryConfig.AnyConfig> = Readonly<{
+  [Tag in keyof TrajectoryConfig.MetricsOf<Config>]?: ReadonlyArray<ResultOf<Config, Tag>>;
 }>;
 
 /**
@@ -87,15 +88,15 @@ export type AttachedMetrics<Config extends Config.AnyConfig> = Readonly<{
  * @stability stable
  * @category models
  */
-export type MetricTrajectoryPart<Config extends Config.AnyConfig> =
+export type MetricTrajectoryPart<Config extends TrajectoryConfig.AnyConfig> =
   | (AttachablePart<Config> & Readonly<{ metrics: AttachedMetrics<Config> }>)
-  | Trajectory.MetricPartOf<Config>;
+  | TrajectoryConfig.MetricPartOf<Config>;
 
-type AttachablePart<Config extends Config.AnyConfig> =
-  | Trajectory.PromptPartOf<Config>
-  | Trajectory.SessionPartOf<Config>
-  | Trajectory.ResponsePartOf<Config>
-  | Trajectory.EventPartOf<Config>;
+type AttachablePart<Config extends TrajectoryConfig.AnyConfig> =
+  | TrajectoryConfig.PromptPartOf<Config>
+  | TrajectoryConfig.SessionPartOf<Config>
+  | TrajectoryConfig.ResponsePartOf<Config>
+  | TrajectoryConfig.EventPartOf<Config>;
 
 /**
  * A trajectory view carrying the results attached to each part.
@@ -106,7 +107,7 @@ type AttachablePart<Config extends Config.AnyConfig> =
  * @category models
  */
 export type MetricTrajectoryStream<
-  Config extends Config.AnyConfig,
+  Config extends TrajectoryConfig.AnyConfig,
   E = never,
   R = never,
 > = Stream.Stream<MetricTrajectoryPart<Config>, E, R>;
@@ -141,16 +142,20 @@ export type MetricTrajectoryStream<
  * @stability stable
  * @category transforming
  */
-export const metricTrajectory = Effect.fn(function* <Config extends Config.AnyConfig, E, R>(
+export const metricTrajectory = Effect.fn(function* <
+  Config extends TrajectoryConfig.AnyConfig,
+  E,
+  R,
+>(
   trajectory: Trajectory.Trajectory<string, Config, E, R>,
 ): Effect.fn.Return<
   MetricTrajectoryStream<
     Config,
     TrajectoryError | Cache.CacheError,
-    Config.DecodingServices<Config>
+    TrajectoryConfig.DecodingServices<Config>
   >,
   E | TrajectoryError | Cache.CacheError,
-  R | Cache.Cache | Config.SchemaServices<Config>
+  R | Cache.Cache | TrajectoryConfig.SchemaServices<Config>
 > {
   const cache = yield* Cache.Cache;
   const cached = yield* cache.cache(trajectory);

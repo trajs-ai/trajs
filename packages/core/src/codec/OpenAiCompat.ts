@@ -13,8 +13,8 @@ import type { Prompt } from "effect/ai";
 import * as Base64 from "effect/encoding/Base64";
 
 import { imagesOf, mediaTypeOf, resultText, textOf } from "#/codec/internal/prompt.ts";
-import * as Config from "#/Config.ts";
 import * as Session from "#/Session.ts";
+import * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import * as View from "#/view/index.ts";
 
 /**
@@ -62,11 +62,11 @@ export type Sessions = Record<string, Message[]>;
  *
  * ```ts
  * import { OpenAiCompat } from "@trajs/core/codec"
- * import { Cache, Config, Prompt, Response, Session, Trajectory } from "@trajs/core"
+ * import { Cache, Prompt, Response, Session, Trajectory, TrajectoryConfig, TrajectoryPart } from "@trajs/core"
  * import { Effect, Stream } from "effect"
  *
- * const config = Config.config()
- * const part = Trajectory.parts(config)
+ * const config = TrajectoryConfig.config()
+ * const part = TrajectoryPart.parts(config)
  *
  * const parts = [
  *   part.prompt(
@@ -108,7 +108,7 @@ export type Sessions = Record<string, Message[]>;
  *   return yield* OpenAiCompat.make(root)
  * }).pipe(Effect.provide(Cache.layerMemory())))
  *
- * conversations[Trajectory.mainSessionId]?.map((message) => message.role) // => ["user", "assistant", "tool", "assistant"]
+ * conversations[TrajectoryPart.mainSessionId]?.map((message) => message.role) // => ["user", "assistant", "tool", "assistant"]
  * ```
  *
  * @see {@link Sessions} for the result map.
@@ -117,7 +117,7 @@ export type Sessions = Record<string, Message[]>;
  * @stability stable
  * @category converting
  */
-export const make = <Config extends Config.AnyConfig, E, R>(
+export const make = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   main: Session.MainSession<Config, E, R>,
 ): Effect.Effect<Sessions, E, R> =>
   Effect.gen(function* () {

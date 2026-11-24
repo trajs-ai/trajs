@@ -11,7 +11,6 @@ import { Bytes, Compression } from "@trajs/utils";
 import { Effect } from "effect";
 import { Hex } from "effect/encoding";
 
-import * as Config from "#/Config.ts";
 import * as EventKit from "#/EventKit.ts";
 import * as ExchangeIssue from "#/ExchangeIssue.ts";
 import * as ExtraKit from "#/ExtraKit.ts";
@@ -19,6 +18,7 @@ import * as reader from "#/internal/exchange/read.ts";
 import * as MetricKit from "#/MetricKit.ts";
 import * as Toolkit from "#/Toolkit.ts";
 import * as Trajectory from "#/Trajectory.ts";
+import * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import { TrajectoryError } from "#/TrajectoryError.ts";
 
 export interface Metadata {
@@ -37,23 +37,28 @@ export interface KitSchemas {
 }
 
 export const read =
-  <Config extends Config.AnyConfig>(config: Config) =>
+  <Config extends TrajectoryConfig.AnyConfig>(config: Config) =>
   <E, R>(
     bytes: Bytes.Bytes<E, R>,
   ): Effect.Effect<
-    Trajectory.TrajectoryFile<string, Config, TrajectoryError, Config.SchemaServices<Config>>,
+    Trajectory.TrajectoryFile<
+      string,
+      Config,
+      TrajectoryError,
+      TrajectoryConfig.SchemaServices<Config>
+    >,
     TrajectoryError | ExchangeIssue.Issue | E,
-    Config.SchemaServices<Config> | Compression.Compression | R
+    TrajectoryConfig.SchemaServices<Config> | Compression.Compression | R
   > => {
     throw new Error("Not implemented");
   };
 
-export const write = <Config extends Config.AnyConfig, E, R>(
+export const write = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   trajectory: Trajectory.Trajectory<string, Config, E, R>,
 ): Effect.Effect<
   Bytes.Bytes<TrajectoryError | E, R>,
   TrajectoryError | ExchangeIssue.Issue | E,
-  Config.SchemaServices<Config> | R
+  TrajectoryConfig.SchemaServices<Config> | R
 > => {
   throw new Error("Not implemented");
 };

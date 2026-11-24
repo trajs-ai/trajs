@@ -1,6 +1,16 @@
 import { expect, it } from "@effect/vitest";
-import { Cache, Prompt, Response, Session, Tool, Toolkit, Trajectory, View } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
+import {
+  Cache,
+  Prompt,
+  Response,
+  Session,
+  Tool,
+  Toolkit,
+  Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
+  View,
+} from "@trajs/core";
 import { Event } from "@trajs/core/unstable/atif";
 import { Effect, Match, Schema, Stream } from "effect";
 
@@ -20,7 +30,7 @@ const toolkit = Toolkit.make(
 );
 
 // The eventkit must sit on the config, or this event cannot be stored.
-const config = Config.config({ toolkit, eventkit: Event.eventkit });
+const config = TrajectoryConfig.config({ toolkit, eventkit: Event.eventkit });
 
 interface Phase {
   /** What opened the phase: `"run"`, or the type of an event. */
@@ -80,7 +90,7 @@ interface SummaryDraft {
   readonly rediscovered: Set<string>;
 }
 
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 const grep = (id: string, pattern: string) =>
   part.response(Response.anyToolCallPart({ id, name: "grep", params: { pattern } }));

@@ -19,7 +19,7 @@ import type {
 } from "effect/ai/Response";
 import { toolCallPart, toolResultPart } from "effect/ai/Response";
 
-import type * as Config from "#/Config.ts";
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 
 /**
  * Re-exports Effect's response APIs without modification.
@@ -119,7 +119,9 @@ export type ToolResultPartsView<Tools extends Record<string, Tool.Any>> =
  * @stability stable
  * @category models
  */
-export type ToolCallOf<Config extends Config.AnyConfig> = ToolCallPartsView<Config.ToolsOf<Config>>;
+export type ToolCallOf<Config extends TrajectoryConfig.AnyConfig> = ToolCallPartsView<
+  TrajectoryConfig.ToolsOf<Config>
+>;
 
 /**
  * A tool result read through a config, including results from undeclared tools.
@@ -128,8 +130,8 @@ export type ToolCallOf<Config extends Config.AnyConfig> = ToolCallPartsView<Conf
  * @stability stable
  * @category models
  */
-export type ToolResultOf<Config extends Config.AnyConfig> = ToolResultPartsView<
-  Config.ToolsOf<Config>
+export type ToolResultOf<Config extends TrajectoryConfig.AnyConfig> = ToolResultPartsView<
+  TrajectoryConfig.ToolsOf<Config>
 >;
 
 type AnyToolCallParams = Omit<ConstructorParams<AnyToolCallPart>, "providerExecuted"> & {

@@ -9,12 +9,12 @@
 import { Data, Match, Stream, type Effect } from "effect";
 import { Prompt, type Tool } from "effect/ai";
 
-import type * as Config from "#/Config.ts";
 import type * as Response from "#/Response.ts";
 import type * as Session from "#/Session.ts";
-import type * as Trajectory from "#/Trajectory.ts";
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
+import type * as TrajectoryPart from "#/TrajectoryPart.ts";
 
-type Tools<Config extends Config.AnyConfig> = Config["toolkit"]["tools"];
+type Tools<Config extends TrajectoryConfig.AnyConfig> = Config["toolkit"]["tools"];
 
 /**
  * Reconstructs a prompt from a session's messages and finished responses.
@@ -39,7 +39,7 @@ type Tools<Config extends Config.AnyConfig> = Config["toolkit"]["tools"];
  * @stability stable
  * @category converting
  */
-export const prompt = <Config extends Config.AnyConfig, E, R>(
+export const prompt = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   stream: Session.SessionStream<Config, E, R>,
 ): Effect.Effect<Prompt.Prompt, E, R> =>
   steps(stream).pipe(
@@ -67,7 +67,7 @@ export const prompt = <Config extends Config.AnyConfig, E, R>(
  * @stability stable
  * @category models
  */
-export type Step<Config extends Config.AnyConfig> =
+export type Step<Config extends TrajectoryConfig.AnyConfig> =
   | PromptStep<Config>
   | ResponseStep<Config>
   | EventStep<Config>;
@@ -79,8 +79,10 @@ export type Step<Config extends Config.AnyConfig> =
  * @stability stable
  * @category models
  */
-export class PromptStep<Config extends Config.AnyConfig> extends Data.TaggedClass("Prompt")<{
-  readonly prompt: Trajectory.PromptPart<Config["extrakit"]>;
+export class PromptStep<Config extends TrajectoryConfig.AnyConfig> extends Data.TaggedClass(
+  "Prompt",
+)<{
+  readonly prompt: TrajectoryPart.PromptPart<Config["extrakit"]>;
 }> {}
 
 /**
@@ -94,7 +96,9 @@ export class PromptStep<Config extends Config.AnyConfig> extends Data.TaggedClas
  * @stability stable
  * @category models
  */
-export class ResponseStep<Config extends Config.AnyConfig> extends Data.TaggedClass("Response")<{
+export class ResponseStep<Config extends TrajectoryConfig.AnyConfig> extends Data.TaggedClass(
+  "Response",
+)<{
   readonly response: ReadonlyArray<Response.PartView<Tools<Config>>>;
 }> {}
 
@@ -105,8 +109,10 @@ export class ResponseStep<Config extends Config.AnyConfig> extends Data.TaggedCl
  * @stability stable
  * @category models
  */
-export class EventStep<Config extends Config.AnyConfig> extends Data.TaggedClass("Event")<{
-  readonly event: Trajectory.EventPart<Config["eventkit"]>;
+export class EventStep<Config extends TrajectoryConfig.AnyConfig> extends Data.TaggedClass(
+  "Event",
+)<{
+  readonly event: TrajectoryPart.EventPart<Config["eventkit"]>;
 }> {}
 
 /** The finished responses of one run, since the last prompt or event. */
@@ -117,20 +123,20 @@ interface Run<Tools extends Record<string, Tool.Any>> {
 const idle = <Tools extends Record<string, Tool.Any>>(): Run<Tools> => ({ response: [] });
 
 /** The step a run states, where it produced any part. */
-const stepsOf = <Config extends Config.AnyConfig>(
+const stepsOf = <Config extends TrajectoryConfig.AnyConfig>(
   run: Run<Tools<Config>>,
 ): ReadonlyArray<Step<Config>> =>
   run.response.length === 0 ? [] : [new ResponseStep<Config>({ response: run.response })];
 
 /** The responses a part leaves open, and the steps it closed. */
-type Assembly<Config extends Config.AnyConfig> = readonly [
+type Assembly<Config extends TrajectoryConfig.AnyConfig> = readonly [
   Run<Tools<Config>>,
   ReadonlyArray<Step<Config>>,
 ];
 
-const assembleStep = <Config extends Config.AnyConfig>(
+const assembleStep = <Config extends TrajectoryConfig.AnyConfig>(
   run: Run<Tools<Config>>,
-  part: Exclude<Trajectory.Part<Config>, Trajectory.SessionPart<Config["extrakit"]>>,
+  part: Exclude<TrajectoryPart.Part<Config>, TrajectoryPart.SessionPart<Config["extrakit"]>>,
 ): Assembly<Config> =>
   Match.value(part).pipe(
     // A prompt ends the run of responses before it.
@@ -175,7 +181,7 @@ const assembleStep = <Config extends Config.AnyConfig>(
  * @stability stable
  * @category transforming
  */
-export const steps = <Config extends Config.AnyConfig, E, R>(
+export const steps = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   stream: Session.SessionStream<Config, E, R>,
 ): Stream.Stream<Step<Config>, E, R> =>
   stream.pipe(

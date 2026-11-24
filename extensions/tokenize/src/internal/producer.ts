@@ -15,8 +15,7 @@
  * run over two trajectories counts each of them from its own beginning.
  */
 
-import { Trajectory } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
+import { TrajectoryConfig, TrajectoryPart } from "@trajs/core";
 import { Effect, Option, Predicate } from "effect";
 import { Tokenizer } from "effect/ai";
 import type { AiError } from "effect/ai";
@@ -86,7 +85,7 @@ const ensureSession = (state: Sessions, id: string): SessionCount => {
  * declaration, an event, a count already derived — holds nothing a tokenizer
  * answers for.
  */
-const isCounted = (part: Trajectory.Part<Config.AnyConfig>): part is CountedPart =>
+const isCounted = (part: TrajectoryPart.Part<TrajectoryConfig.AnyConfig>): part is CountedPart =>
   Predicate.isTagged("Prompt")(part) || Predicate.isTagged("Response")(part);
 
 /**
@@ -102,7 +101,7 @@ const isCounted = (part: Trajectory.Part<Config.AnyConfig>): part is CountedPart
  */
 export type Step = (
   state: Sessions,
-  part: Trajectory.Part<Config.AnyConfig>,
+  part: TrajectoryPart.Part<TrajectoryConfig.AnyConfig>,
 ) => Effect.Effect<readonly [Sessions, ReadonlyArray<Measured>], UncountedFailure>;
 
 /**
@@ -157,7 +156,7 @@ export const makeStep = Effect.fn("makeStep")(function* (
       );
 
       // A part that states no session of its own belongs to the main session.
-      const sessionId = part.sessionId ?? Trajectory.mainSessionId;
+      const sessionId = part.sessionId ?? TrajectoryPart.mainSessionId;
       const known = state.get(sessionId);
       const count = countDatum(part, counted, known === undefined ? noCalls : known.calls);
 

@@ -10,7 +10,6 @@
 
 import { Cause, DateTime, Effect, Exit, Function, Option, Predicate, Queue, Stream } from "effect";
 
-import * as Config from "#/Config.ts";
 import * as Event from "#/Event.ts";
 import * as EventKit from "#/EventKit.ts";
 import * as Extra from "#/Extra.ts";
@@ -24,7 +23,9 @@ import * as Response from "#/Response.ts";
 import * as Tool from "#/Tool.ts";
 import * as Toolkit from "#/Toolkit.ts";
 import * as Trajectory from "#/Trajectory.ts";
+import * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import { TrajectoryError } from "#/TrajectoryError.ts";
+import * as TrajectoryPart from "#/TrajectoryPart.ts";
 
 /**
  * A response part of a message stream.
@@ -39,7 +40,7 @@ import { TrajectoryError } from "#/TrajectoryError.ts";
  * Production folds those increments into the chunk they build.
  * The part the chunk ends in is the one written, with its own `sessionId`,
  * `timestamp`, and `extra`.
- * A part {@link Trajectory.parts} builds states the rest.
+ * A part {@link TrajectoryPart.parts} builds states the rest.
  * Spread such a part and replace its `response` with the increment.
  *
  * **Gotchas**
@@ -52,13 +53,13 @@ import { TrajectoryError } from "#/TrajectoryError.ts";
  * @stability stable
  * @category models
  */
-export type MessageResponsePart<Config extends Config.AnyConfig> = Omit<
-  Trajectory.ResponsePartOf<Config>,
+export type MessageResponsePart<Config extends TrajectoryConfig.AnyConfig> = Omit<
+  TrajectoryConfig.ResponsePartOf<Config>,
   "response"
 > & {
   readonly response:
-    | Trajectory.ResponsePartOf<Config>["response"]
-    | Response.AllPartsView<Config.ToolsOf<Config>>;
+    | TrajectoryConfig.ResponsePartOf<Config>["response"]
+    | Response.AllPartsView<TrajectoryConfig.ToolsOf<Config>>;
 };
 
 /**
@@ -74,10 +75,10 @@ export type MessageResponsePart<Config extends Config.AnyConfig> = Omit<
  * @stability stable
  * @category models
  */
-export type MessagePart<Config extends Config.AnyConfig> =
-  | Trajectory.PromptPartOf<Config>
+export type MessagePart<Config extends TrajectoryConfig.AnyConfig> =
+  | TrajectoryConfig.PromptPartOf<Config>
   | MessageResponsePart<Config>
-  | Trajectory.EventPartOf<Config>;
+  | TrajectoryConfig.EventPartOf<Config>;
 
 /**
  * Prompt, response, and event parts supplied to trajectory production.
@@ -93,11 +94,11 @@ export type MessagePart<Config extends Config.AnyConfig> =
  * @stability stable
  * @category models
  */
-export type MessageStream<Config extends Config.AnyConfig, E = never, R = never> = Stream.Stream<
-  MessagePart<Config>,
-  E,
-  R
->;
+export type MessageStream<
+  Config extends TrajectoryConfig.AnyConfig,
+  E = never,
+  R = never,
+> = Stream.Stream<MessagePart<Config>, E, R>;
 
 /**
  * A session's message stream, parent id, and declaration extras.
@@ -111,11 +112,15 @@ export type MessageStream<Config extends Config.AnyConfig, E = never, R = never>
  * @stability stable
  * @category models
  */
-export type SessionSource<Config extends Config.AnyConfig, E = never, R = never> = Readonly<{
+export type SessionSource<
+  Config extends TrajectoryConfig.AnyConfig,
+  E = never,
+  R = never,
+> = Readonly<{
   messages: MessageStream<Config, E, R>;
   subTo?: string;
 }> &
-  Extra.ExtraRecord<Config.ExtrasOf<Config>, "session">;
+  Extra.ExtraRecord<TrajectoryConfig.ExtrasOf<Config>, "session">;
 
 /**
  * Session sources keyed by id, including a required `main` source.
@@ -130,7 +135,11 @@ export type SessionSource<Config extends Config.AnyConfig, E = never, R = never>
  * @stability stable
  * @category models
  */
-export type SessionStreams<Config extends Config.AnyConfig, E = never, R = never> = Readonly<{
+export type SessionStreams<
+  Config extends TrajectoryConfig.AnyConfig,
+  E = never,
+  R = never,
+> = Readonly<{
   main: SessionSource<Config, E, R> & { readonly subTo?: never };
 }> &
   Readonly<Record<string, SessionSource<Config, E, R>>>;
@@ -152,33 +161,36 @@ export type ProducingConfig<
   Events extends EventKit.Any,
   Metrics extends MetricKit.Any,
   Extras extends ExtraKit.Any,
-> = Config.Config<Toolkit, Events, MetricKit.WithProducers<Metrics>, Extras>;
+> = TrajectoryConfig.Config<Toolkit, Events, MetricKit.WithProducers<Metrics>, Extras>;
 
 // A trajectory holds the part a chunk ends in, not the increments that build
 // it, so an increment leaves the stream without a part of its own.
-const foldMessages = <Config extends Config.AnyConfig, E, R>(
+const foldMessages = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   stream: MessageStream<Config, E, R>,
-): Stream.Stream<Trajectory.Part<Config>, E, R> =>
+): Stream.Stream<TrajectoryPart.Part<Config>, E, R> =>
   stream.pipe(
-    Stream.mapAccum<State, MessagePart<Config>, Trajectory.Part<Config>>(initial, (state, part) => {
-      if (!Predicate.isTagged("Response")(part)) {
-        return [state, [part]];
-      }
+    Stream.mapAccum<State, MessagePart<Config>, TrajectoryPart.Part<Config>>(
+      initial,
+      (state, part) => {
+        if (!Predicate.isTagged("Response")(part)) {
+          return [state, [part]];
+        }
 
-      const [next, folded] = foldResponse<Config.ToolsOf<Config>>(
-        state,
-        part.sessionId ?? Trajectory.mainSessionId,
-        part.response,
-      );
+        const [next, folded] = foldResponse<TrajectoryConfig.ToolsOf<Config>>(
+          state,
+          part.sessionId ?? TrajectoryPart.mainSessionId,
+          part.response,
+        );
 
-      return [
-        next,
-        Option.match(folded, {
-          onNone: () => [],
-          onSome: (response) => [{ ...part, response }],
-        }),
-      ];
-    }),
+        return [
+          next,
+          Option.match(folded, {
+            onNone: () => [],
+            onSome: (response) => [{ ...part, response }],
+          }),
+        ];
+      },
+    ),
   );
 
 const produceWith =
@@ -342,7 +354,7 @@ export function fromSessions<
     | [config: ProducingConfig<Toolkit, Events, Metrics, Extras>]
 ) {
   const [id, config] = args.length === 1 ? [undefined, args[0]] : args;
-  const part = Trajectory.parts(config);
+  const part = TrajectoryPart.parts(config);
 
   return <E, R>(
     sessions: SessionStreams<ProducingConfig<Toolkit, Events, Metrics, Extras>, E, R>,
@@ -353,7 +365,7 @@ export function fromSessions<
       Extra.stated(config.extrakit, "session")(source);
 
     const main = part.mainSession(extraOf(sessions.main));
-    const mainId = Trajectory.mainSessionId;
+    const mainId = TrajectoryPart.mainSessionId;
 
     // A session is declared after the session it is forked from, so the declarations are
     // produced in the order `subTo` states: the main session first, and each session once
@@ -411,7 +423,10 @@ export function fromSessions<
  * The config a trajectory states once the metrics of `Metrics` are produced of it: the
  * config it is read with, with a metric kit of both.
  */
-type WithMetrics<Config extends Config.AnyConfig, Metrics extends MetricKit.Any> = Config.Config<
+type WithMetrics<
+  Config extends TrajectoryConfig.AnyConfig,
+  Metrics extends MetricKit.Any,
+> = TrajectoryConfig.Config<
   Config["toolkit"],
   Config["eventkit"],
   MetricKit.Merged<readonly [Config["metrickit"], Metrics]>,
@@ -447,16 +462,16 @@ type WithMetrics<Config extends Config.AnyConfig, Metrics extends MetricKit.Any>
 export const produceMetrics: {
   <Metrics extends MetricKit.Any>(
     metrickit: MetricKit.WithProducers<Metrics>,
-  ): <Config extends Config.AnyConfig, E, R>(
+  ): <Config extends TrajectoryConfig.AnyConfig, E, R>(
     trajectory: Trajectory.Trajectory<string, Config, E, R>,
   ) => Trajectory.Trajectory<string, WithMetrics<Config, Metrics>, E | TrajectoryError, R>;
-  <Config extends Config.AnyConfig, Metrics extends MetricKit.Any, E, R>(
+  <Config extends TrajectoryConfig.AnyConfig, Metrics extends MetricKit.Any, E, R>(
     trajectory: Trajectory.Trajectory<string, Config, E, R>,
     metrickit: MetricKit.WithProducers<Metrics>,
   ): Trajectory.Trajectory<string, WithMetrics<Config, Metrics>, E | TrajectoryError, R>;
 } = Function.dual(
   2,
-  <Config extends Config.AnyConfig, Metrics extends MetricKit.Any, E, R>(
+  <Config extends TrajectoryConfig.AnyConfig, Metrics extends MetricKit.Any, E, R>(
     trajectory: Trajectory.Trajectory<string, Config, E, R>,
     metrickit: MetricKit.WithProducers<Metrics>,
   ): Trajectory.Trajectory<string, WithMetrics<Config, Metrics>, E | TrajectoryError, R> => {
@@ -509,7 +524,7 @@ export type ProduceSession<
   enqueuePrompt: (
     message: Prompt.Prompt,
     options?: Extra.ExtraRecord<Extras, "prompt"> & Moments,
-  ) => Effect.Effect<Trajectory.PromptPart<ExtraKit.ExtraKit<Extras>>>;
+  ) => Effect.Effect<TrajectoryPart.PromptPart<ExtraKit.ExtraKit<Extras>>>;
   /**
    * Writes the part a response ended in, folding the increments it arrived in.
    *
@@ -528,12 +543,12 @@ export type ProduceSession<
     response: Response.AllPartsView<Tools>,
     options?: Extra.ExtraRecord<Extras, "response"> & Moments,
   ) => Effect.Effect<
-    Option.Option<Trajectory.ResponsePart<Toolkit.Toolkit<Tools>, ExtraKit.ExtraKit<Extras>>>
+    Option.Option<TrajectoryPart.ResponsePart<Toolkit.Toolkit<Tools>, ExtraKit.ExtraKit<Extras>>>
   >;
   enqueueEvent: (
     event: Event.EventParts<Events>,
     options?: Moments,
-  ) => Effect.Effect<Trajectory.EventPart<EventKit.EventKit<Events>>>;
+  ) => Effect.Effect<TrajectoryPart.EventPart<EventKit.EventKit<Events>>>;
   /**
    * Declares a child writer from an already enqueued fork target.
    *
@@ -587,10 +602,10 @@ type ProduceFn<
  * **Example** (Forking after a recorded prompt)
  *
  * ```ts
- * import { Config, MetricKit, Produce, Prompt } from "@trajs/core"
+ * import { MetricKit, Produce, Prompt, TrajectoryConfig } from "@trajs/core"
  * import { Effect, Stream } from "effect"
  *
- * const config = Config.config({ metrickit: MetricKit.toProducers(MetricKit.empty, {}) })
+ * const config = TrajectoryConfig.config({ metrickit: MetricKit.toProducers(MetricKit.empty, {}) })
  * const trajectory = Produce.produce("run-1", config)((main) => Effect.gen(function* () {
  *   const prompt = yield* main.enqueuePrompt(Prompt.make("Investigate"))
  *   const child = yield* main.forkSession({ id: "worker", fork: prompt.uuid })
@@ -664,7 +679,7 @@ export function produce<
   R
 > {
   const [id, config] = args.length === 1 ? [undefined, args[0]] : args;
-  const part = Trajectory.parts<ProducingConfig<Toolkit, Events, Metrics, Extras>>(config);
+  const part = TrajectoryPart.parts<ProducingConfig<Toolkit, Events, Metrics, Extras>>(config);
 
   // The extra data the kit declares of a session part is stated beside the config, and is
   // declared with the main session: the one the program is handed.
@@ -675,7 +690,7 @@ export function produce<
     // trajectory through the fork — so its failure type is the end alone.
     const trajectory = Effect.gen(function* () {
       const parts = yield* Queue.unbounded<
-        Trajectory.Part<ProducingConfig<Toolkit, Events, Metrics, Extras>>,
+        TrajectoryPart.Part<ProducingConfig<Toolkit, Events, Metrics, Extras>>,
         Cause.Done
       >();
 
@@ -684,7 +699,7 @@ export function produce<
       const folding = initial();
 
       const enqueue = <
-        P extends Trajectory.Part<ProducingConfig<Toolkit, Events, Metrics, Extras>> & {
+        P extends TrajectoryPart.Part<ProducingConfig<Toolkit, Events, Metrics, Extras>> & {
           readonly uuid: string;
         },
       >(
@@ -708,7 +723,7 @@ export function produce<
         stated: string | undefined,
         declaration: string,
       ): ProduceSession<Toolkit["tools"], Events["events"], Extras["extra"]> => ({
-        id: stated ?? Trajectory.mainSessionId,
+        id: stated ?? TrajectoryPart.mainSessionId,
         enqueuePrompt: (prompt, options = {}) => {
           const { timestamp, startTimestamp, ...extra } = options;
 
@@ -722,7 +737,11 @@ export function produce<
           return Effect.gen(function* () {
             // A response that is still arriving is folded into the chunk it builds, so
             // the trajectory holds the part the chunk ends in.
-            const [, folded] = foldResponse(folding, stated ?? Trajectory.mainSessionId, response);
+            const [, folded] = foldResponse(
+              folding,
+              stated ?? TrajectoryPart.mainSessionId,
+              response,
+            );
 
             if (Option.isNone(folded)) {
               return Option.none();
@@ -777,7 +796,7 @@ export function produce<
       // The main session is declared before the program runs, so every part it writes is
       // read in a session the trajectory already names.
       yield* enqueue(mainDeclaration);
-      declared.add(Trajectory.mainSessionId);
+      declared.add(TrajectoryPart.mainSessionId);
 
       const program = fn(session(undefined, mainDeclaration.uuid)).pipe(
         Effect.onExit((exit) =>

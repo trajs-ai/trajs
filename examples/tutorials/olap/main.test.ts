@@ -1,12 +1,11 @@
 import { expect, it } from "@effect/vitest";
-import { Prompt, Response, Trajectory } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
+import { Prompt, Response, Trajectory, TrajectoryConfig, TrajectoryPart } from "@trajs/core";
 import { Clickhouse, Parts } from "@trajs/olap";
 import { Effect, Stream } from "effect";
 
-const config = Config.config();
+const config = TrajectoryConfig.config();
 
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 interface Tool {
   readonly tool: string;

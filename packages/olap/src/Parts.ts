@@ -35,8 +35,7 @@
  * not name: a trajectory read without an event kit holds no event parts.
  */
 
-import * as Config from "@trajs/core/Config";
-import type * as Trajectory from "@trajs/core/Trajectory";
+import type { Trajectory, TrajectoryConfig } from "@trajs/core";
 import { TrajectoryError } from "@trajs/core/TrajectoryError";
 import { Effect, Schema } from "effect";
 import { SqlError } from "effect/sql/SqlError";
@@ -193,7 +192,7 @@ export const create = (): Effect.Effect<void, SqlError, Client> =>
  * toolkit it was produced with does: a tool result travels as its encoded form,
  * not as the decoded one, and the bytes of a media part are the base64 string
  * JSON states them as ({@link Encoded}). Encoding is what a toolkit states of its
- * own tools' results, so the stream takes {@link Config.EncodingServices} beside
+ * own tools' results, so the stream takes {@link TrajectoryConfig.EncodingServices} beside
  * the services the trajectory is read with.
  *
  * @see {@link ingest} for writing the rows this stream makes.
@@ -249,7 +248,7 @@ export const write = writeRows;
  * import { Parts } from "@trajs/olap"
  * import { Effect } from "effect"
  *
- * const importTrajectory = (id: string, config: Config.AnyConfig) =>
+ * const importTrajectory = (id: string, config: TrajectoryConfig.AnyConfig) =>
  *   Effect.gen(function*() {
  *     const exchange = yield* Exchange
  *     const loaded = yield* exchange.load(id)
@@ -261,7 +260,10 @@ export const write = writeRows;
  * @see {@link create} for the table it writes into.
  * @category destructors
  */
-export const ingest = <C extends Config.AnyConfig, E, R>(
+export const ingest = <C extends TrajectoryConfig.AnyConfig, E, R>(
   trajectory: Trajectory.Trajectory<string, C, E, R>,
-): Effect.Effect<number, E | TrajectoryError | SqlError, R | Config.EncodingServices<C> | Client> =>
-  rows(trajectory).pipe(write);
+): Effect.Effect<
+  number,
+  E | TrajectoryError | SqlError,
+  R | TrajectoryConfig.EncodingServices<C> | Client
+> => rows(trajectory).pipe(write);

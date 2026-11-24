@@ -11,9 +11,9 @@ import { Match, Option, Stream } from "effect";
 import type { Prompt, Tool } from "effect/ai";
 
 import { textOf } from "#/codec/internal/prompt.ts";
-import * as Config from "#/Config.ts";
 import type * as Response from "#/Response.ts";
 import type * as Session from "#/Session.ts";
+import * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
 import * as View from "#/view/index.ts";
 
@@ -52,7 +52,7 @@ export type Step<Tools extends Record<string, Tool.Any>> = Readonly<{
 }>;
 
 /** The tools of a trajectory's toolkit, which the steps read from it are typed by. */
-type Tools<Config extends Config.AnyConfig> = Config["toolkit"]["tools"];
+type Tools<Config extends TrajectoryConfig.AnyConfig> = Config["toolkit"]["tools"];
 
 const sources: Record<Prompt.Message["role"], StepSource> = {
   system: "system",
@@ -70,7 +70,7 @@ const messageOf = (message: Prompt.Message): string => {
 };
 
 /** The steps one step of a session is read as. */
-const stepViews = <Config extends Config.AnyConfig>(
+const stepViews = <Config extends TrajectoryConfig.AnyConfig>(
   step: View.Step<Config>,
 ): ReadonlyArray<Step<Tools<Config>>> =>
   Match.value(step).pipe(
@@ -146,7 +146,7 @@ const stepViews = <Config extends Config.AnyConfig>(
  * @stability stable
  * @category converting
  */
-export const steps = <Config extends Config.AnyConfig, E, R>(
+export const steps = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   stream: Session.SessionStream<Config, E, R>,
 ): Stream.Stream<Step<Tools<Config>>, E | TrajectoryError, R> =>
   View.steps(stream).pipe(Stream.flatMap((step) => Stream.fromIterable(stepViews(step))));

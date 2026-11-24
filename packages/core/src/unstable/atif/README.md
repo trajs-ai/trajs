@@ -176,18 +176,18 @@ transforms its context produces the event among the parts of its own trajectory
 rather than in a field of the ATIF document.
 
 ```ts
-import { Config, MetricKit, Produce, Trajectory } from "@trajs/core";
+import { MetricKit, Produce, TrajectoryConfig, TrajectoryPart } from "@trajs/core";
 import { Event } from "@trajs/core/unstable/atif";
 import { Stream } from "effect";
 
-const config = Config.config({
+const config = TrajectoryConfig.config({
   eventkit: Event.eventkit,
   metrickit: MetricKit.toProducers(MetricKit.empty, {}),
 });
 
 // The event is what a system part carries, and the session produces it where it
 // happened.
-const part = Trajectory.parts(config).event(
+const part = TrajectoryPart.parts(config).event(
   Event.contextManagement({ type: "compaction", boundary: "replace" }),
 );
 

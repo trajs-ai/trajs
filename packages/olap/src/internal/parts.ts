@@ -1,6 +1,5 @@
-import * as Config from "@trajs/core/Config";
+import { Trajectory, TrajectoryConfig, TrajectoryPart } from "@trajs/core";
 import { Part } from "@trajs/core/Exchange";
-import * as Trajectory from "@trajs/core/Trajectory";
 import { TrajectoryError } from "@trajs/core/TrajectoryError";
 import { DateTime, Effect, Match, Schema, Stream } from "effect";
 import { SqlError } from "effect/sql/SqlError";
@@ -46,11 +45,11 @@ const formatMoment = (timestamp: DateTime.Utc | undefined): string | null =>
 /**
  * The session a part states, or the main session where it states none.
  *
- * {@link Trajectory.mainSessionId} states the rule a part that names no session
+ * {@link TrajectoryPart.mainSessionId} states the rule a part that names no session
  * of its own follows.
  */
 const statedSession = (part: { readonly sessionId?: string }): string =>
-  part.sessionId ?? Trajectory.mainSessionId;
+  part.sessionId ?? TrajectoryPart.mainSessionId;
 
 /**
  * The columns a row states beside its payload, which every kind of part states its
@@ -76,7 +75,7 @@ const columns = (
  * stated, so a kind added to a trajectory fails here rather than writing a row of
  * nothing.
  */
-const statedColumns = (part: Trajectory.Part<Config.AnyConfig>) =>
+const statedColumns = (part: TrajectoryPart.Part<TrajectoryConfig.AnyConfig>) =>
   Match.valueTags(part, {
     Prompt: (part) => columns(part, { variant: "", session: statedSession(part) }),
     Session: (part) => columns(part, { variant: "", session: part.type.id }),
@@ -90,7 +89,7 @@ const statedColumns = (part: Trajectory.Part<Config.AnyConfig>) =>
 const makeRow = (
   trajectoryId: string,
   position: number,
-  part: Trajectory.Part<Config.AnyConfig>,
+  part: TrajectoryPart.Part<TrajectoryConfig.AnyConfig>,
   payload: Encoded,
 ): Row => ({ trajectory_id: trajectoryId, position, ...statedColumns(part), part: payload });
 
@@ -109,9 +108,9 @@ const makeRow = (
  * them outside the row, and a payload would carry the reference a query reaches them
  * by.
  */
-export const partRows = <C extends Config.AnyConfig, E, R>(
+export const partRows = <C extends TrajectoryConfig.AnyConfig, E, R>(
   trajectory: Trajectory.Trajectory<string, C, E, R>,
-): Stream.Stream<Row, E | TrajectoryError, R | Config.EncodingServices<C>> => {
+): Stream.Stream<Row, E | TrajectoryError, R | TrajectoryConfig.EncodingServices<C>> => {
   const encode = Part(trajectory).pipe(Schema.toCodecJson, Schema.encodeEffect);
 
   // Every row of one reading is of the trajectory it is read from, named by the id

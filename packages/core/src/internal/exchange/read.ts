@@ -1,10 +1,10 @@
 import { Bytes, Compression } from "@trajs/utils";
 import { Effect, Option, Schema } from "effect";
 
-import type * as Config from "#/Config.ts";
 import * as chunk from "#/internal/exchange/chunk.ts";
 import * as frame from "#/internal/exchange/frame.ts";
 import * as Trajectory from "#/Trajectory.ts";
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import { TrajectoryError } from "#/TrajectoryError.ts";
 
 const corrupt = (message: string): TrajectoryError => TrajectoryError.parse(new Error(message));
@@ -111,7 +111,7 @@ export const readHeader = <E, R>(
   });
 
 /** The parts of a stored trajectory a sequence of bytes holds, read by index. */
-export const makeBuffer = <C extends Config.AnyConfig>(config: C) =>
+export const makeBuffer = <C extends TrajectoryConfig.AnyConfig>(config: C) =>
   Effect.gen(function* () {
     const compression = yield* Compression.Compression;
     const decodeFrame = frame.decodeFrame(config);
@@ -153,7 +153,7 @@ export const makeBuffer = <C extends Config.AnyConfig>(config: C) =>
     return <E, R>(
       sequence: Bytes.Bytes<E, R>,
     ): Effect.Effect<
-      Trajectory.TrajectoryBuffer<C, TrajectoryError, Config.DecodingServices<C> | R>,
+      Trajectory.TrajectoryBuffer<C, TrajectoryError, TrajectoryConfig.DecodingServices<C> | R>,
       TrajectoryError,
       R
     > =>

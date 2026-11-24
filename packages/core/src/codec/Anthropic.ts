@@ -13,8 +13,8 @@ import type { Prompt } from "effect/ai";
 import * as Base64 from "effect/encoding/Base64";
 
 import { imagesOf, mediaTypeOf, resultText, textOf } from "#/codec/internal/prompt.ts";
-import * as Config from "#/Config.ts";
 import * as Session from "#/Session.ts";
+import * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import * as View from "#/view/index.ts";
 
 /**
@@ -78,11 +78,11 @@ export type Sessions = Record<string, Conversation>;
  *
  * ```ts
  * import { Anthropic } from "@trajs/core/codec"
- * import { Cache, Config, Prompt, Response, Session, Trajectory } from "@trajs/core"
+ * import { Cache, Prompt, Response, Session, Trajectory, TrajectoryConfig, TrajectoryPart } from "@trajs/core"
  * import { Effect, Stream } from "effect"
  *
- * const config = Config.config()
- * const part = Trajectory.parts(config)
+ * const config = TrajectoryConfig.config()
+ * const part = TrajectoryPart.parts(config)
  *
  * const parts = [
  *   part.prompt(
@@ -128,7 +128,7 @@ export type Sessions = Record<string, Conversation>;
  *
  *   return yield* Anthropic.make(root)
  * }).pipe(Effect.provide(Cache.layerMemory())))
- * const conversation = conversations[Trajectory.mainSessionId]
+ * const conversation = conversations[TrajectoryPart.mainSessionId]
  *
  * conversation?.messages.map((message) => message.role) // => ["user", "assistant", "user", "assistant"]
  * Array.isArray(conversation?.system) ? conversation.system.length : 0 // => 1
@@ -140,7 +140,7 @@ export type Sessions = Record<string, Conversation>;
  * @stability stable
  * @category converting
  */
-export const make = <Config extends Config.AnyConfig, E, R>(
+export const make = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   main: Session.MainSession<Config, E, R>,
 ): Effect.Effect<Sessions, E, R> =>
   Effect.gen(function* () {

@@ -17,9 +17,10 @@ import {
   Response,
   Toolkit,
   Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
   VersionedSchema,
 } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
 import { DateTime, Effect, Schema, Stream } from "effect";
 import { expect, it } from "vite-plus/test";
 
@@ -27,13 +28,13 @@ import { Client, layerEmbedded } from "#/Clickhouse.ts";
 import * as Parts from "#/Parts.ts";
 
 /** The session the trajectory runs in: the main one, which a part that states none belongs to. */
-const session = Trajectory.mainSessionId;
+const session = TrajectoryPart.mainSessionId;
 
 /** No extra data is declared, since none of it is stated of the parts below. */
 const extrakit = ExtraKit.empty;
 
 /** The kits the trajectory is built with: no tools and no events. */
-const config = Config.config({
+const config = TrajectoryConfig.config({
   toolkit: Toolkit.empty,
   eventkit: EventKit.empty,
   metrickit: MetricKit.empty,
@@ -44,7 +45,7 @@ const config = Config.config({
 const trajectoryId = "01890a5d-ac96-774b-bcce-b302099a8058";
 
 /** The builders of the parts below, under the config they are read with. */
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 /** When the conversation was produced, so the moment a row states is one a test can state. */
 const at = DateTime.makeUnsafe("2026-01-01T00:00:00.000Z");
@@ -130,8 +131,8 @@ it("states what an event and a metric name, and the session a metric does not st
   const metrickit = MetricKit.make(measured);
 
   // What the trajectory that holds them is read with, and the parts of it built under it.
-  const kitted = Config.config({ ...config, eventkit, metrickit });
-  const described = Trajectory.parts(kitted);
+  const kitted = TrajectoryConfig.config({ ...config, eventkit, metrickit });
+  const described = TrajectoryPart.parts(kitted);
 
   const eventPart = described.event(
     Event.EventPart(step.tag, step.schema).make({ data: { version: "0.1.0", index: 1 } }),

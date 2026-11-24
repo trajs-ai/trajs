@@ -1,9 +1,17 @@
 import { expect, it } from "@effect/vitest";
-import { Cache, Prompt, Response, Session, Trajectory, View } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
+import {
+  Cache,
+  Prompt,
+  Response,
+  Session,
+  Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
+  View,
+} from "@trajs/core";
 import { Effect, Stream } from "effect";
 
-const config = Config.config();
+const config = TrajectoryConfig.config();
 
 interface RepeatedToolCall {
   readonly name: string;
@@ -16,7 +24,7 @@ interface Summary {
   readonly repeated: ReadonlyArray<RepeatedToolCall>;
 }
 
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 const prompt = (text: string) => part.prompt(Prompt.make(text));
 

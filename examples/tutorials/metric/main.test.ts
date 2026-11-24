@@ -1,11 +1,19 @@
 import { expect, it } from "@effect/vitest";
-import { Metric, MetricKit, Prompt, Response, Trajectory, VersionedSchema } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
+import {
+  Metric,
+  MetricKit,
+  Prompt,
+  Response,
+  Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
+  VersionedSchema,
+} from "@trajs/core";
 import { Effect, Match, Predicate, Schema, Stream } from "effect";
 
-const config = Config.config();
+const config = TrajectoryConfig.config();
 
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 interface Summary {
   /** Characters of text each tool result held. */
@@ -101,7 +109,7 @@ const toolText = new Metric.Metric({
 
 /** The datum one part is worth: its count, or the failure of a result with no text to count. */
 const datumOf = (
-  value: Trajectory.Part<Config.AnyConfig>,
+  value: TrajectoryPart.Part<TrajectoryConfig.AnyConfig>,
 ): Effect.Effect<
   ReadonlyArray<Metric.Output<typeof toolText>>,
   Metric.Failure<typeof toolText>

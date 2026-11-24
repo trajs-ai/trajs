@@ -7,7 +7,7 @@
  * without parsing the part frame.
  */
 
-import * as Exchange from "@trajs/core/Exchange";
+import { Exchange } from "@trajs/core";
 import { NodeServices } from "@trajs/platform-node";
 import { layerFileSystem } from "@trajs/utils/ByteStore";
 import { Algorithm as CompressionAlgorithm } from "@trajs/utils/Compression";

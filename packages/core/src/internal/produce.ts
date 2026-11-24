@@ -1,21 +1,22 @@
 import { Effect, Stream } from "effect";
 
-import type * as Config from "#/Config.ts";
 import * as Metric from "#/Metric.ts";
 import type * as MetricKit from "#/MetricKit.ts";
 import * as Trajectory from "#/Trajectory.ts";
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
+import * as TrajectoryPart from "#/TrajectoryPart.ts";
 
 /** The parts of `stream` beside the metric parts its producers report of them. */
 export const produceParts =
-  <Config extends Config.AnyConfig, Metrics extends Record<string, Metric.Any>>(
+  <Config extends TrajectoryConfig.AnyConfig, Metrics extends Record<string, Metric.Any>>(
     config: Config,
     metrickit: MetricKit.WithProducers<MetricKit.MetricKit<Metrics>>,
   ) =>
   <E, R>(
     stream: Trajectory.TrajectoryStream<Config, E, R>,
-  ): Stream.Stream<Trajectory.Part<Config>, E | TrajectoryError, R> => {
-    const parts = Trajectory.parts(config);
+  ): Stream.Stream<TrajectoryPart.Part<Config>, E | TrajectoryError, R> => {
+    const parts = TrajectoryPart.parts(config);
 
     return stream.pipe(
       // A trajectory of a run cannot be read from its source again.
@@ -30,7 +31,7 @@ export const produceParts =
             // holds. No type of either kit relates them, so the part cannot be read
             // as one of the config's metrics otherwise.
             Stream.map((metric) =>
-              parts.metric(metric as Metric.MetricParts<Config.MetricsOf<Config>>),
+              parts.metric(metric as Metric.MetricParts<TrajectoryConfig.MetricsOf<Config>>),
             ),
           ),
         ),

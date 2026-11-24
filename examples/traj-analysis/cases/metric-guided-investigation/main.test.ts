@@ -6,10 +6,11 @@ import {
   Prompt,
   Response,
   Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
   VersionedSchema,
   View,
 } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
 import { Effect, Match, Predicate, Result, Schema, Stream } from "effect";
 
 interface Evidence {
@@ -36,8 +37,8 @@ const testEvidence = new Metric.Metric({
   failure: evidenceSchema,
 });
 
-const config = Config.config({ metrickit: MetricKit.make(testEvidence) });
-const part = Trajectory.parts(config);
+const config = TrajectoryConfig.config({ metrickit: MetricKit.make(testEvidence) });
+const part = TrajectoryPart.parts(config);
 
 const prompt = (text: string) => part.prompt(Prompt.make(text));
 

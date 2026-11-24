@@ -3,13 +3,13 @@ import * as BinaryProtocol from "@trajs/utils/BinaryProtocol";
 import type { CompressionError } from "@trajs/utils/Compression";
 import { Effect, Option, Schema, Stream } from "effect";
 
-import type * as Config from "#/Config.ts";
 import * as EventKit from "#/EventKit.ts";
 import * as ExtraKit from "#/ExtraKit.ts";
 import type { Frame } from "#/internal/exchange/frame.ts";
 import { ChainBytes, Uuid } from "#/internal/schema.ts";
 import * as MetricKit from "#/MetricKit.ts";
 import * as Toolkit from "#/Toolkit.ts";
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 
 /** The marker that begins every trajectory and ends every file, so it states no place of its own. */
 export const Magic = new TextEncoder().encode("TRAJS");
@@ -37,7 +37,7 @@ export const Header: Schema.Codec<Header> = Schema.Struct({
 
 /** The header a config's kits write for one trajectory. */
 export const makeHeader = (
-  config: Config.AnyConfig,
+  config: TrajectoryConfig.AnyConfig,
   {
     id,
     version,

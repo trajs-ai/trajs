@@ -9,10 +9,11 @@
 
 import type { Effect, Option, Stream } from "effect";
 
-import type * as Config from "#/Config.ts";
 import { allSessions, findSession, read, sessionParts } from "#/internal/session.ts";
 import * as Trajectory from "#/Trajectory.ts";
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
+import * as TrajectoryPart from "#/TrajectoryPart.ts";
 
 /**
  * A session's own parts and attached metric results in trajectory order.
@@ -29,8 +30,8 @@ import type { TrajectoryError } from "#/TrajectoryError.ts";
  * @stability stable
  * @category models
  */
-export type SessionStream<Config extends Config.AnyConfig, E, R> = Stream.Stream<
-  Exclude<Trajectory.Part<Config>, Trajectory.SessionPart<Config["extrakit"]>>,
+export type SessionStream<Config extends TrajectoryConfig.AnyConfig, E, R> = Stream.Stream<
+  Exclude<TrajectoryPart.Part<Config>, TrajectoryPart.SessionPart<Config["extrakit"]>>,
   E,
   R
 >;
@@ -50,7 +51,7 @@ export type SessionStream<Config extends Config.AnyConfig, E, R> = Stream.Stream
  * @stability stable
  * @category models
  */
-export type Session<Config extends Config.AnyConfig, E, R> = Readonly<{
+export type Session<Config extends TrajectoryConfig.AnyConfig, E, R> = Readonly<{
   id: string;
   forkFrom: Readonly<{
     session: Session<Config, E, R> | MainSession<Config, E, R>;
@@ -61,7 +62,7 @@ export type Session<Config extends Config.AnyConfig, E, R> = Readonly<{
 }>;
 
 /**
- * The session tree root, identified by {@link Trajectory.mainSessionId}.
+ * The session tree root, identified by {@link TrajectoryPart.mainSessionId}.
  *
  * **Details**
  *
@@ -74,8 +75,8 @@ export type Session<Config extends Config.AnyConfig, E, R> = Readonly<{
  * @stability stable
  * @category models
  */
-export type MainSession<Config extends Config.AnyConfig, E, R> = Readonly<{
-  id: typeof Trajectory.mainSessionId;
+export type MainSession<Config extends TrajectoryConfig.AnyConfig, E, R> = Readonly<{
+  id: typeof TrajectoryPart.mainSessionId;
   forkBy: Record<string, Session<Config, E, R>>;
   stream: SessionStream<Config, E, R>;
 }>;
@@ -92,7 +93,7 @@ export type MainSession<Config extends Config.AnyConfig, E, R> = Readonly<{
  * @stability stable
  * @category models
  */
-export type AnySession<Config extends Config.AnyConfig, E, R> =
+export type AnySession<Config extends TrajectoryConfig.AnyConfig, E, R> =
   | Session<Config, E, R>
   | MainSession<Config, E, R>;
 
@@ -123,7 +124,7 @@ export type AnySession<Config extends Config.AnyConfig, E, R> =
  * @stability stable
  * @category constructors
  */
-export const main = <Config extends Config.AnyConfig, E, R>(
+export const main = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   buffer: Trajectory.TrajectoryBuffer<Config, E, R>,
 ): Effect.Effect<MainSession<Config, E | TrajectoryError, R>, E | TrajectoryError, R> =>
   read(Trajectory.asStream(buffer));
@@ -150,7 +151,7 @@ export const main = <Config extends Config.AnyConfig, E, R>(
  * @stability stable
  * @category combinators
  */
-export const stream = <Config extends Config.AnyConfig, E, R>(
+export const stream = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   session: AnySession<Config, E, R>,
 ): SessionStream<Config, E, R> => sessionParts(session);
 
@@ -170,7 +171,7 @@ export const stream = <Config extends Config.AnyConfig, E, R>(
  * @stability stable
  * @category getters
  */
-export const all = <Config extends Config.AnyConfig, E, R>(
+export const all = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   main: MainSession<Config, E, R>,
 ): ReadonlyArray<AnySession<Config, E, R>> => allSessions(main);
 
@@ -181,7 +182,7 @@ export const all = <Config extends Config.AnyConfig, E, R>(
  * @stability stable
  * @category getters
  */
-export const find = <Config extends Config.AnyConfig, E, R>(
+export const find = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   main: MainSession<Config, E, R>,
   id: string,
 ): Option.Option<AnySession<Config, E, R>> => findSession(main, id);

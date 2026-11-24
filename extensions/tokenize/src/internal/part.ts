@@ -1,10 +1,11 @@
+import { TrajectoryConfig, type TrajectoryPart } from "@trajs/core";
 /**
  * The parts of a trajectory this package counts.
  *
  * A count is taken from what a model was given — the messages a prompt part holds
  * — and from what it returned — the one content part a response part carries.
  * Both are read as the parts of the most general trajectory,
- * `Config.AnyConfig`: a trajectory is counted without knowing the toolkit, the
+ * `TrajectoryConfig.AnyConfig`: a trajectory is counted without knowing the toolkit, the
  * kits or the variant it was produced with, so a part is read for the content it
  * carries and for nothing else.
  *
@@ -13,12 +14,9 @@
  * speak of the same parts.
  */
 
-import type { Trajectory } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
-
 /** A part a count is taken from: what a model was given, or what it returned. */
 export type CountedPart = Extract<
-  Trajectory.Part<Config.AnyConfig>,
+  TrajectoryPart.Part<TrajectoryConfig.AnyConfig>,
   { readonly _tag: "Prompt" | "Response" }
 >;
 

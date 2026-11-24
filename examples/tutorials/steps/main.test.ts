@@ -1,9 +1,17 @@
 import { expect, it } from "@effect/vitest";
-import { Cache, Prompt, Response, Session, Trajectory, View } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
+import {
+  Cache,
+  Prompt,
+  Response,
+  Session,
+  Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
+  View,
+} from "@trajs/core";
 import { Effect, Match, Stream } from "effect";
 
-const config = Config.config();
+const config = TrajectoryConfig.config();
 
 interface Summary {
   readonly steps: number;
@@ -14,7 +22,7 @@ interface Summary {
   readonly toolCalls: Readonly<Record<string, number>>;
 }
 
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 const trajectory = Trajectory.make(config)(
   Stream.fromArray([

@@ -21,8 +21,8 @@ The directory meets `examples/AGENTS.md` before it is added.
 
 `vite.config.ts` includes `*/main.test.ts`, so the file name is fixed.
 
-1. `const config = Config.config()`, with the toolkit or metric the API needs.
-2. Trajectory at the top, before the reading: `Trajectory.parts(config)`, `part.prompt`,
+1. `const config = TrajectoryConfig.config()`, with the toolkit or metric the API needs.
+2. Trajectory at the top, before the reading: `TrajectoryPart.parts(config)`, `part.prompt`,
    `part.response`, `Trajectory.make(config)(Stream.fromArray(parts))`. No part the reading does
    not need.
 3. `const main = Effect.fn(function* () { … })`. Steps stay in it, so `main` is read in one pass.

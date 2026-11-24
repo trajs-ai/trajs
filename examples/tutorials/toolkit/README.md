@@ -13,14 +13,14 @@ const toolkit = Toolkit.make(
   }),
 );
 
-const config = Config.config({ toolkit });
+const config = TrajectoryConfig.config({ toolkit });
 
 const calls = View.toolCalls(session.stream);
 ```
 
 `Tool` and `Toolkit` are re-exported from Effect's `@effect/ai`, so the schemas
 are Effect Schemas and a declaration can still carry a handler for real
-production. The typing follows the config: `Config.config` keeps the toolkit's
+production. The typing follows the config: `TrajectoryConfig.config` keeps the toolkit's
 types, so `query` is a `string` where the call is read, not `unknown`.
 
 `View.toolCalls` emits every call in session order, including calls to tools the

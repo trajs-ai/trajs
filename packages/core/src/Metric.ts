@@ -12,11 +12,11 @@ import { PackageMetadata } from "@trajs/utils/Package";
 import { Data, DateTime, Schema, Stream } from "effect";
 import type { NonEmptyArray } from "effect/Array";
 
-import type * as Config from "#/Config.ts";
 import { runProducers } from "#/internal/metric.ts";
 import { jsonDocument, requireBinaryLayout } from "#/internal/schema.ts";
 import type * as MetricKit from "#/MetricKit.ts";
 import type * as Trajectory from "#/Trajectory.ts";
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
 
 /**
@@ -320,7 +320,7 @@ export const makeFailure = <Ext extends Any>(
  * @category models
  */
 export type Producer<Ext extends Any> = <E, R>(
-  trajectory: Trajectory.TrajectoryStream<Config.AnyConfig, E, R>,
+  trajectory: Trajectory.TrajectoryStream<TrajectoryConfig.AnyConfig, E, R>,
 ) => Stream.Stream<Output<Ext>, E | TrajectoryError | Failure<Ext>, R>;
 
 type OutputSchema<Ext extends Any> = Schema.TaggedStruct<
@@ -412,7 +412,7 @@ export const MetricParts = <K extends MetricKit.Any>(
  */
 export const produce =
   <K extends MetricKit.Any>({ producers }: MetricKit.WithProducers<K>) =>
-  <Config extends Config.AnyConfig, E, R>(
+  <Config extends TrajectoryConfig.AnyConfig, E, R>(
     produced: Trajectory.TrajectoryStream<Config, E, R>,
   ): Stream.Stream<MetricParts<K["metrics"]>, E | TrajectoryError, R> =>
     runProducers(producers, produced);

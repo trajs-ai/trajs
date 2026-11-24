@@ -9,11 +9,11 @@
 
 import { Predicate, Result, Stream } from "effect";
 
-import type * as Config from "#/Config.ts";
 import type * as Response from "#/Response.ts";
 import type * as Session from "#/Session.ts";
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 
-type Tools<Config extends Config.AnyConfig> = Config["toolkit"]["tools"];
+type Tools<Config extends TrajectoryConfig.AnyConfig> = Config["toolkit"]["tools"];
 
 /**
  * Selects tool calls from response parts in session order.
@@ -32,7 +32,7 @@ type Tools<Config extends Config.AnyConfig> = Config["toolkit"]["tools"];
  * @stability stable
  * @category filtering
  */
-export const toolCalls = <Config extends Config.AnyConfig, E, R>(
+export const toolCalls = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   stream: Session.SessionStream<Config, E, R>,
 ): Stream.Stream<Response.ToolCallOf<Config>, E, R> =>
   stream.pipe(
@@ -50,7 +50,7 @@ export const toolCalls = <Config extends Config.AnyConfig, E, R>(
  * @stability stable
  * @category models
  */
-export type ToolTurn<Config extends Config.AnyConfig> = Readonly<{
+export type ToolTurn<Config extends TrajectoryConfig.AnyConfig> = Readonly<{
   call: Response.ToolCallOf<Config>;
   result: Response.ToolResultOf<Config>;
 }>;
@@ -75,7 +75,7 @@ export type ToolTurn<Config extends Config.AnyConfig> = Readonly<{
  * @stability stable
  * @category transforming
  */
-export const toolTurns = <Config extends Config.AnyConfig, E, R>(
+export const toolTurns = <Config extends TrajectoryConfig.AnyConfig, E, R>(
   stream: Session.SessionStream<Config, E, R>,
 ): Stream.Stream<ToolTurn<Config>, E, R> =>
   stream.pipe(

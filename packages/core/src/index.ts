@@ -16,14 +16,6 @@
 export * as Cache from "#/Cache.ts";
 
 /**
- * Response variants, kit configuration, and schema requirements.
- *
- * @stability stable
- * @category re-exports
- */
-export * as Config from "#/Config.ts";
-
-/**
  * Versioned event declarations, their stored form, and tagged payload schemas.
  *
  * @stability stable
@@ -136,12 +128,20 @@ export * as Tool from "#/Tool.ts";
 export * as Toolkit from "#/Toolkit.ts";
 
 /**
- * Configured part schemas, builders, and named trajectory streams.
+ * Named trajectory streams and their buffers.
  *
  * @stability stable
  * @category re-exports
  */
 export * as Trajectory from "#/Trajectory.ts";
+
+/**
+ * Kits for reading trajectory parts, and the part of one config.
+ *
+ * @stability stable
+ * @category re-exports
+ */
+export * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 
 /**
  * Structured trajectory parsing, tool-schema, and session failures.
@@ -150,6 +150,14 @@ export * as Trajectory from "#/Trajectory.ts";
  * @category re-exports
  */
 export * as TrajectoryError from "#/TrajectoryError.ts";
+
+/**
+ * Configured part schemas and the builders of one config's parts.
+ *
+ * @stability stable
+ * @category re-exports
+ */
+export * as TrajectoryPart from "#/TrajectoryPart.ts";
 
 /**
  * Conversation steps, tool turns, and attached metric views.

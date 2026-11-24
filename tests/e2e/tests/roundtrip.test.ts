@@ -7,16 +7,19 @@
  * the packages over a file a program would keep, rather than any one of them.
  */
 import { NodeServices as PlatformNodeServices } from "@effect/platform-node";
-import * as Config from "@trajs/core/Config";
-import * as EventKit from "@trajs/core/EventKit";
-import * as Exchange from "@trajs/core/Exchange";
-import * as ExtraKit from "@trajs/core/ExtraKit";
-import * as MetricKit from "@trajs/core/MetricKit";
+import {
+  EventKit,
+  Exchange,
+  ExtraKit,
+  MetricKit,
+  Prompt,
+  Response,
+  Toolkit,
+  Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
+} from "@trajs/core";
 import core from "@trajs/core/package.json" with { type: "json" };
-import * as Prompt from "@trajs/core/Prompt";
-import * as Response from "@trajs/core/Response";
-import * as Toolkit from "@trajs/core/Toolkit";
-import * as Trajectory from "@trajs/core/Trajectory";
 import { NodeServices } from "@trajs/platform-node";
 import { layerFileSystem } from "@trajs/utils/ByteStore";
 import { Algorithm as CompressionAlgorithm } from "@trajs/utils/Compression";
@@ -36,7 +39,7 @@ const extrakit = ExtraKit.empty;
  * The kits the trajectory is built and read with: no tools, no events, and no
  * metrics.
  */
-const config = Config.config({
+const config = TrajectoryConfig.config({
   toolkit: Toolkit.empty,
   eventkit: EventKit.empty,
   metrickit: MetricKit.empty,
@@ -44,7 +47,7 @@ const config = Config.config({
 });
 
 /** The builders of those parts, under the config they are read with. */
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 /** The declaration of the main session, which the session of the run is forked from. */
 const main = part.mainSession();

@@ -6,10 +6,11 @@ import {
   Prompt,
   Response,
   Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
   VersionedSchema,
   View,
 } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
 import { Effect, Match, Predicate, Schema, Stream } from "effect";
 
 interface Summary {
@@ -45,11 +46,11 @@ const toolText = new Metric.Metric({
 
 // The declaration is on the config, so the trajectory's metric parts decode as
 // this metric's results.
-const config = Config.config({
+const config = TrajectoryConfig.config({
   metrickit: MetricKit.make(toolText),
 });
 
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 const grepText = "src/config.ts:12";
 const readText = "export const readTimeout = () => Number(process.env.TIMEOUT_MS);";

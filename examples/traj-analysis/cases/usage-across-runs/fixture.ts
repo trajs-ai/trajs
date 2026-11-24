@@ -1,17 +1,23 @@
 import { fileURLToPath } from "node:url";
 
-import { Exchange, Prompt, Response, Trajectory } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
+import {
+  Exchange,
+  Prompt,
+  Response,
+  Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
+} from "@trajs/core";
 import { DateTime, Effect, FileSystem, Stream } from "effect";
 
-export const config = Config.config();
+export const config = TrajectoryConfig.config();
 
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
-type Produced = ReadonlyArray<Trajectory.Part<typeof config>>;
+type Produced = ReadonlyArray<TrajectoryPart.Part<typeof config>>;
 
 type Message = ReadonlyArray<
-  Trajectory.PromptPartOf<typeof config> | Trajectory.ResponsePartOf<typeof config>
+  TrajectoryConfig.PromptPartOf<typeof config> | TrajectoryConfig.ResponsePartOf<typeof config>
 >;
 
 export const Fixtures = fileURLToPath(new URL("fixtures/trajs", import.meta.url));

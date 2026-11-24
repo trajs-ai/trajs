@@ -1,6 +1,16 @@
 import { expect, it } from "@effect/vitest";
-import { Cache, Prompt, Response, Session, Tool, Toolkit, Trajectory, View } from "@trajs/core";
-import * as Config from "@trajs/core/Config";
+import {
+  Cache,
+  Prompt,
+  Response,
+  Session,
+  Tool,
+  Toolkit,
+  Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
+  View,
+} from "@trajs/core";
 import { Effect, Match, Schema, Stream } from "effect";
 
 const toolkit = Toolkit.make(
@@ -23,7 +33,7 @@ const toolkit = Toolkit.make(
 
 // A toolkit on the config types params.
 // city stays a string, not an unknown payload.
-const config = Config.config({ toolkit });
+const config = TrajectoryConfig.config({ toolkit });
 
 interface Summary {
   readonly cities: ReadonlyArray<string>;
@@ -37,7 +47,7 @@ interface Summary {
   readonly undescribed: number;
 }
 
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 const trajectory = Trajectory.make(config)(
   Stream.fromArray([

@@ -1,3 +1,15 @@
+import {
+  EventKit,
+  ExtraKit,
+  Metric,
+  MetricKit,
+  Prompt,
+  Response,
+  Toolkit,
+  Trajectory,
+  TrajectoryConfig,
+  TrajectoryPart,
+} from "@trajs/core";
 /**
  * What the tokenize metric reports of a trajectory, end to end.
  *
@@ -11,17 +23,6 @@
  * would change — apart from the rule of a payload that is not text, which is a
  * number the package publishes.
  */
-import {
-  EventKit,
-  ExtraKit,
-  Metric,
-  MetricKit,
-  Prompt,
-  Response,
-  Toolkit,
-  Trajectory,
-} from "@trajs/core";
-import * as Config from "@trajs/core/Config";
 import { Effect, Predicate, Stream } from "effect";
 import { describe, expect, it } from "vite-plus/test";
 
@@ -32,7 +33,7 @@ import type { Estimate } from "../src/index.ts";
 const answering = "01890a5d-ac96-774b-bcce-b302099a8058";
 
 /** What the trajectory is built and read with: no tool, event, metric or extra datum. */
-const config = Config.config({
+const config = TrajectoryConfig.config({
   toolkit: Toolkit.empty,
   eventkit: EventKit.empty,
   metrickit: MetricKit.empty,
@@ -40,7 +41,7 @@ const config = Config.config({
 });
 
 /** The builders of the parts below, under that config. */
-const part = Trajectory.parts(config);
+const part = TrajectoryPart.parts(config);
 
 /** A prompt part, as a trajectory holds one: of the main session where no id is given. */
 const promptPart = (prompt: Prompt.Prompt, sessionId?: string) =>
@@ -271,7 +272,7 @@ describe("the metric over a trajectory", () => {
     const running = new Map<string, number>();
 
     for (const part of [question, answer, call, result, carried, image]) {
-      const sessionId = part.sessionId ?? Trajectory.mainSessionId;
+      const sessionId = part.sessionId ?? TrajectoryPart.mainSessionId;
       const total = (running.get(sessionId) ?? 0) + of(byPart, part).count.tokens;
 
       running.set(sessionId, total);

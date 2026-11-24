@@ -23,11 +23,12 @@ import type { Path, PlatformError, Scope } from "effect";
 import * as EffectCache from "effect/Cache";
 import { KeyValueStore } from "effect/persistence";
 
-import type * as Config from "#/Config.ts";
 import { decodePart, encodePart } from "#/internal/exchange/part.ts";
 import { configOf } from "#/internal/trajectory.ts";
 import type * as Trajectory from "#/Trajectory.ts";
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
+import type * as TrajectoryPart from "#/TrajectoryPart.ts";
 
 /**
  * A backing-store failure while reading or writing a cached part.
@@ -71,17 +72,17 @@ export class CacheError extends Data.TaggedError("CacheError")<{
  * @category services
  */
 export interface Cache {
-  readonly cache: <Id extends string, Config extends Config.AnyConfig, E, R>(
+  readonly cache: <Id extends string, Config extends TrajectoryConfig.AnyConfig, E, R>(
     trajectory: Trajectory.Trajectory<Id, Config, E, R>,
   ) => Effect.Effect<
     Trajectory.TrajectoryFile<
       Id,
       Config,
       TrajectoryError | CacheError,
-      Config.DecodingServices<Config>
+      TrajectoryConfig.DecodingServices<Config>
     >,
     E | TrajectoryError | CacheError,
-    R | Config.EncodingServices<Config>
+    R | TrajectoryConfig.EncodingServices<Config>
   >;
 }
 
@@ -136,7 +137,7 @@ export const layerKVStore = (options?: {
       const store = yield* KeyValueStore.KeyValueStore;
 
       return {
-        cache: <Id extends string, Config extends Config.AnyConfig, E, R>(
+        cache: <Id extends string, Config extends TrajectoryConfig.AnyConfig, E, R>(
           trajectory: Trajectory.Trajectory<Id, Config, E, R>,
         ) =>
           Effect.gen(function* () {
@@ -189,7 +190,7 @@ export const layerKVStore = (options?: {
               length,
               at: (index: number) =>
                 index < 0 || index >= length
-                  ? Effect.succeed(Option.none<Trajectory.Part<Config>>())
+                  ? Effect.succeed(Option.none<TrajectoryPart.Part<Config>>())
                   : EffectCache.get(parts, index).pipe(Effect.map(Option.some)),
             };
           }),
@@ -261,7 +262,7 @@ export const layerFileSystem = (
 export const layerMemory: Layer.Layer<Cache> = Layer.effect(
   Cache,
   Effect.succeed({
-    cache: <Id extends string, Config extends Config.AnyConfig, E, R>(
+    cache: <Id extends string, Config extends TrajectoryConfig.AnyConfig, E, R>(
       trajectory: Trajectory.Trajectory<Id, Config, E, R>,
     ) =>
       trajectory.pipe(

@@ -9,17 +9,17 @@
 
 import { Context, Effect, Effectable, Sink, type Schema } from "effect";
 
-import * as Config from "#/Config.ts";
-import * as Trajectory from "#/Trajectory.ts";
+import * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
+import type * as TrajectoryPart from "#/TrajectoryPart.ts";
 
 type SinkOf<
   S extends Schema.Constraint,
-  Config extends Config.AnyConfig,
+  Config extends TrajectoryConfig.AnyConfig,
   Dependencies extends ReadonlyArray<Context.Key<any, any>>,
 > = Sink.Sink<
   S["Type"],
-  Trajectory.Part<Config>,
+  TrajectoryPart.Part<Config>,
   never,
   TrajectoryError,
   Context.Service.Identifier<Dependencies[number]>
@@ -29,7 +29,7 @@ type Props<
   Pkg extends string,
   Id extends string,
   S extends Schema.Constraint,
-  Config extends Config.AnyConfig,
+  Config extends TrajectoryConfig.AnyConfig,
   Dependencies extends ReadonlyArray<Context.Key<any, any>>,
 > = {
   readonly package: Pkg;
@@ -61,7 +61,7 @@ export class Index<
   Pkg extends string,
   Id extends string,
   S extends Schema.Constraint,
-  Config extends Config.AnyConfig,
+  Config extends TrajectoryConfig.AnyConfig,
   Dependencies extends ReadonlyArray<Context.Key<any, any>> = [],
 > extends Effectable.Class<
   SinkOf<S, Config, Dependencies>,

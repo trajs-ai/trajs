@@ -1,11 +1,11 @@
 import { Effect, Predicate, Stream } from "effect";
 
-// `MetricKit` reads `MetricSchema` while it loads, and this module loads before
-// it, so `Config` stays a type here.
-import type * as Config from "#/Config.ts";
 import type { Any, MetricParts, Producer, Failure } from "#/Metric.ts";
 import type { Producers } from "#/MetricKit.ts";
 import type * as Trajectory from "#/Trajectory.ts";
+// `MetricKit` reads `MetricSchema` while it loads, and this module loads before
+// it, so `TrajectoryConfig` stays a type here.
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import type { TrajectoryError } from "#/TrajectoryError.ts";
 
 const isFailure = (value: unknown): value is Failure<Any> =>
@@ -17,7 +17,7 @@ const isFailure = (value: unknown): value is Failure<Any> =>
  */
 export const runProducers = <
   Metrics extends Record<string, Any>,
-  Config extends Config.AnyConfig,
+  Config extends TrajectoryConfig.AnyConfig,
   E,
   R,
 >(

@@ -3,7 +3,6 @@ import type { DateTime } from "effect";
 import type { NonEmptyReadonlyArray } from "effect/Array";
 import { SchemaBinary } from "effect/encoding";
 
-import type * as Config from "#/Config.ts";
 import * as Event from "#/Event.ts";
 import * as EventKit from "#/EventKit.ts";
 import * as Extra from "#/Extra.ts";
@@ -14,8 +13,9 @@ import * as MetricKit from "#/MetricKit.ts";
 import * as Prompt from "#/Prompt.ts";
 import * as Response from "#/Response.ts";
 import * as Toolkit from "#/Toolkit.ts";
-import * as Trajectory from "#/Trajectory.ts";
+import type * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import { TrajectoryError } from "#/TrajectoryError.ts";
+import * as TrajectoryPart from "#/TrajectoryPart.ts";
 
 /** The `extra` field, which a stored part may leave out. */
 const extraField = <K extends ExtraKit.Any, P extends Extra.Part>(extrakit: K, part: P) =>
@@ -23,12 +23,15 @@ const extraField = <K extends ExtraKit.Any, P extends Extra.Part>(extrakit: K, p
 
 /** The meta of a prompt part, which a scan reads alone. */
 type PromptPartMeta = Pick<
-  Trajectory.PromptPart<ExtraKit.Any>,
+  TrajectoryPart.PromptPart<ExtraKit.Any>,
   "_tag" | "uuid" | "sessionId" | "timestamp" | "startTimestamp"
 >;
 
 /** The messages and extras of a prompt part, stored apart from its meta. */
-type PromptPartBody<K extends ExtraKit.Any> = Pick<Trajectory.PromptPart<K>, "messages" | "extra">;
+type PromptPartBody<K extends ExtraKit.Any> = Pick<
+  TrajectoryPart.PromptPart<K>,
+  "messages" | "extra"
+>;
 
 /** A prompt part's meta as stored, which a scan reads alone. */
 export interface PromptPartMetaEncoded {
@@ -70,16 +73,16 @@ export const PromptPartBody = <K extends ExtraKit.Any>(
 /** Both halves as one struct, which `encodePart` writes as one binary value. */
 export const PromptPart = <K extends ExtraKit.Any>(
   extrakit: K,
-): Schema.Codec<Trajectory.PromptPart<K>, PromptPartMetaEncoded & PromptPartBodyEncoded> =>
+): Schema.Codec<TrajectoryPart.PromptPart<K>, PromptPartMetaEncoded & PromptPartBodyEncoded> =>
   Schema.Struct({ ...promptMetaFields, ...promptBodyFields(extrakit) }).annotate({
     identifier: "PromptPart",
   });
 
 /** The meta of a session part, which a scan reads alone. */
-type SessionPartMeta = Pick<Trajectory.SessionPart<ExtraKit.Any>, "_tag" | "uuid" | "type">;
+type SessionPartMeta = Pick<TrajectoryPart.SessionPart<ExtraKit.Any>, "_tag" | "uuid" | "type">;
 
 /** The extras of a session part, stored apart from its meta. */
-type SessionPartBody<K extends ExtraKit.Any> = Pick<Trajectory.SessionPart<K>, "extra">;
+type SessionPartBody<K extends ExtraKit.Any> = Pick<TrajectoryPart.SessionPart<K>, "extra">;
 
 /** A session part's meta as stored, which a scan reads alone. */
 export interface SessionPartMetaEncoded {
@@ -102,7 +105,7 @@ const SubSessionEncoded = Schema.TaggedStruct("sub", { id: Schema.String, fork: 
  * stated here because the part schema is generic in the extras it reads.
  */
 const SessionTypeDecoded = Schema.Union([
-  Schema.TaggedStruct("main", { id: Schema.Literal(Trajectory.mainSessionId) }),
+  Schema.TaggedStruct("main", { id: Schema.Literal(TrajectoryPart.mainSessionId) }),
   Schema.TaggedStruct("sub", { id: Schema.String, fork: Schema.String }),
 ]);
 
@@ -110,8 +113,8 @@ const SessionType = Schema.Union([MainSessionEncoded, SubSessionEncoded]).pipe(
   Schema.decodeTo(SessionTypeDecoded, {
     decode: SchemaGetter.transform((stored) =>
       Match.value(stored).pipe(
-        Match.tag("main", () => ({ ...Trajectory.mainSession })),
-        Match.tag("sub", (sub) => Trajectory.subSession(sub.id, { fork: sub.fork })),
+        Match.tag("main", () => ({ ...TrajectoryPart.mainSession })),
+        Match.tag("sub", (sub) => TrajectoryPart.subSession(sub.id, { fork: sub.fork })),
         Match.exhaustive,
       ),
     ),
@@ -147,20 +150,20 @@ export const SessionPartBody = <K extends ExtraKit.Any>(
 /** Both halves as one struct, which `encodePart` writes as one binary value. */
 export const SessionPart = <K extends ExtraKit.Any>(
   extrakit: K,
-): Schema.Codec<Trajectory.SessionPart<K>, SessionPartMetaEncoded & SessionPartBodyEncoded> =>
+): Schema.Codec<TrajectoryPart.SessionPart<K>, SessionPartMetaEncoded & SessionPartBodyEncoded> =>
   Schema.Struct({ ...sessionMetaFields, ...sessionBodyFields(extrakit) }).annotate({
     identifier: "SessionPart",
   });
 
 /** The meta of a response part, which a scan reads alone. */
 type ResponsePartMeta = Pick<
-  Trajectory.ResponsePart<Toolkit.Any, ExtraKit.Any>,
+  TrajectoryPart.ResponsePart<Toolkit.Any, ExtraKit.Any>,
   "_tag" | "uuid" | "sessionId" | "timestamp" | "startTimestamp"
 >;
 
 /** The response and extras of a response part, stored apart from its meta. */
 type ResponsePartBody<T extends Toolkit.Any, K extends ExtraKit.Any> = Pick<
-  Trajectory.ResponsePart<T, K>,
+  TrajectoryPart.ResponsePart<T, K>,
   "response" | "extra"
 >;
 
@@ -222,7 +225,7 @@ export const ResponsePart = <T extends Toolkit.Any, K extends ExtraKit.Any>(
   toolkit: T,
   extrakit: K,
 ): Schema.Codec<
-  Trajectory.ResponsePart<T, K>,
+  TrajectoryPart.ResponsePart<T, K>,
   ResponsePartMetaEncoded & ResponsePartBodyEncoded,
   Schema.Codec.DecodingServices<ResponseParts<T>>,
   Schema.Codec.EncodingServices<ResponseParts<T>>
@@ -233,12 +236,12 @@ export const ResponsePart = <T extends Toolkit.Any, K extends ExtraKit.Any>(
 
 /** The meta of an event part, which a scan reads alone. */
 type EventPartMeta = Pick<
-  Trajectory.EventPart<EventKit.Any>,
+  TrajectoryPart.EventPart<EventKit.Any>,
   "_tag" | "uuid" | "sessionId" | "timestamp" | "startTimestamp"
 >;
 
 /** The event an event part carries, stored apart from its meta. */
-type EventPartBody<K extends EventKit.Any> = Pick<Trajectory.EventPart<K>, "event">;
+type EventPartBody<K extends EventKit.Any> = Pick<TrajectoryPart.EventPart<K>, "event">;
 
 /** An event part's meta as stored, which a scan reads alone. */
 export interface EventPartMetaEncoded {
@@ -286,7 +289,7 @@ export const EventPartBody = <K extends EventKit.Any>(
 export const EventPart = <K extends EventKit.Any>(
   eventkit: K,
 ): Schema.Codec<
-  Trajectory.EventPart<K>,
+  TrajectoryPart.EventPart<K>,
   EventPartMetaEncoded & EventPartBodyEncoded,
   Schema.Codec.DecodingServices<ReturnType<typeof Event.EventParts<K>>>,
   Schema.Codec.EncodingServices<ReturnType<typeof Event.EventParts<K>>>
@@ -367,7 +370,7 @@ export const MetricPartBody = <K extends MetricKit.Any>(
  * the meta's business alone.
  */
 const readMetricPart = <K extends MetricKit.Any>(metrickit: K) =>
-  Trajectory.MetricPart(metrickit).mapFields((fields) => ({
+  TrajectoryPart.MetricPart(metrickit).mapFields((fields) => ({
     ...fields,
     timestamp: Schema.optional(Schema.toType(TimestampInt)),
     startTimestamp: Schema.optional(Schema.toType(TimestampInt)),
@@ -420,7 +423,7 @@ const encodeMetricPart = <K extends MetricKit.Any>({
 export const MetricPart = <K extends MetricKit.Any>(
   metrickit: K,
 ): Schema.Codec<
-  Trajectory.MetricPart<K>,
+  TrajectoryPart.MetricPart<K>,
   MetricPartMetaEncoded & MetricPartBodyEncoded,
   Schema.Codec.DecodingServices<ReturnType<typeof Metric.MetricParts<K>>>,
   Schema.Codec.EncodingServices<ReturnType<typeof Metric.MetricParts<K>>>
@@ -449,7 +452,7 @@ export const Meta = Schema.Union([
 export type Meta = Schema.Schema.Type<typeof Meta>;
 
 /** The parts a config reads, each with the config's own kits. */
-const configParts = <C extends Config.AnyConfig>(config: C) =>
+const configParts = <C extends TrajectoryConfig.AnyConfig>(config: C) =>
   Schema.Union([
     PromptPart(config.extrakit),
     SessionPart(config.extrakit),
@@ -458,35 +461,35 @@ const configParts = <C extends Config.AnyConfig>(config: C) =>
     MetricPart(config.metrickit),
   ]);
 
-type ConfigParts<C extends Config.AnyConfig> = ReturnType<typeof configParts<C>>;
+type ConfigParts<C extends TrajectoryConfig.AnyConfig> = ReturnType<typeof configParts<C>>;
 
 /** The part of any kind, of which a stored trajectory is a sequence. */
-export const Part = <C extends Config.AnyConfig>(
+export const Part = <C extends TrajectoryConfig.AnyConfig>(
   config: C,
 ): Schema.Codec<
-  Trajectory.Part<C>,
+  TrajectoryPart.Part<C>,
   Schema.Codec.Encoded<ConfigParts<C>>,
-  Config.DecodingServices<C>,
-  Config.EncodingServices<C>
+  TrajectoryConfig.DecodingServices<C>,
+  TrajectoryConfig.EncodingServices<C>
 > =>
   // SAFETY: every member reads one kind with the config's own kits, so the
   // config's services cover them.
   // Effect omits tool parameter services from response part types; see
   // https://github.com/Effect-TS/effect/issues/9867.
   configParts(config) as Schema.Codec<
-    Trajectory.Part<C>,
+    TrajectoryPart.Part<C>,
     Schema.Codec.Encoded<ConfigParts<C>>,
-    Config.DecodingServices<C>,
-    Config.EncodingServices<C>
+    TrajectoryConfig.DecodingServices<C>,
+    TrajectoryConfig.EncodingServices<C>
   >;
 
 /** The part as the one binary value a cache stores. */
-export const encodePart = <C extends Config.AnyConfig>(config: C) => {
+export const encodePart = <C extends TrajectoryConfig.AnyConfig>(config: C) => {
   const encode = Part(config).pipe(SchemaBinary.toCodec, Schema.encodeEffect);
 
   return (
-    part: Trajectory.Part<C>,
-  ): Effect.Effect<Uint8Array, TrajectoryError, Config.EncodingServices<C>> =>
+    part: TrajectoryPart.Part<C>,
+  ): Effect.Effect<Uint8Array, TrajectoryError, TrajectoryConfig.EncodingServices<C>> =>
     encode(part).pipe(
       Effect.mapError(TrajectoryError.parse),
       // The codec writes into an arena it shares, so the store takes its own copy.
@@ -495,11 +498,11 @@ export const encodePart = <C extends Config.AnyConfig>(config: C) => {
 };
 
 /** Reads the one binary value a cache stores as the part it holds. */
-export const decodePart = <C extends Config.AnyConfig>(config: C) => {
+export const decodePart = <C extends TrajectoryConfig.AnyConfig>(config: C) => {
   const decode = Part(config).pipe(SchemaBinary.toCodec, Schema.decodeUnknownEffect);
 
   return (
     bytes: Uint8Array,
-  ): Effect.Effect<Trajectory.Part<C>, TrajectoryError, Config.DecodingServices<C>> =>
+  ): Effect.Effect<TrajectoryPart.Part<C>, TrajectoryError, TrajectoryConfig.DecodingServices<C>> =>
     decode(bytes).pipe(Effect.mapError(TrajectoryError.parse));
 };

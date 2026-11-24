@@ -10,11 +10,11 @@
 import { Effect, FileSystem, Path, Schema } from "effect";
 import type { PlatformError } from "effect";
 
-import * as Config from "#/Config.ts";
 import * as MetricKit from "#/MetricKit.ts";
 import * as Produce from "#/Produce.ts";
 import type * as Toolkit from "#/Toolkit.ts";
 import * as Trajectory from "#/Trajectory.ts";
+import * as TrajectoryConfig from "#/TrajectoryConfig.ts";
 import { TrajectoryError } from "#/TrajectoryError.ts";
 import { FromJson } from "#/unstable/atif/Document.ts";
 import type { Document } from "#/unstable/atif/Document.ts";
@@ -28,7 +28,7 @@ import { documentToolkit } from "#/unstable/atif/internal/toolkit.ts";
  *
  * A reader installs the same kits to read the parts back.
  */
-type AtifConfig = Config.Config<
+type AtifConfig = TrajectoryConfig.Config<
   Toolkit.Any,
   typeof AtifEvent.eventkit,
   MetricKit.WithProducers<MetricKit.Empty>,
@@ -145,7 +145,7 @@ export const fromFile = (
  */
 const kits = (document: Document) =>
   Produce.produce(
-    Config.config({
+    TrajectoryConfig.config({
       toolkit: documentToolkit(document),
       // The events this module declares, so the trajectory names the kit its events are
       // read with. No step is read as an event yet.
